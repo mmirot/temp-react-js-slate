@@ -25,7 +25,7 @@ export default function StainQCForm() {
   const fetchStains = async () => {
     try {
       const { data, error } = await supabase
-        .from('stains')  // Updated from 'new_stain_list' to 'stains'
+        .from('stains')
         .select('*')
         .order('name', { ascending: true });
       
