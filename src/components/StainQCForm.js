@@ -23,11 +23,15 @@ export default function StainQCForm() {
   }, []);
 
   const fetchStains = async () => {
-    const { data, error } = await supabase.from('stains').select('*');
+    const { data, error } = await supabase
+      .from('stains')
+      .select('*')
+      .order('name', { ascending: true });
+    
     if (error) {
       console.error('Error fetching stains:', error);
     } else {
-      setStains(data);
+      setStains(data || []);
     }
   };
 
@@ -45,7 +49,7 @@ export default function StainQCForm() {
     if (error) {
       console.error('Error fetching submissions:', error);
     } else {
-      setSubmissions(data);
+      setSubmissions(data || []);
     }
   };
 
@@ -102,7 +106,9 @@ export default function StainQCForm() {
             >
               <option value="">Select a stain</option>
               {stains.map(stain => (
-                <option key={stain.id} value={stain.id}>{stain.name}</option>
+                <option key={stain.id} value={stain.id}>
+                  {stain.name}
+                </option>
               ))}
             </select>
           </div>
@@ -225,7 +231,7 @@ export default function StainQCForm() {
           <tbody>
             {submissions.map(sub => (
               <tr key={sub.id} className={sub.stain_qc === 'FAIL' ? 'failed' : ''}>
-                <td>{sub.stains.name}</td>
+                <td>{sub.stains?.name || 'Unknown'}</td>
                 <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
                 <td>{sub.tech_initials}</td>
                 <td>{sub.stain_qc || 'Pending'}</td>
