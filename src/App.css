@@ -10,6 +10,24 @@
 }
 
 .App-header h1 {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   color: #2c3e50;
+}
+
+.nav-links {
+  margin-bottom: 30px;
+}
+
+.nav-links a {
+  color: #4CAF50;
+  text-decoration: none;
+  margin: 0 15px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.nav-links a:hover {
+  background-color: #4CAF50;
+  color: white;
 }
