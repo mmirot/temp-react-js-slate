@@ -20,16 +20,23 @@
 }
 
 .stain-qc-form {
-  display: grid;
+  display: flex;
   gap: 20px;
-  max-width: 600px;
-  margin: 0 auto;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 150px;
+  flex: 1;
+}
+
+.form-group.stain-list {
+  min-width: 200px;
+  flex: 2;
 }
 
 .form-group label {
@@ -56,10 +63,6 @@
   flex-direction: row;
   align-items: center;
   gap: 8px;
-}
-
-.stain-list {
-  margin-bottom: 20px;
 }
 
 .stain-checkboxes {
@@ -160,7 +163,7 @@
   background-color: #e9ecef;
 }
 
-button {
+.submit-button {
   background-color: #4CAF50;
   color: white;
   padding: 12px 20px;
@@ -170,9 +173,11 @@ button {
   font-size: 16px;
   font-weight: 600;
   transition: background-color 0.2s;
+  margin-top: 24px;
+  align-self: flex-end;
 }
 
-button:hover {
+.submit-button:hover {
   background-color: #45a049;
 }
 
@@ -226,5 +231,17 @@ button:hover {
   .submissions-table th,
   .submissions-table td {
     padding: 8px;
+  }
+
+  .stain-qc-form {
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .submit-button {
+    width: 100%;
   }
 }

@@ -286,8 +286,8 @@ export default function StainQCForm() {
             </>
           )}
 
-          <div className="form-group">
-            <label className="checkbox">
+          <div className="form-group checkbox">
+            <label>
               <input
                 type="checkbox"
                 checked={isPathologist}
@@ -297,7 +297,7 @@ export default function StainQCForm() {
             </label>
           </div>
 
-          <button type="submit">Submit</button>
+          <button type="submit" className="submit-button">Submit</button>
         </form>
       </div>
 
