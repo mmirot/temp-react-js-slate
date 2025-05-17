@@ -16,6 +16,7 @@ export default function StainQCForm() {
   });
   const [isPathologist, setIsPathologist] = useState(false);
   const [submissions, setSubmissions] = useState([]);
+  const [selectedStains, setSelectedStains] = useState(new Set());
 
   useEffect(() => {
     fetchStains();
@@ -69,6 +70,16 @@ export default function StainQCForm() {
     }));
   };
 
+  const handleStainSelect = (stainId) => {
+    const newSelectedStains = new Set(selectedStains);
+    if (newSelectedStains.has(stainId)) {
+      newSelectedStains.delete(stainId);
+    } else {
+      newSelectedStains.add(stainId);
+    }
+    setSelectedStains(newSelectedStains);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -77,9 +88,20 @@ export default function StainQCForm() {
       return;
     }
 
+    // Create a submission for each selected stain
+    const submissions = Array.from(selectedStains).map(stainId => ({
+      ...formData,
+      stain_id: stainId
+    }));
+
+    if (submissions.length === 0) {
+      alert('Please select at least one stain');
+      return;
+    }
+
     const { error } = await supabase
       .from('stain_submissions')
-      .insert([formData]);
+      .insert(submissions);
 
     if (error) {
       alert('Error submitting: ' + error.message);
@@ -95,6 +117,7 @@ export default function StainQCForm() {
         comments: '',
         repeat_stain: false
       });
+      setSelectedStains(new Set());
       fetchSubmissions();
     }
   };
@@ -104,21 +127,20 @@ export default function StainQCForm() {
       <div className="form-section">
         <h2>Stain QC Submission</h2>
         <form onSubmit={handleSubmit} className="stain-qc-form">
-          <div className="form-group">
-            <label>Stain:</label>
-            <select
-              name="stain_id"
-              value={formData.stain_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select a stain</option>
-              {stains && stains.map(stain => (
-                <option key={stain.id} value={stain.id}>
+          <div className="form-group stain-list">
+            <label>Select Stains:</label>
+            <div className="stain-checkboxes">
+              {stains.map(stain => (
+                <label key={stain.id} className="stain-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedStains.has(stain.id)}
+                    onChange={() => handleStainSelect(stain.id)}
+                  />
                   {stain.name}
-                </option>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="form-group">
