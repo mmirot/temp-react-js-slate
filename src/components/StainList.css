@@ -4,6 +4,11 @@
   padding: 20px;
 }
 
+.stain-list-container h1 {
+  color: #4a5568;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+
 .stains-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -20,11 +25,13 @@
   font-size: 16px;
   transition: transform 0.2s;
   color: #2d3748;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e9d8fd;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .stain-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background: #f8fafc;
+  border-color: #9f7aea;
 }
