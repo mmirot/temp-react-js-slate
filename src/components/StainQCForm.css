@@ -65,25 +65,79 @@
   width: 200px;
 }
 
-.stain-checkboxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.stain-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: white;
-  width: 200px;
-  max-height: 35px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
   overflow-y: auto;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.stain-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  padding: 15px;
+  margin: 15px 0;
 }
 
 .stain-checkbox {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   font-size: 14px;
-  white-space: nowrap;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+.stain-checkbox:hover {
+  background: #e9ecef;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.modal-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.save-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
 }
 
 .view-toggle-button {
@@ -103,6 +157,27 @@
 
 .view-toggle-button:hover {
   background-color: #45a049;
+}
+
+.selected-stains {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-height: 35px;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px;
+  width: 200px;
+  background: white;
+}
+
+.selected-stain-tag {
+  background: #e9ecef;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .submit-button {
@@ -176,7 +251,7 @@
     width: 100%;
   }
 
-  .stain-checkboxes {
+  .selected-stains {
     width: 100%;
   }
 
@@ -191,5 +266,10 @@
   .submissions-table th,
   .submissions-table td {
     padding: 8px;
+  }
+
+  .stain-modal {
+    width: 90%;
+    max-height: 90vh;
   }
 }
