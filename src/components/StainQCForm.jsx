@@ -134,7 +134,7 @@ export default function StainQCForm() {
   };
 
   const handlePendingChange = async (submissionId, field, value) => {
-    // Instead of immediately updating the database, update local state
+    // Update only the local state, not the database
     setSubmissions(prevSubmissions => 
       prevSubmissions.map(sub => 
         sub.id === submissionId 
@@ -147,6 +147,7 @@ export default function StainQCForm() {
   const handlePendingSubmit = async (submissionId) => {
     const submission = submissions.find(s => s.id === submissionId);
     
+    // Validate required fields
     if (!submission.path_initials?.trim()) {
       alert('Please enter pathologist initials');
       return;
@@ -162,6 +163,7 @@ export default function StainQCForm() {
       return;
     }
 
+    // Prepare the update data
     const updates = {
       stain_qc: submission.stain_qc,
       path_initials: submission.path_initials.trim(),
@@ -170,6 +172,7 @@ export default function StainQCForm() {
       date_qc: new Date().toISOString().split('T')[0]
     };
 
+    // Submit to database only when the submit button is clicked
     const { error } = await supabase
       .from('stain_submissions')
       .update(updates)
@@ -179,7 +182,7 @@ export default function StainQCForm() {
       alert('Error updating submission: ' + error.message);
     } else {
       alert('QC submission successful!');
-      fetchSubmissions();
+      fetchSubmissions(); // Refresh the list
     }
   };
 
