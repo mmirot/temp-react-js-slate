@@ -355,7 +355,9 @@
 }
 
 .modal-input {
-  display: none;
+  margin: 20px auto;
+  max-width: 200px;
+  text-align: center;
 }
 
 .modal-input label {
