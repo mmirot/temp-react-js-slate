@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import StainQCForm from './components/StainQCForm';
+import StainList from './components/StainList';
 import './App.css';
 
 function App() {
@@ -9,8 +10,13 @@ function App() {
       <div className="App">
         <header className="App-header">
           <h1>Pathology Stain QC Tracking</h1>
+          <nav className="nav-links">
+            <Link to="/">QC Form</Link>
+            <Link to="/stains">View All Stains</Link>
+          </nav>
           <Routes>
             <Route path="/" element={<StainQCForm />} />
+            <Route path="/stains" element={<StainList />} />
           </Routes>
         </header>
       </div>

@@ -1,15 +1,36 @@
 .App {
   text-align: center;
-  background-color: #f0f2f5;
+  background-color: #f0f4f8;
   min-height: 100vh;
 }
 
 .App-header {
   padding: 20px;
-  color: #333;
+  color: #1a365d;
 }
 
 .App-header h1 {
+  margin-bottom: 20px;
+  color: #2c5282;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.nav-links {
   margin-bottom: 30px;
-  color: #2c3e50;
+}
+
+.nav-links a {
+  color: #4a5568;
+  text-decoration: none;
+  margin: 0 15px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.nav-links a:hover {
+  background-color: #9f7aea;
+  color: white;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
