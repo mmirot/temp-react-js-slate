@@ -9,7 +9,7 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <h1>Pathology Stain QC Tracking</h1>
+          <h1>Daily Stain QC</h1>
           <nav className="nav-links">
             <Link to="/">QC Form</Link>
             <Link to="/stains">View All Stains</Link>
@@ -24,4 +24,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
