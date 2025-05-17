@@ -168,7 +168,6 @@ export default function StainQCForm() {
             >
               {showMultiSelect ? '-' : '+'}
             </button>
-            <label>Select Stains:</label>
             {!showMultiSelect ? (
               <select
                 onChange={(e) => handleStainSelect(e.target.value)}
