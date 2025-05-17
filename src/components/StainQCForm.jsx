@@ -32,6 +32,7 @@ export default function StainQCForm() {
       if (error) {
         console.error('Error fetching stains:', error);
       } else {
+        console.log('Fetched stains:', data); // Add this line for debugging
         setStains(data || []);
       }
     } catch (error) {
