@@ -23,33 +23,42 @@ export default function StainQCForm() {
   }, []);
 
   const fetchStains = async () => {
-    const { data, error } = await supabase
-      .from('stains')
-      .select('*')
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching stains:', error);
-    } else {
-      setStains(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('stains')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching stains:', error);
+      } else {
+        console.log('Fetched stains:', data); // Debug log
+        setStains(data || []);
+      }
+    } catch (error) {
+      console.error('Error in fetchStains:', error);
     }
   };
 
   const fetchSubmissions = async () => {
-    const { data, error } = await supabase
-      .from('stain_submissions')
-      .select(`
-        *,
-        stains (
-          name
-        )
-      `)
-      .order('date_prepared', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching submissions:', error);
-    } else {
-      setSubmissions(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('stain_submissions')
+        .select(`
+          *,
+          stains (
+            name
+          )
+        `)
+        .order('date_prepared', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching submissions:', error);
+      } else {
+        setSubmissions(data || []);
+      }
+    } catch (error) {
+      console.error('Error in fetchSubmissions:', error);
     }
   };
 
@@ -105,7 +114,7 @@ export default function StainQCForm() {
               required
             >
               <option value="">Select a stain</option>
-              {stains.map(stain => (
+              {stains && stains.map(stain => (
                 <option key={stain.id} value={stain.id}>
                   {stain.name}
                 </option>
