@@ -133,8 +133,8 @@ export default function StainQCForm() {
     }));
   };
 
-  const handlePendingChange = async (submissionId, field, value) => {
-    // Update only the local state, not the database
+  const handlePendingChange = (submissionId, field, value) => {
+    // Only update local state, not the database
     setSubmissions(prevSubmissions => 
       prevSubmissions.map(sub => 
         sub.id === submissionId 
