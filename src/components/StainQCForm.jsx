@@ -406,7 +406,7 @@ export default function StainQCForm() {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group horizontal">
             <label>Tech Initials:</label>
             <input
               type="text"
