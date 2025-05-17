@@ -7,7 +7,7 @@ export default function StainQCForm() {
   const [formData, setFormData] = useState({
     date_prepared: new Date().toISOString().split('T')[0],
     tech_initials: '',
-    stain_qc: null,
+    stain_qc: null,  // Initialize as null to prevent automatic approval
     path_initials: '',
     date_qc: null,
     comments: '',
@@ -134,7 +134,6 @@ export default function StainQCForm() {
   };
 
   const handlePendingChange = (submissionId, field, value) => {
-    // Only update local state, not the database
     setSubmissions(prevSubmissions => 
       prevSubmissions.map(sub => 
         sub.id === submissionId 
@@ -149,12 +148,12 @@ export default function StainQCForm() {
     
     // Validate required fields
     if (!submission.path_initials?.trim()) {
-      alert('Please enter pathologist initials');
+      alert('Pathologist initials are required');
       return;
     }
 
     if (!submission.stain_qc) {
-      alert('Please select a QC status');
+      alert('QC status (PASS/FAIL) is required');
       return;
     }
 
@@ -172,17 +171,20 @@ export default function StainQCForm() {
       date_qc: new Date().toISOString().split('T')[0]
     };
 
-    // Submit to database only when the submit button is clicked
-    const { error } = await supabase
-      .from('stain_submissions')
-      .update(updates)
-      .eq('id', submissionId);
+    try {
+      const { error } = await supabase
+        .from('stain_submissions')
+        .update(updates)
+        .eq('id', submissionId);
 
-    if (error) {
-      alert('Error updating submission: ' + error.message);
-    } else {
+      if (error) {
+        throw error;
+      }
+
       alert('QC submission successful!');
       fetchSubmissions(); // Refresh the list
+    } catch (error) {
+      alert('Error updating submission: ' + error.message);
     }
   };
 
@@ -208,24 +210,31 @@ export default function StainQCForm() {
       return;
     }
 
-    const submissionData = {
-      ...formData,
-      date_prepared: formData.date_prepared || null,
-      date_qc: formData.date_qc || null
-    };
+    if (!formData.tech_initials.trim()) {
+      alert('Tech initials are required');
+      return;
+    }
 
     const submissions = Array.from(selectedStains).map(stainId => ({
-      ...submissionData,
-      stain_id: stainId
+      stain_id: stainId,
+      date_prepared: formData.date_prepared,
+      tech_initials: formData.tech_initials.trim(),
+      stain_qc: null,  // Always null for new submissions
+      path_initials: null,
+      date_qc: null,
+      comments: null,
+      repeat_stain: false
     }));
 
-    const { error } = await supabase
-      .from('stain_submissions')
-      .insert(submissions);
+    try {
+      const { error } = await supabase
+        .from('stain_submissions')
+        .insert(submissions);
 
-    if (error) {
-      alert('Error submitting: ' + error.message);
-    } else {
+      if (error) {
+        throw error;
+      }
+
       alert('Submission successful!');
       setFormData({
         date_prepared: new Date().toISOString().split('T')[0],
@@ -238,6 +247,8 @@ export default function StainQCForm() {
       });
       setSelectedStains(new Set());
       fetchSubmissions();
+    } catch (error) {
+      alert('Error submitting: ' + error.message);
     }
   };
 
