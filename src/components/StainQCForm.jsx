@@ -436,7 +436,6 @@ export default function StainQCForm() {
                 onChange={handleChange}
                 required
                 maxLength={3}
-                placeholder="Enter initials"
               />
             </div>
             <div className="stain-checkboxes">
