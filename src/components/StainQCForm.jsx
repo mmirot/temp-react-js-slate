@@ -24,17 +24,32 @@ export default function StainQCForm() {
 
   const fetchStains = async () => {
     try {
-      const { data, error } = await supabase
+      // Query both tables to check their contents
+      const { data: stainsData, error: stainsError } = await supabase
         .from('stains')
         .select('*')
         .order('name', { ascending: true });
       
-      if (error) {
-        console.error('Error fetching stains:', error);
+      const { data: newStainListData, error: newStainListError } = await supabase
+        .from('new_stain_list')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (stainsError) {
+        console.log('Stains table:', stainsError.message);
       } else {
-        console.log('Fetched stains:', data); // Debug log
-        setStains(data || []);
+        console.log('Stains table contents:', stainsData);
       }
+
+      if (newStainListError) {
+        console.log('New stain list table:', newStainListError.message);
+      } else {
+        console.log('New stain list contents:', newStainListData);
+      }
+
+      // Use data from whichever table has content
+      const data = stainsData || newStainListData || [];
+      setStains(data);
     } catch (error) {
       console.error('Error in fetchStains:', error);
     }
