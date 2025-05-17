@@ -16,6 +16,7 @@ export default function StainQCForm() {
   const [isPathologist, setIsPathologist] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [selectedStains, setSelectedStains] = useState(new Set());
+  const [viewMode, setViewMode] = useState('dropdown'); // 'dropdown', 'horizontal', or 'vertical'
 
   useEffect(() => {
     fetchStains();
@@ -80,6 +81,11 @@ export default function StainQCForm() {
     setSelectedStains(newSelectedStains);
   };
 
+  const handleDropdownChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setSelectedStains(new Set(selectedOptions));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -120,25 +126,74 @@ export default function StainQCForm() {
     }
   };
 
+  const renderStainSelection = () => {
+    switch (viewMode) {
+      case 'dropdown':
+        return (
+          <select
+            multiple
+            value={Array.from(selectedStains)}
+            onChange={handleDropdownChange}
+            className="form-control"
+            style={{ height: '200px' }}
+          >
+            {stains.map(stain => (
+              <option key={stain.id} value={stain.id}>
+                {stain.name}
+              </option>
+            ))}
+          </select>
+        );
+      case 'horizontal':
+      case 'vertical':
+        return (
+          <div className="stain-checkboxes" style={{ flexDirection: viewMode === 'vertical' ? 'column' : 'row' }}>
+            {stains.map(stain => (
+              <label key={stain.id} className={`stain-checkbox ${viewMode}`}>
+                <input
+                  type="checkbox"
+                  checked={selectedStains.has(stain.id)}
+                  onChange={() => handleStainSelect(stain.id)}
+                />
+                {stain.name}
+              </label>
+            ))}
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="stain-qc-container">
       <div className="form-section">
         <h2>Stain QC Submission</h2>
         <form onSubmit={handleSubmit} className="stain-qc-form">
           <div className="form-group stain-list">
-            <label>Select Stains:</label>
-            <div className="stain-checkboxes">
-              {stains.map(stain => (
-                <label key={stain.id} className="stain-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedStains.has(stain.id)}
-                    onChange={() => handleStainSelect(stain.id)}
-                  />
-                  {stain.name}
-                </label>
-              ))}
+            <div className="view-toggle">
+              <button
+                type="button"
+                className={viewMode === 'dropdown' ? 'active' : ''}
+                onClick={() => setViewMode('dropdown')}
+              >
+                Dropdown
+              </button>
+              <button
+                type="button"
+                className={viewMode === 'horizontal' ? 'active' : ''}
+                onClick={() => setViewMode('horizontal')}
+              >
+                Horizontal
+              </button>
+              <button
+                type="button"
+                className={viewMode === 'vertical' ? 'active' : ''}
+                onClick={() => setViewMode('vertical')}
+              >
+                Vertical
+              </button>
             </div>
+            <label>Select Stains:</label>
+            {renderStainSelection()}
           </div>
 
           <div className="form-group">
