@@ -24,32 +24,16 @@ export default function StainQCForm() {
 
   const fetchStains = async () => {
     try {
-      // Query both tables to check their contents
-      const { data: stainsData, error: stainsError } = await supabase
-        .from('stains')
-        .select('*')
-        .order('name', { ascending: true });
-      
-      const { data: newStainListData, error: newStainListError } = await supabase
+      const { data, error } = await supabase
         .from('new_stain_list')
         .select('*')
         .order('name', { ascending: true });
       
-      if (stainsError) {
-        console.log('Stains table:', stainsError.message);
+      if (error) {
+        console.error('Error fetching stains:', error);
       } else {
-        console.log('Stains table contents:', stainsData);
+        setStains(data || []);
       }
-
-      if (newStainListError) {
-        console.log('New stain list table:', newStainListError.message);
-      } else {
-        console.log('New stain list contents:', newStainListData);
-      }
-
-      // Use data from whichever table has content
-      const data = stainsData || newStainListData || [];
-      setStains(data);
     } catch (error) {
       console.error('Error in fetchStains:', error);
     }
@@ -61,7 +45,7 @@ export default function StainQCForm() {
         .from('stain_submissions')
         .select(`
           *,
-          stains (
+          new_stain_list (
             name
           )
         `)
@@ -255,7 +239,7 @@ export default function StainQCForm() {
           <tbody>
             {submissions.map(sub => (
               <tr key={sub.id} className={sub.stain_qc === 'FAIL' ? 'failed' : ''}>
-                <td>{sub.stains?.name || 'Unknown'}</td>
+                <td>{sub.new_stain_list?.name || 'Unknown'}</td>
                 <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
                 <td>{sub.tech_initials}</td>
                 <td>{sub.stain_qc || 'Pending'}</td>
