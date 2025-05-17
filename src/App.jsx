@@ -11,7 +11,6 @@ function App() {
         <header className="App-header">
           <h1>Daily Stain QC</h1>
           <nav className="nav-links">
-            <Link to="/">Submit</Link>
             <Link to="/stains">View All Stains</Link>
           </nav>
           <Routes>
