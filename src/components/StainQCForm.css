@@ -328,6 +328,13 @@
   outline: none;
 }
 
+.submissions-table button.submit-button {
+  padding: 4px 12px;
+  height: auto;
+  font-size: 12px;
+  min-width: 80px;
+}
+
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;

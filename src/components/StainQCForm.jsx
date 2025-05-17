@@ -132,6 +132,44 @@ export default function StainQCForm() {
     }
   };
 
+  const handlePendingSubmit = async (submissionId) => {
+    const submission = submissions.find(s => s.id === submissionId);
+    
+    if (!submission.path_initials) {
+      alert('Please enter pathologist initials');
+      return;
+    }
+
+    if (!submission.stain_qc) {
+      alert('Please select a QC status');
+      return;
+    }
+
+    if (submission.stain_qc === 'FAIL' && !submission.comments?.trim()) {
+      alert('Comments are required when failing a stain QC');
+      return;
+    }
+
+    const updates = {
+      stain_qc: submission.stain_qc,
+      path_initials: submission.path_initials,
+      comments: submission.comments,
+      repeat_stain: submission.repeat_stain,
+      date_qc: new Date().toISOString().split('T')[0]
+    };
+
+    const { error } = await supabase
+      .from('stain_submissions')
+      .update(updates)
+      .eq('id', submissionId);
+
+    if (error) {
+      alert('Error updating submission: ' + error.message);
+    } else {
+      fetchSubmissions();
+    }
+  };
+
   const handleStainSelect = (stainId) => {
     if (!showMultiSelect) {
       setSelectedStains(new Set([stainId]));
@@ -325,6 +363,7 @@ export default function StainQCForm() {
                 <th>QC Status</th>
                 <th>Comments</th>
                 <th>Repeat</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -367,6 +406,15 @@ export default function StainQCForm() {
                       checked={sub.repeat_stain || false}
                       onChange={(e) => handlePendingChange(sub.id, 'repeat_stain', e.target.checked)}
                     />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="submit-button"
+                      onClick={() => handlePendingSubmit(sub.id)}
+                    >
+                      Submit
+                    </button>
                   </td>
                 </tr>
               ))}
