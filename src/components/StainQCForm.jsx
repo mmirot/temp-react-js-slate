@@ -9,7 +9,7 @@ export default function StainQCForm() {
     tech_initials: '',
     stain_qc: null,
     path_initials: '',
-    date_qc: null,  // Changed from empty string to null
+    date_qc: null,
     comments: '',
     repeat_stain: false
   });
@@ -17,6 +17,7 @@ export default function StainQCForm() {
   const [selectedStains, setSelectedStains] = useState(new Set());
   const [showMultiSelect, setShowMultiSelect] = useState(false);
   const [tempSelectedStains, setTempSelectedStains] = useState(new Set());
+  const [editingSubmission, setEditingSubmission] = useState(null);
   const modalRef = useRef(null);
 
   useEffect(() => {
@@ -83,11 +84,9 @@ export default function StainQCForm() {
     const { name, type, value, checked } = e.target;
     let finalValue;
 
-    // Handle different input types
     if (type === 'checkbox') {
       finalValue = checked;
     } else if (type === 'date') {
-      // Set to null if empty, otherwise use the value
       finalValue = value || null;
     } else {
       finalValue = value;
@@ -99,12 +98,28 @@ export default function StainQCForm() {
     }));
   };
 
+  const handlePendingChange = async (submissionId, field, value) => {
+    const updates = {
+      [field]: value,
+      ...(field === 'stain_qc' && { date_qc: new Date().toISOString().split('T')[0] })
+    };
+
+    const { error } = await supabase
+      .from('stain_submissions')
+      .update(updates)
+      .eq('id', submissionId);
+
+    if (error) {
+      alert('Error updating submission: ' + error.message);
+    } else {
+      fetchSubmissions();
+    }
+  };
+
   const handleStainSelect = (stainId) => {
     if (!showMultiSelect) {
-      // Single select mode (dropdown)
       setSelectedStains(new Set([stainId]));
     } else {
-      // Multiple select mode
       const newTempSelectedStains = new Set(tempSelectedStains);
       if (newTempSelectedStains.has(stainId)) {
         newTempSelectedStains.delete(stainId);
@@ -123,7 +138,6 @@ export default function StainQCForm() {
       return;
     }
 
-    // Ensure date fields are either valid dates or null
     const submissionData = {
       ...formData,
       date_prepared: formData.date_prepared || null,
@@ -148,7 +162,7 @@ export default function StainQCForm() {
         tech_initials: '',
         stain_qc: null,
         path_initials: '',
-        date_qc: null,  // Reset to null instead of empty string
+        date_qc: null,
         comments: '',
         repeat_stain: false
       });
@@ -172,7 +186,6 @@ export default function StainQCForm() {
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
   const completedSubmissions = submissions.filter(sub => sub.stain_qc);
 
-  // Helper function to safely format dates
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
@@ -292,7 +305,10 @@ export default function StainQCForm() {
                 <th>Stain</th>
                 <th>Date Prepared</th>
                 <th>Tech</th>
-                <th>Status</th>
+                <th>QC Status</th>
+                <th>Path Initials</th>
+                <th>Comments</th>
+                <th>Repeat</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +317,38 @@ export default function StainQCForm() {
                   <td>{sub.new_stain_list?.name || 'Unknown'}</td>
                   <td>{formatDate(sub.date_prepared)}</td>
                   <td>{sub.tech_initials}</td>
-                  <td>Pending</td>
+                  <td>
+                    <select
+                      value={sub.stain_qc || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'stain_qc', e.target.value)}
+                    >
+                      <option value="">Pending</option>
+                      <option value="PASS">PASS</option>
+                      <option value="FAIL">FAIL</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={sub.path_initials || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
+                      maxLength={3}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={sub.comments || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'comments', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={sub.repeat_stain || false}
+                      onChange={(e) => handlePendingChange(sub.id, 'repeat_stain', e.target.checked)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
