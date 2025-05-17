@@ -5,7 +5,6 @@ import './StainQCForm.css';
 export default function StainQCForm() {
   const [stains, setStains] = useState([]);
   const [formData, setFormData] = useState({
-    stain_id: '',
     date_prepared: new Date().toISOString().split('T')[0],
     tech_initials: '',
     stain_qc: 'PASS',
@@ -88,16 +87,15 @@ export default function StainQCForm() {
       return;
     }
 
-    // Create a submission for each selected stain
+    if (selectedStains.size === 0) {
+      alert('Please select at least one stain');
+      return;
+    }
+
     const submissions = Array.from(selectedStains).map(stainId => ({
       ...formData,
       stain_id: stainId
     }));
-
-    if (submissions.length === 0) {
-      alert('Please select at least one stain');
-      return;
-    }
 
     const { error } = await supabase
       .from('stain_submissions')
@@ -108,7 +106,6 @@ export default function StainQCForm() {
     } else {
       alert('Submission successful!');
       setFormData({
-        stain_id: '',
         date_prepared: new Date().toISOString().split('T')[0],
         tech_initials: '',
         stain_qc: 'PASS',
