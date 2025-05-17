@@ -5,6 +5,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true
+    host: true,
+    proxy: {
+      '/rest/v1': {
+        target: 'https://pbsgsljpqrwrfeddazjx.supabase.co',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 });
