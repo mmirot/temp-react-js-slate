@@ -267,6 +267,56 @@ export default function StainQCForm() {
     }
   };
 
+  const handleModalSubmit = async () => {
+    if (tempSelectedStains.size === 0) {
+      alert('Please select at least one stain');
+      return;
+    }
+
+    if (!formData.tech_initials.trim()) {
+      alert('Tech initials are required');
+      return;
+    }
+
+    const submissions = Array.from(tempSelectedStains).map(stainId => ({
+      stain_id: stainId,
+      date_prepared: formData.date_prepared,
+      tech_initials: formData.tech_initials.trim(),
+      stain_qc: null,
+      path_initials: null,
+      date_qc: null,
+      comments: null,
+      repeat_stain: false
+    }));
+
+    try {
+      const { error } = await supabase
+        .from('stain_submissions')
+        .insert(submissions);
+
+      if (error) {
+        throw error;
+      }
+
+      alert('Submission successful!');
+      setFormData({
+        date_prepared: new Date().toISOString().split('T')[0],
+        tech_initials: '',
+        stain_qc: null,
+        path_initials: '',
+        date_qc: null,
+        comments: '',
+        repeat_stain: false
+      });
+      setSelectedStains(new Set());
+      setTempSelectedStains(new Set());
+      setShowMultiSelect(false);
+      fetchSubmissions();
+    } catch (error) {
+      alert('Error submitting: ' + error.message);
+    }
+  };
+
   const toggleMultiSelect = () => {
     if (!showMultiSelect) {
       setTempSelectedStains(new Set(selectedStains));
@@ -377,6 +427,18 @@ export default function StainQCForm() {
           <div className="modal-overlay" />
           <div className="stain-modal" ref={modalRef}>
             <h2>Select Multiple Stains</h2>
+            <div className="form-group modal-input">
+              <label>Tech Initials:</label>
+              <input
+                type="text"
+                name="tech_initials"
+                value={formData.tech_initials}
+                onChange={handleChange}
+                required
+                maxLength={3}
+                placeholder="Enter initials"
+              />
+            </div>
             <div className="stain-checkboxes">
               {stains.map(stain => (
                 <label key={stain.id} className="stain-checkbox">
@@ -398,9 +460,9 @@ export default function StainQCForm() {
               </button>
               <button 
                 className="modal-button save-button"
-                onClick={saveMultiSelection}
+                onClick={handleModalSubmit}
               >
-                Save
+                Submit
               </button>
             </div>
           </div>

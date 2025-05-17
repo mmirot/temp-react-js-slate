@@ -354,6 +354,24 @@
   transform: translateY(-50%);
 }
 
+.modal-input {
+  margin-bottom: 20px;
+}
+
+.modal-input input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.modal-input input:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  outline: none;
+}
+
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;
