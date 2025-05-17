@@ -9,7 +9,7 @@ export default function StainQCForm() {
     tech_initials: '',
     stain_qc: null,
     path_initials: '',
-    date_qc: '',
+    date_qc: null,  // Changed from empty string to null
     comments: '',
     repeat_stain: false
   });
@@ -80,10 +80,22 @@ export default function StainQCForm() {
   };
 
   const handleChange = (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const { name, type, value, checked } = e.target;
+    let finalValue;
+
+    // Handle different input types
+    if (type === 'checkbox') {
+      finalValue = checked;
+    } else if (type === 'date') {
+      // Set to null if empty, otherwise use the value
+      finalValue = value || null;
+    } else {
+      finalValue = value;
+    }
+
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: value
+      [name]: finalValue
     }));
   };
 
@@ -111,9 +123,11 @@ export default function StainQCForm() {
       return;
     }
 
+    // Ensure date fields are either valid dates or null
     const submissionData = {
       ...formData,
-      date_prepared: formData.date_prepared || new Date().toISOString().split('T')[0]
+      date_prepared: formData.date_prepared || null,
+      date_qc: formData.date_qc || null
     };
 
     const submissions = Array.from(selectedStains).map(stainId => ({
@@ -134,7 +148,7 @@ export default function StainQCForm() {
         tech_initials: '',
         stain_qc: null,
         path_initials: '',
-        date_qc: '',
+        date_qc: null,  // Reset to null instead of empty string
         comments: '',
         repeat_stain: false
       });
@@ -157,6 +171,17 @@ export default function StainQCForm() {
 
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
   const completedSubmissions = submissions.filter(sub => sub.stain_qc);
+
+  // Helper function to safely format dates
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '-';
+    }
+  };
 
   return (
     <div className="stain-qc-container">
@@ -201,7 +226,7 @@ export default function StainQCForm() {
             <input
               type="date"
               name="date_prepared"
-              value={formData.date_prepared}
+              value={formData.date_prepared || ''}
               onChange={handleChange}
               required
             />
@@ -274,7 +299,7 @@ export default function StainQCForm() {
               {pendingSubmissions.map(sub => (
                 <tr key={sub.id}>
                   <td>{sub.new_stain_list?.name || 'Unknown'}</td>
-                  <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
+                  <td>{formatDate(sub.date_prepared)}</td>
                   <td>{sub.tech_initials}</td>
                   <td>Pending</td>
                 </tr>
@@ -303,11 +328,11 @@ export default function StainQCForm() {
             {completedSubmissions.map(sub => (
               <tr key={sub.id} className={sub.stain_qc === 'FAIL' ? 'failed' : ''}>
                 <td>{sub.new_stain_list?.name || 'Unknown'}</td>
-                <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
+                <td>{formatDate(sub.date_prepared)}</td>
                 <td>{sub.tech_initials}</td>
                 <td>{sub.stain_qc}</td>
                 <td>{sub.path_initials || '-'}</td>
-                <td>{sub.date_qc ? new Date(sub.date_qc).toLocaleDateString() : '-'}</td>
+                <td>{formatDate(sub.date_qc)}</td>
                 <td>{sub.comments || '-'}</td>
                 <td>{sub.repeat_stain ? 'Yes' : 'No'}</td>
               </tr>
