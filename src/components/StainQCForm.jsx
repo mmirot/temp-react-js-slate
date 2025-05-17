@@ -281,7 +281,7 @@ export default function StainQCForm() {
       )}
 
       <div className="submissions-section">
-        <h2>Recent Submissions</h2>
+        <h2>Stain QC Log</h2>
         <table className="submissions-table">
           <thead>
             <tr>
