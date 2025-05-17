@@ -9,14 +9,13 @@ export default function StainQCForm() {
     tech_initials: '',
     stain_qc: 'PASS',
     path_initials: '',
-    date_qc: new Date().toISOString().split('T')[0], // Initialize with today's date
+    date_qc: new Date().toISOString().split('T')[0],
     comments: '',
     repeat_stain: false
   });
-  const [isPathologist, setIsPathologist] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [selectedStains, setSelectedStains] = useState(new Set());
-  const [showModal, setShowModal] = useState(false);
+  const [showMultiSelect, setShowMultiSelect] = useState(false);
   const [tempSelectedStains, setTempSelectedStains] = useState(new Set());
   const modalRef = useRef(null);
 
@@ -28,18 +27,18 @@ export default function StainQCForm() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowModal(false);
+        setShowMultiSelect(false);
       }
     };
 
-    if (showModal) {
+    if (showMultiSelect) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showModal]);
+  }, [showMultiSelect]);
 
   const fetchStains = async () => {
     try {
@@ -89,8 +88,8 @@ export default function StainQCForm() {
   };
 
   const handleStainSelect = (stainId) => {
-    if (!showModal) {
-      // Single select mode
+    if (!showMultiSelect) {
+      // Single select mode (dropdown)
       setSelectedStains(new Set([stainId]));
     } else {
       // Multiple select mode
@@ -107,17 +106,11 @@ export default function StainQCForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.stain_qc === 'FAIL' && !formData.comments) {
-      alert('Comments are required when failing a stain QC');
-      return;
-    }
-
     if (selectedStains.size === 0) {
       alert('Please select at least one stain');
       return;
     }
 
-    // Ensure dates are valid before submission
     const submissionData = {
       ...formData,
       date_prepared: formData.date_prepared || new Date().toISOString().split('T')[0],
@@ -142,7 +135,7 @@ export default function StainQCForm() {
         tech_initials: '',
         stain_qc: 'PASS',
         path_initials: '',
-        date_qc: new Date().toISOString().split('T')[0], // Reset to today's date
+        date_qc: new Date().toISOString().split('T')[0],
         comments: '',
         repeat_stain: false
       });
@@ -151,14 +144,16 @@ export default function StainQCForm() {
     }
   };
 
-  const openModal = () => {
-    setTempSelectedStains(new Set(selectedStains));
-    setShowModal(true);
+  const toggleMultiSelect = () => {
+    if (!showMultiSelect) {
+      setTempSelectedStains(new Set(selectedStains));
+    }
+    setShowMultiSelect(!showMultiSelect);
   };
 
-  const saveSelection = () => {
+  const saveMultiSelection = () => {
     setSelectedStains(tempSelectedStains);
-    setShowModal(false);
+    setShowMultiSelect(false);
   };
 
   return (
@@ -169,12 +164,12 @@ export default function StainQCForm() {
             <button
               type="button"
               className="view-toggle-button"
-              onClick={openModal}
+              onClick={toggleMultiSelect}
             >
-              +
+              {showMultiSelect ? '-' : '+'}
             </button>
             <label>Select Stains:</label>
-            {!showModal && (
+            {!showMultiSelect ? (
               <select
                 onChange={(e) => handleStainSelect(e.target.value)}
                 value={Array.from(selectedStains)[0] || ''}
@@ -186,6 +181,17 @@ export default function StainQCForm() {
                   </option>
                 ))}
               </select>
+            ) : (
+              <div className="selected-stains">
+                {Array.from(tempSelectedStains).map(stainId => {
+                  const stain = stains.find(s => s.id === stainId);
+                  return stain ? (
+                    <span key={stain.id} className="selected-stain-tag">
+                      {stain.name}
+                    </span>
+                  ) : null;
+                })}
+              </div>
             )}
           </div>
 
@@ -213,6 +219,19 @@ export default function StainQCForm() {
           </div>
 
           <div className="form-group">
+            <label>QC Status:</label>
+            <select
+              name="stain_qc"
+              value={formData.stain_qc}
+              onChange={handleChange}
+              required
+            >
+              <option value="PASS">PASS</option>
+              <option value="FAIL">FAIL</option>
+            </select>
+          </div>
+
+          <div className="form-group">
             <label>Path Initials:</label>
             <input
               type="text"
@@ -223,65 +242,15 @@ export default function StainQCForm() {
             />
           </div>
 
-          {isPathologist && (
-            <>
-              <div className="form-group">
-                <label>QC Status:</label>
-                <select
-                  name="stain_qc"
-                  value={formData.stain_qc}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="PASS">PASS</option>
-                  <option value="FAIL">FAIL</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>QC Date:</label>
-                <input
-                  type="date"
-                  name="date_qc"
-                  value={formData.date_qc}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Comments:</label>
-                <textarea
-                  name="comments"
-                  value={formData.comments}
-                  onChange={handleChange}
-                  required={formData.stain_qc === 'FAIL'}
-                />
-              </div>
-
-              <div className="form-group checkbox">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="repeat_stain"
-                    checked={formData.repeat_stain}
-                    onChange={handleChange}
-                  />
-                  Repeat Required
-                </label>
-              </div>
-            </>
-          )}
-
           <button type="submit" className="submit-button">Submit</button>
         </form>
       </div>
 
-      {showModal && (
+      {showMultiSelect && (
         <>
           <div className="modal-overlay" />
           <div className="stain-modal" ref={modalRef}>
-            <h2>Select Stains</h2>
+            <h2>Select Multiple Stains</h2>
             <div className="stain-checkboxes">
               {stains.map(stain => (
                 <label key={stain.id} className="stain-checkbox">
@@ -297,13 +266,13 @@ export default function StainQCForm() {
             <div className="modal-buttons">
               <button 
                 className="modal-button cancel-button"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowMultiSelect(false)}
               >
                 Cancel
               </button>
               <button 
                 className="modal-button save-button"
-                onClick={saveSelection}
+                onClick={saveMultiSelection}
               >
                 Save
               </button>
@@ -321,7 +290,7 @@ export default function StainQCForm() {
               <th>Date Prepared</th>
               <th>Tech</th>
               <th>QC Status</th>
-              <th>Pathologist</th>
+              <th>Path</th>
               <th>QC Date</th>
               <th>Comments</th>
               <th>Repeat</th>
