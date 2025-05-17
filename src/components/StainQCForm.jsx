@@ -89,13 +89,19 @@ export default function StainQCForm() {
   };
 
   const handleStainSelect = (stainId) => {
-    const newTempSelectedStains = new Set(tempSelectedStains);
-    if (newTempSelectedStains.has(stainId)) {
-      newTempSelectedStains.delete(stainId);
+    if (!showModal) {
+      // Single select mode
+      setSelectedStains(new Set([stainId]));
     } else {
-      newTempSelectedStains.add(stainId);
+      // Multiple select mode
+      const newTempSelectedStains = new Set(tempSelectedStains);
+      if (newTempSelectedStains.has(stainId)) {
+        newTempSelectedStains.delete(stainId);
+      } else {
+        newTempSelectedStains.add(stainId);
+      }
+      setTempSelectedStains(newTempSelectedStains);
     }
-    setTempSelectedStains(newTempSelectedStains);
   };
 
   const handleSubmit = async (e) => {
@@ -148,12 +154,6 @@ export default function StainQCForm() {
     setShowModal(false);
   };
 
-  const getSelectedStainNames = () => {
-    return Array.from(selectedStains).map(id => 
-      stains.find(stain => stain.id === id)?.name
-    ).filter(Boolean);
-  };
-
   return (
     <div className="stain-qc-container">
       <div className="form-section">
@@ -167,11 +167,19 @@ export default function StainQCForm() {
               +
             </button>
             <label>Select Stains:</label>
-            <div className="selected-stains">
-              {getSelectedStainNames().map(name => (
-                <span key={name} className="selected-stain-tag">{name}</span>
-              ))}
-            </div>
+            {!showModal && (
+              <select
+                onChange={(e) => handleStainSelect(e.target.value)}
+                value={Array.from(selectedStains)[0] || ''}
+              >
+                <option value="">Select a stain</option>
+                {stains.map(stain => (
+                  <option key={stain.id} value={stain.id}>
+                    {stain.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="form-group">
