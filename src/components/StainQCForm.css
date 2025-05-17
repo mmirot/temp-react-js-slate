@@ -300,11 +300,11 @@
 }
 
 .submissions-table tr.failed {
-  background-color: #fff5f5;
+  background-color: #ebf8ff;
 }
 
 .submissions-table tr.failed:hover {
-  background-color: #fed7d7;
+  background-color: #bee3f8;
 }
 
 .submissions-table select,
