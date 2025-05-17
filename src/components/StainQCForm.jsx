@@ -113,6 +113,14 @@ export default function StainQCForm() {
           return;
         }
       }
+
+      // Reset repeat_stain when changing from FAIL to PASS
+      if (value === 'PASS') {
+        await supabase
+          .from('stain_submissions')
+          .update({ repeat_stain: false })
+          .eq('id', submissionId);
+      }
     }
 
     const updates = {
@@ -324,7 +332,7 @@ export default function StainQCForm() {
                 <th>Path Initials</th>
                 <th>QC Status</th>
                 <th>Comments</th>
-                <th>Repeat</th>
+                {pendingSubmissions.some(sub => sub.stain_qc === 'FAIL') && <th>Repeat</th>}
               </tr>
             </thead>
             <tbody>
@@ -361,13 +369,15 @@ export default function StainQCForm() {
                       required={sub.stain_qc === 'FAIL'}
                     />
                   </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={sub.repeat_stain || false}
-                      onChange={(e) => handlePendingChange(sub.id, 'repeat_stain', e.target.checked)}
-                    />
-                  </td>
+                  {sub.stain_qc === 'FAIL' && (
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={sub.repeat_stain || false}
+                        onChange={(e) => handlePendingChange(sub.id, 'repeat_stain', e.target.checked)}
+                      />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
