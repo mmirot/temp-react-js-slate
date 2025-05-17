@@ -89,8 +89,10 @@ export default function StainQCForm() {
 
   const handleStainSelect = (stainId) => {
     if (!showMultiSelect) {
+      // Single select mode (dropdown)
       setSelectedStains(new Set([stainId]));
     } else {
+      // Multiple select mode
       const newTempSelectedStains = new Set(tempSelectedStains);
       if (newTempSelectedStains.has(stainId)) {
         newTempSelectedStains.delete(stainId);
