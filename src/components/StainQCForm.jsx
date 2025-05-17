@@ -95,7 +95,6 @@ export default function StainQCForm() {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
 
-      // Handle special cases
       if (sortConfig.key === 'new_stain_list.name') {
         aValue = a.new_stain_list?.name || '';
         bValue = b.new_stain_list?.name || '';
@@ -159,10 +158,9 @@ export default function StainQCForm() {
         throw error;
       }
 
-      alert('Submission deleted successfully');
-      fetchSubmissions(); // Refresh the list
+      fetchSubmissions();
     } catch (error) {
-      alert('Error deleting submission: ' + error.message);
+      console.error('Error deleting submission:', error.message);
     }
   };
 
@@ -170,29 +168,23 @@ export default function StainQCForm() {
     const pendingUpdate = pendingUpdates[submissionId] || {};
     const submission = submissions.find(s => s.id === submissionId);
     
-    // Combine current submission with pending updates
     const updatedSubmission = {
       ...submission,
       ...pendingUpdate
     };
     
-    // Validate required fields
     if (!updatedSubmission.path_initials?.trim()) {
-      alert('Pathologist initials are required');
       return;
     }
 
     if (!updatedSubmission.stain_qc) {
-      alert('QC status (PASS/FAIL) is required');
       return;
     }
 
     if (updatedSubmission.stain_qc === 'FAIL' && !updatedSubmission.comments?.trim()) {
-      alert('Comments are required when failing a stain QC');
       return;
     }
 
-    // Prepare the update data
     const updates = {
       stain_qc: updatedSubmission.stain_qc,
       path_initials: updatedSubmission.path_initials.trim(),
@@ -211,17 +203,15 @@ export default function StainQCForm() {
         throw error;
       }
 
-      // Clear pending updates for this submission
       setPendingUpdates(prev => {
         const newUpdates = { ...prev };
         delete newUpdates[submissionId];
         return newUpdates;
       });
 
-      alert('QC submission successful!');
-      fetchSubmissions(); // Refresh the list
+      fetchSubmissions();
     } catch (error) {
-      alert('Error updating submission: ' + error.message);
+      console.error('Error updating submission:', error.message);
     }
   };
 
@@ -243,12 +233,10 @@ export default function StainQCForm() {
     e.preventDefault();
     
     if (selectedStains.size === 0) {
-      alert('Please select at least one stain');
       return;
     }
 
     if (!formData.tech_initials.trim()) {
-      alert('Tech initials are required');
       return;
     }
 
@@ -256,7 +244,7 @@ export default function StainQCForm() {
       stain_id: stainId,
       date_prepared: formData.date_prepared,
       tech_initials: formData.tech_initials.trim(),
-      stain_qc: null,  // Always null for new submissions
+      stain_qc: null,
       path_initials: null,
       date_qc: null,
       comments: null,
@@ -272,7 +260,6 @@ export default function StainQCForm() {
         throw error;
       }
 
-      alert('Submission successful!');
       setFormData({
         date_prepared: new Date().toISOString().split('T')[0],
         tech_initials: '',
@@ -285,18 +272,16 @@ export default function StainQCForm() {
       setSelectedStains(new Set());
       fetchSubmissions();
     } catch (error) {
-      alert('Error submitting: ' + error.message);
+      console.error('Error submitting:', error.message);
     }
   };
 
   const handleModalSubmit = async () => {
     if (tempSelectedStains.size === 0) {
-      alert('Please select at least one stain');
       return;
     }
 
     if (!formData.tech_initials.trim()) {
-      alert('Tech initials are required');
       return;
     }
 
@@ -320,7 +305,6 @@ export default function StainQCForm() {
         throw error;
       }
 
-      alert('Submission successful!');
       setFormData({
         date_prepared: new Date().toISOString().split('T')[0],
         tech_initials: '',
@@ -335,7 +319,7 @@ export default function StainQCForm() {
       setShowMultiSelect(false);
       fetchSubmissions();
     } catch (error) {
-      alert('Error submitting: ' + error.message);
+      console.error('Error submitting:', error.message);
     }
   };
 
