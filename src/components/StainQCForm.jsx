@@ -105,6 +105,14 @@ export default function StainQCForm() {
         alert('Please enter pathologist initials before setting QC status');
         return;
       }
+      
+      if (value === 'FAIL') {
+        const comments = submission.comments?.trim();
+        if (!comments) {
+          alert('Comments are required when failing a stain QC');
+          return;
+        }
+      }
     }
 
     const updates = {
@@ -350,6 +358,7 @@ export default function StainQCForm() {
                       type="text"
                       value={sub.comments || ''}
                       onChange={(e) => handlePendingChange(sub.id, 'comments', e.target.value)}
+                      required={sub.stain_qc === 'FAIL'}
                     />
                   </td>
                   <td>
