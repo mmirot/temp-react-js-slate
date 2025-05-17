@@ -356,36 +356,19 @@
 
 .modal-input {
   margin-bottom: 20px;
-  background: #ebf8ff;
-  padding: 15px;
-  border-radius: 8px;
-  border: 2px solid #4299e1;
-}
-
-.modal-input label {
-  display: block;
-  font-weight: 600;
-  color: #2c5282;
-  margin-bottom: 8px;
-  font-size: 14px;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .modal-input input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #4299e1;
+  padding: 8px;
+  border: 1px solid #cbd5e0;
   border-radius: 4px;
-  font-size: 16px;
-  background: white;
-  color: #2d3748;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
 }
 
 .modal-input input:focus {
-  border-color: #2b6cb0;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
   outline: none;
 }
 
