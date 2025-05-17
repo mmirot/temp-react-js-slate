@@ -9,7 +9,7 @@ export default function StainQCForm() {
     tech_initials: '',
     stain_qc: 'PASS',
     path_initials: '',
-    date_qc: '',
+    date_qc: new Date().toISOString().split('T')[0], // Initialize with today's date
     comments: '',
     repeat_stain: false
   });
@@ -117,8 +117,15 @@ export default function StainQCForm() {
       return;
     }
 
-    const submissions = Array.from(selectedStains).map(stainId => ({
+    // Ensure dates are valid before submission
+    const submissionData = {
       ...formData,
+      date_prepared: formData.date_prepared || new Date().toISOString().split('T')[0],
+      date_qc: formData.date_qc || new Date().toISOString().split('T')[0]
+    };
+
+    const submissions = Array.from(selectedStains).map(stainId => ({
+      ...submissionData,
       stain_id: stainId
     }));
 
@@ -135,7 +142,7 @@ export default function StainQCForm() {
         tech_initials: '',
         stain_qc: 'PASS',
         path_initials: '',
-        date_qc: '',
+        date_qc: new Date().toISOString().split('T')[0], // Reset to today's date
         comments: '',
         repeat_stain: false
       });
