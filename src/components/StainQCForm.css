@@ -307,6 +307,27 @@
   background-color: #fed7d7;
 }
 
+.submissions-table select,
+.submissions-table input[type="text"] {
+  padding: 4px 8px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 120px;
+}
+
+.submissions-table input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.submissions-table select:focus,
+.submissions-table input[type="text"]:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  outline: none;
+}
+
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;
