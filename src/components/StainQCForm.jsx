@@ -7,9 +7,9 @@ export default function StainQCForm() {
   const [formData, setFormData] = useState({
     date_prepared: new Date().toISOString().split('T')[0],
     tech_initials: '',
-    stain_qc: 'PASS',
+    stain_qc: null,
     path_initials: '',
-    date_qc: new Date().toISOString().split('T')[0],
+    date_qc: '',
     comments: '',
     repeat_stain: false
   });
@@ -113,8 +113,7 @@ export default function StainQCForm() {
 
     const submissionData = {
       ...formData,
-      date_prepared: formData.date_prepared || new Date().toISOString().split('T')[0],
-      date_qc: formData.date_qc || new Date().toISOString().split('T')[0]
+      date_prepared: formData.date_prepared || new Date().toISOString().split('T')[0]
     };
 
     const submissions = Array.from(selectedStains).map(stainId => ({
@@ -133,9 +132,9 @@ export default function StainQCForm() {
       setFormData({
         date_prepared: new Date().toISOString().split('T')[0],
         tech_initials: '',
-        stain_qc: 'PASS',
+        stain_qc: null,
         path_initials: '',
-        date_qc: new Date().toISOString().split('T')[0],
+        date_qc: '',
         comments: '',
         repeat_stain: false
       });
@@ -155,6 +154,9 @@ export default function StainQCForm() {
     setSelectedStains(tempSelectedStains);
     setShowMultiSelect(false);
   };
+
+  const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
+  const completedSubmissions = submissions.filter(sub => sub.stain_qc);
 
   return (
     <div className="stain-qc-container">
@@ -217,30 +219,6 @@ export default function StainQCForm() {
             />
           </div>
 
-          <div className="form-group">
-            <label>QC Status:</label>
-            <select
-              name="stain_qc"
-              value={formData.stain_qc}
-              onChange={handleChange}
-              required
-            >
-              <option value="PASS">PASS</option>
-              <option value="FAIL">FAIL</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Path Initials:</label>
-            <input
-              type="text"
-              name="path_initials"
-              value={formData.path_initials}
-              onChange={handleChange}
-              maxLength={3}
-            />
-          </div>
-
           <button type="submit" className="submit-button">Submit</button>
         </form>
       </div>
@@ -280,6 +258,32 @@ export default function StainQCForm() {
         </>
       )}
 
+      {pendingSubmissions.length > 0 && (
+        <div className="submissions-section pending-section">
+          <h2>Pending Approval</h2>
+          <table className="submissions-table">
+            <thead>
+              <tr>
+                <th>Stain</th>
+                <th>Date Prepared</th>
+                <th>Tech</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingSubmissions.map(sub => (
+                <tr key={sub.id}>
+                  <td>{sub.new_stain_list?.name || 'Unknown'}</td>
+                  <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
+                  <td>{sub.tech_initials}</td>
+                  <td>Pending</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div className="submissions-section">
         <h2>Stain QC Log</h2>
         <table className="submissions-table">
@@ -296,12 +300,12 @@ export default function StainQCForm() {
             </tr>
           </thead>
           <tbody>
-            {submissions.map(sub => (
+            {completedSubmissions.map(sub => (
               <tr key={sub.id} className={sub.stain_qc === 'FAIL' ? 'failed' : ''}>
                 <td>{sub.new_stain_list?.name || 'Unknown'}</td>
                 <td>{new Date(sub.date_prepared).toLocaleDateString()}</td>
                 <td>{sub.tech_initials}</td>
-                <td>{sub.stain_qc || 'Pending'}</td>
+                <td>{sub.stain_qc}</td>
                 <td>{sub.path_initials || '-'}</td>
                 <td>{sub.date_qc ? new Date(sub.date_qc).toLocaleDateString() : '-'}</td>
                 <td>{sub.comments || '-'}</td>

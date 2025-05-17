@@ -259,17 +259,26 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
   border: 1px solid #bee3f8;
+  margin-bottom: 20px;
+}
+
+.pending-section {
+  border-color: #fbd38d;
+}
+
+.pending-section h2 {
+  color: #c05621;
 }
 
 .submissions-section h2 {
   text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
   color: #4a5568;
+  margin-bottom: 15px;
 }
 
 .submissions-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
 }
 
 .submissions-table th,
