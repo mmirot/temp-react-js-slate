@@ -24,7 +24,6 @@ export default function StainQCForm() {
     fetchStains();
     fetchSubmissions();
 
-    // Close dropdown when clicking outside
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
@@ -133,6 +132,11 @@ export default function StainQCForm() {
     }
   };
 
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'dropdown' ? 'horizontal' : 'dropdown');
+    setIsDropdownOpen(false);
+  };
+
   const renderStainSelection = () => {
     if (viewMode === 'dropdown') {
       return (
@@ -186,22 +190,13 @@ export default function StainQCForm() {
         <h2>Stain QC Submission</h2>
         <form onSubmit={handleSubmit} className="stain-qc-form">
           <div className="form-group stain-list">
-            <div className="view-toggle">
-              <button
-                type="button"
-                className={viewMode === 'dropdown' ? 'active' : ''}
-                onClick={() => setViewMode('dropdown')}
-              >
-                Dropdown
-              </button>
-              <button
-                type="button"
-                className={viewMode === 'horizontal' ? 'active' : ''}
-                onClick={() => setViewMode('horizontal')}
-              >
-                Horizontal
-              </button>
-            </div>
+            <button
+              type="button"
+              className="view-toggle-button"
+              onClick={toggleViewMode}
+            >
+              {viewMode === 'dropdown' ? '+' : '-'}
+            </button>
             <label>Select Stains:</label>
             {renderStainSelection()}
           </div>
