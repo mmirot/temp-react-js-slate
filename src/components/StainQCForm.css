@@ -1,7 +1,6 @@
-/* Add to the existing CSS file */
 .App {
   text-align: center;
-  background-color: #f0f4f8;
+  background-color: #f0f2f5;
   min-height: 100vh;
 }
 
@@ -9,7 +8,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  color: #1a365d;
+  color: #333;
 }
 
 .form-section {
@@ -35,8 +34,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: #2d3748;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+  color: #444;
 }
 
 .form-group input[type="text"],
@@ -44,12 +42,9 @@
 .form-group select,
 .form-group textarea {
   padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  background: white;
-  color: #2d3748;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .form-group textarea {
@@ -57,29 +52,53 @@
   resize: vertical;
 }
 
+.form-group.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.stain-list {
+  margin-bottom: 20px;
+}
+
+.stain-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.stain-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.stain-checkbox:hover {
+  background-color: #f5f5f5;
+}
+
 button {
-  background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%);
+  background-color: #4CAF50;
   color: white;
   padding: 12px 20px;
-  border: 1px solid #2b6cb0;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 button:hover {
-  background: linear-gradient(180deg, #3182ce 0%, #2b6cb0 100%);
-}
-
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #45a049;
 }
 
 .submissions-section {
@@ -100,129 +119,66 @@ button:active {
 .submissions-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #ddd;
 }
 
 .submissions-table th {
-  background-color: #f7fafc;
+  background-color: #f5f5f5;
   font-weight: 600;
-  color: #2d3748;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .submissions-table tr:hover {
-  background-color: #f7fafc;
+  background-color: #f9f9f9;
 }
 
 .submissions-table tr.failed {
-  background-color: #fff5f5;
+  background-color: #fff3f3;
 }
 
 .submissions-table tr.failed:hover {
-  background-color: #fed7d7;
+  background-color: #ffe9e9;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.stain-modal {
+.stains-reference {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1001;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
 }
 
-.stain-checkboxes {
+.stains-reference h2 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.stains-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 8px;
+  padding: 10px;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
-.stain-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.stain-item {
   padding: 8px;
+  background-color: #f8f9fa;
   border-radius: 4px;
-  cursor: pointer;
+  text-align: left;
 }
 
-.stain-checkbox:hover {
-  background-color: #f7fafc;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.modal-button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.save-button {
-  background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%);
-  color: white;
-  border: 1px solid #2b6cb0;
-}
-
-.cancel-button {
-  background: white;
-  color: #4a5568;
-  border: 1px solid #cbd5e0;
-}
-
-.selected-stains {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.selected-stain-tag {
-  background: #ebf8ff;
-  color: #2c5282;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 14px;
-  border: 1px solid #bee3f8;
-}
-
-.view-toggle-button {
-  position: absolute;
-  right: -40px;
-  top: 0;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  line-height: 1;
+@media (max-width: 768px) {
+  .stain-qc-container {
+    padding: 10px;
+  }
+  
+  .submissions-table {
+    font-size: 14px;
+  }
+  
+  .submissions-table th,
+  .submissions-table td {
+    padding: 8px;
+  }
 }
