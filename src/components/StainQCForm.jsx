@@ -7,7 +7,7 @@ export default function StainQCForm() {
   const [formData, setFormData] = useState({
     date_prepared: new Date().toISOString().split('T')[0],
     tech_initials: '',
-    stain_qc: null,  // Initialize as null to prevent automatic approval
+    stain_qc: null,
     path_initials: '',
     date_qc: null,
     comments: '',
@@ -19,6 +19,7 @@ export default function StainQCForm() {
   const [tempSelectedStains, setTempSelectedStains] = useState(new Set());
   const [sortConfig, setSortConfig] = useState({ key: 'date_prepared', direction: 'desc' });
   const modalRef = useRef(null);
+  const [pendingUpdates, setPendingUpdates] = useState({});
 
   useEffect(() => {
     fetchStains();
@@ -133,42 +134,48 @@ export default function StainQCForm() {
     }));
   };
 
-  const handlePendingChange = async (submissionId, field, value) => {
-    // Update only the local state, don't submit to database
-    setSubmissions(prevSubmissions => 
-      prevSubmissions.map(sub => 
-        sub.id === submissionId 
-          ? { ...sub, [field]: value }
-          : sub
-      )
-    );
+  const handlePendingChange = (submissionId, field, value) => {
+    setPendingUpdates(prev => ({
+      ...prev,
+      [submissionId]: {
+        ...prev[submissionId],
+        [field]: value
+      }
+    }));
   };
 
   const handlePendingSubmit = async (submissionId) => {
+    const pendingUpdate = pendingUpdates[submissionId] || {};
     const submission = submissions.find(s => s.id === submissionId);
     
+    // Combine current submission with pending updates
+    const updatedSubmission = {
+      ...submission,
+      ...pendingUpdate
+    };
+    
     // Validate required fields
-    if (!submission.path_initials?.trim()) {
+    if (!updatedSubmission.path_initials?.trim()) {
       alert('Pathologist initials are required');
       return;
     }
 
-    if (!submission.stain_qc) {
+    if (!updatedSubmission.stain_qc) {
       alert('QC status (PASS/FAIL) is required');
       return;
     }
 
-    if (submission.stain_qc === 'FAIL' && !submission.comments?.trim()) {
+    if (updatedSubmission.stain_qc === 'FAIL' && !updatedSubmission.comments?.trim()) {
       alert('Comments are required when failing a stain QC');
       return;
     }
 
     // Prepare the update data
     const updates = {
-      stain_qc: submission.stain_qc,
-      path_initials: submission.path_initials.trim(),
-      comments: submission.comments,
-      repeat_stain: submission.repeat_stain || false,
+      stain_qc: updatedSubmission.stain_qc,
+      path_initials: updatedSubmission.path_initials.trim(),
+      comments: updatedSubmission.comments,
+      repeat_stain: updatedSubmission.repeat_stain || false,
       date_qc: new Date().toISOString().split('T')[0]
     };
 
@@ -181,6 +188,13 @@ export default function StainQCForm() {
       if (error) {
         throw error;
       }
+
+      // Clear pending updates for this submission
+      setPendingUpdates(prev => {
+        const newUpdates = { ...prev };
+        delete newUpdates[submissionId];
+        return newUpdates;
+      });
 
       alert('QC submission successful!');
       fetchSubmissions(); // Refresh the list
@@ -263,6 +277,14 @@ export default function StainQCForm() {
   const saveMultiSelection = () => {
     setSelectedStains(tempSelectedStains);
     setShowMultiSelect(false);
+  };
+
+  const getSubmissionValue = (submission, field) => {
+    const pendingUpdate = pendingUpdates[submission.id];
+    if (pendingUpdate && field in pendingUpdate) {
+      return pendingUpdate[field];
+    }
+    return submission[field];
   };
 
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
@@ -410,18 +432,16 @@ export default function StainQCForm() {
                   <td>
                     <input
                       type="text"
-                      value={sub.path_initials || ''}
+                      value={getSubmissionValue(sub, 'path_initials') || ''}
                       onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
                       maxLength={3}
                       placeholder="Required"
-                      required
                     />
                   </td>
                   <td>
                     <select
-                      value={sub.stain_qc || ''}
+                      value={getSubmissionValue(sub, 'stain_qc') || ''}
                       onChange={(e) => handlePendingChange(sub.id, 'stain_qc', e.target.value)}
-                      required
                     >
                       <option value="">Select Status</option>
                       <option value="PASS">PASS</option>
@@ -431,16 +451,15 @@ export default function StainQCForm() {
                   <td>
                     <input
                       type="text"
-                      value={sub.comments || ''}
+                      value={getSubmissionValue(sub, 'comments') || ''}
                       onChange={(e) => handlePendingChange(sub.id, 'comments', e.target.value)}
-                      placeholder={sub.stain_qc === 'FAIL' ? 'Required for FAIL' : 'Optional'}
-                      required={sub.stain_qc === 'FAIL'}
+                      placeholder={getSubmissionValue(sub, 'stain_qc') === 'FAIL' ? 'Required for FAIL' : 'Optional'}
                     />
                   </td>
                   <td>
                     <input
                       type="checkbox"
-                      checked={sub.repeat_stain || false}
+                      checked={getSubmissionValue(sub, 'repeat_stain') || false}
                       onChange={(e) => handlePendingChange(sub.id, 'repeat_stain', e.target.checked)}
                     />
                   </td>
