@@ -16,23 +16,12 @@ export default function StainQCForm() {
   const [isPathologist, setIsPathologist] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [selectedStains, setSelectedStains] = useState(new Set());
-  const [viewMode, setViewMode] = useState('dropdown');
-  const [showModal, setShowModal] = useState(false);
-  const [tempSelectedStains, setTempSelectedStains] = useState(new Set());
+  const [isMultipleView, setIsMultipleView] = useState(false);
   const modalRef = useRef(null);
 
   useEffect(() => {
     fetchStains();
     fetchSubmissions();
-
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowModal(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchStains = async () => {
@@ -83,23 +72,13 @@ export default function StainQCForm() {
   };
 
   const handleStainSelect = (stainId) => {
-    if (viewMode === 'dropdown') {
-      const newSelectedStains = new Set(selectedStains);
-      if (newSelectedStains.has(stainId)) {
-        newSelectedStains.delete(stainId);
-      } else {
-        newSelectedStains.add(stainId);
-      }
-      setSelectedStains(newSelectedStains);
+    const newSelectedStains = new Set(selectedStains);
+    if (newSelectedStains.has(stainId)) {
+      newSelectedStains.delete(stainId);
     } else {
-      const newTempSelected = new Set(tempSelectedStains);
-      if (newTempSelected.has(stainId)) {
-        newTempSelected.delete(stainId);
-      } else {
-        newTempSelected.add(stainId);
-      }
-      setTempSelectedStains(newTempSelected);
+      newSelectedStains.add(stainId);
     }
+    setSelectedStains(newSelectedStains);
   };
 
   const handleSubmit = async (e) => {
@@ -110,13 +89,12 @@ export default function StainQCForm() {
       return;
     }
 
-    const stainsToSubmit = viewMode === 'dropdown' ? selectedStains : tempSelectedStains;
-    if (stainsToSubmit.size === 0) {
+    if (selectedStains.size === 0) {
       alert('Please select at least one stain');
       return;
     }
 
-    const submissions = Array.from(stainsToSubmit).map(stainId => ({
+    const submissions = Array.from(selectedStains).map(stainId => ({
       ...formData,
       stain_id: stainId
     }));
@@ -139,63 +117,52 @@ export default function StainQCForm() {
         repeat_stain: false
       });
       setSelectedStains(new Set());
-      setTempSelectedStains(new Set());
-      setShowModal(false);
       fetchSubmissions();
     }
   };
 
-  const toggleViewMode = () => {
-    if (viewMode === 'dropdown') {
-      setViewMode('horizontal');
-      setShowModal(true);
-      setTempSelectedStains(new Set(selectedStains));
-    } else {
-      setViewMode('dropdown');
-      setShowModal(false);
-    }
-  };
-
-  const handleSaveSelection = () => {
-    setSelectedStains(new Set(tempSelectedStains));
-    setShowModal(false);
-    setViewMode('dropdown');
-  };
-
-  const renderStainSelection = () => {
-    return (
-      <div className="stain-select-wrapper">
-        <button
-          type="button"
-          className="stain-select-button"
-          onClick={() => setShowModal(true)}
-        >
-          <span>
-            {selectedStains.size === 0
-              ? 'Select stains...'
-              : `${selectedStains.size} stain${selectedStains.size === 1 ? '' : 's'} selected`}
-          </span>
-          <span>▼</span>
-        </button>
-      </div>
-    );
+  const toggleView = () => {
+    setIsMultipleView(!isMultipleView);
   };
 
   return (
     <div className="stain-qc-container">
       <div className="form-section">
         <form onSubmit={handleSubmit} className="stain-qc-form">
-          <button
-            type="button"
-            className="view-toggle-button"
-            onClick={toggleViewMode}
-          >
-            {viewMode === 'dropdown' ? '+' : '-'}
-          </button>
-
           <div className="form-group stain-list">
+            <button
+              type="button"
+              className="view-toggle-button"
+              onClick={toggleView}
+            >
+              {isMultipleView ? '-' : '+'}
+            </button>
             <label>Select Stains:</label>
-            {renderStainSelection()}
+            {isMultipleView ? (
+              <div className="stain-checkboxes">
+                {stains.map(stain => (
+                  <label key={stain.id} className="stain-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedStains.has(stain.id)}
+                      onChange={() => handleStainSelect(stain.id)}
+                    />
+                    {stain.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <select
+                value={Array.from(selectedStains)[0] || ''}
+                onChange={(e) => setSelectedStains(new Set([e.target.value]))}>
+                <option value="">Select a stain</option>
+                {stains.map(stain => (
+                  <option key={stain.id} value={stain.id}>
+                    {stain.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="form-group">
@@ -285,34 +252,6 @@ export default function StainQCForm() {
           <button type="submit" className="submit-button">Submit</button>
         </form>
       </div>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" ref={modalRef}>
-            <h2>Select Stains</h2>
-            <div className="modal-stains-grid">
-              {stains.map(stain => (
-                <label key={stain.id} className="modal-stain-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={tempSelectedStains.has(stain.id)}
-                    onChange={() => handleStainSelect(stain.id)}
-                  />
-                  {stain.name}
-                </label>
-              ))}
-            </div>
-            <div className="modal-actions">
-              <button onClick={handleSaveSelection} className="save-button">
-                Save Selection
-              </button>
-              <button onClick={() => setShowModal(false)} className="cancel-button">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="submissions-section">
         <h2>Recent Submissions</h2>
