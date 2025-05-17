@@ -86,14 +86,6 @@
   background-color: #e9ecef;
 }
 
-.stain-checkbox.vertical {
-  width: 100%;
-}
-
-.stain-checkbox.horizontal {
-  width: auto;
-}
-
 .view-toggle {
   display: flex;
   gap: 10px;

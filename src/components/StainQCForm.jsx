@@ -134,51 +134,49 @@ export default function StainQCForm() {
   };
 
   const renderStainSelection = () => {
-    switch (viewMode) {
-      case 'dropdown':
-        return (
-          <div className="stain-select-wrapper" ref={dropdownRef}>
-            <button
-              type="button"
-              className="stain-select-button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <span>
-                {selectedStains.size === 0
-                  ? 'Select stains...'
-                  : `${selectedStains.size} stain${selectedStains.size === 1 ? '' : 's'} selected`}
-              </span>
-              <span>{isDropdownOpen ? '▲' : '▼'}</span>
-            </button>
-            <div className={`stain-select-dropdown ${isDropdownOpen ? 'show' : ''}`}>
-              {stains.map(stain => (
-                <div
-                  key={stain.id}
-                  className={`stain-option ${selectedStains.has(stain.id) ? 'selected' : ''}`}
-                  onClick={() => handleStainSelect(stain.id)}
-                >
-                  {stain.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'horizontal':
-      case 'vertical':
-        return (
-          <div className="stain-checkboxes" style={{ flexDirection: viewMode === 'vertical' ? 'column' : 'row' }}>
+    if (viewMode === 'dropdown') {
+      return (
+        <div className="stain-select-wrapper" ref={dropdownRef}>
+          <button
+            type="button"
+            className="stain-select-button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <span>
+              {selectedStains.size === 0
+                ? 'Select stains...'
+                : `${selectedStains.size} stain${selectedStains.size === 1 ? '' : 's'} selected`}
+            </span>
+            <span>{isDropdownOpen ? '▲' : '▼'}</span>
+          </button>
+          <div className={`stain-select-dropdown ${isDropdownOpen ? 'show' : ''}`}>
             {stains.map(stain => (
-              <label key={stain.id} className={`stain-checkbox ${viewMode}`}>
-                <input
-                  type="checkbox"
-                  checked={selectedStains.has(stain.id)}
-                  onChange={() => handleStainSelect(stain.id)}
-                />
+              <div
+                key={stain.id}
+                className={`stain-option ${selectedStains.has(stain.id) ? 'selected' : ''}`}
+                onClick={() => handleStainSelect(stain.id)}
+              >
                 {stain.name}
-              </label>
+              </div>
             ))}
           </div>
-        );
+        </div>
+      );
+    } else {
+      return (
+        <div className="stain-checkboxes">
+          {stains.map(stain => (
+            <label key={stain.id} className="stain-checkbox">
+              <input
+                type="checkbox"
+                checked={selectedStains.has(stain.id)}
+                onChange={() => handleStainSelect(stain.id)}
+              />
+              {stain.name}
+            </label>
+          ))}
+        </div>
+      );
     }
   };
 
@@ -202,13 +200,6 @@ export default function StainQCForm() {
                 onClick={() => setViewMode('horizontal')}
               >
                 Horizontal
-              </button>
-              <button
-                type="button"
-                className={viewMode === 'vertical' ? 'active' : ''}
-                onClick={() => setViewMode('vertical')}
-              >
-                Vertical
               </button>
             </div>
             <label>Select Stains:</label>
