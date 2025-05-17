@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import './StainQCForm.css';
 
@@ -16,11 +16,23 @@ export default function StainQCForm() {
   const [isPathologist, setIsPathologist] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [selectedStains, setSelectedStains] = useState(new Set());
-  const [viewMode, setViewMode] = useState('dropdown'); // 'dropdown', 'horizontal', or 'vertical'
+  const [viewMode, setViewMode] = useState('dropdown');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     fetchStains();
     fetchSubmissions();
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchStains = async () => {
@@ -81,11 +93,6 @@ export default function StainQCForm() {
     setSelectedStains(newSelectedStains);
   };
 
-  const handleDropdownChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-    setSelectedStains(new Set(selectedOptions));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -130,19 +137,31 @@ export default function StainQCForm() {
     switch (viewMode) {
       case 'dropdown':
         return (
-          <select
-            multiple
-            value={Array.from(selectedStains)}
-            onChange={handleDropdownChange}
-            className="form-control"
-            style={{ height: '200px' }}
-          >
-            {stains.map(stain => (
-              <option key={stain.id} value={stain.id}>
-                {stain.name}
-              </option>
-            ))}
-          </select>
+          <div className="stain-select-wrapper" ref={dropdownRef}>
+            <button
+              type="button"
+              className="stain-select-button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <span>
+                {selectedStains.size === 0
+                  ? 'Select stains...'
+                  : `${selectedStains.size} stain${selectedStains.size === 1 ? '' : 's'} selected`}
+              </span>
+              <span>{isDropdownOpen ? '▲' : '▼'}</span>
+            </button>
+            <div className={`stain-select-dropdown ${isDropdownOpen ? 'show' : ''}`}>
+              {stains.map(stain => (
+                <div
+                  key={stain.id}
+                  className={`stain-option ${selectedStains.has(stain.id) ? 'selected' : ''}`}
+                  onClick={() => handleStainSelect(stain.id)}
+                >
+                  {stain.name}
+                </div>
+              ))}
+            </div>
+          </div>
         );
       case 'horizontal':
       case 'vertical':
