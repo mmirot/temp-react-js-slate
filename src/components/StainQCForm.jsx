@@ -144,6 +144,28 @@ export default function StainQCForm() {
     }));
   };
 
+  const handleDeleteSubmission = async (submissionId) => {
+    if (!confirm('Are you sure you want to delete this submission?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('stain_submissions')
+        .delete()
+        .eq('id', submissionId);
+
+      if (error) {
+        throw error;
+      }
+
+      alert('Submission deleted successfully');
+      fetchSubmissions(); // Refresh the list
+    } catch (error) {
+      alert('Error deleting submission: ' + error.message);
+    }
+  };
+
   const handlePendingSubmit = async (submissionId) => {
     const pendingUpdate = pendingUpdates[submissionId] || {};
     const submission = submissions.find(s => s.id === submissionId);
@@ -526,13 +548,22 @@ export default function StainQCForm() {
                     />
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="submit-button"
-                      onClick={() => handlePendingSubmit(sub.id)}
-                    >
-                      Submit QC
-                    </button>
+                    <div className="action-buttons">
+                      <button
+                        type="button"
+                        className="submit-button"
+                        onClick={() => handlePendingSubmit(sub.id)}
+                      >
+                        Submit QC
+                      </button>
+                      <button
+                        type="button"
+                        className="delete-button"
+                        onClick={() => handleDeleteSubmission(sub.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -394,6 +394,38 @@
   outline: none;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-button {
+  background: linear-gradient(180deg, #f56565 0%, #c53030 100%);
+  color: white;
+  padding: 4px 12px;
+  border: 1px solid #9b2c2c;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  height: auto;
+  min-width: 80px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  transition: all 0.2s;
+}
+
+.delete-button:hover {
+  background: linear-gradient(180deg, #c53030 0%, #9b2c2c 100%);
+}
+
+.delete-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;
