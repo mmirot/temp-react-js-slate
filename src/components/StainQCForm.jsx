@@ -17,7 +17,7 @@ export default function StainQCForm() {
   const [selectedStains, setSelectedStains] = useState(new Set());
   const [showMultiSelect, setShowMultiSelect] = useState(false);
   const [tempSelectedStains, setTempSelectedStains] = useState(new Set());
-  const [editingSubmission, setEditingSubmission] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'date_prepared', direction: 'desc' });
   const modalRef = useRef(null);
 
   useEffect(() => {
@@ -78,6 +78,41 @@ export default function StainQCForm() {
     } catch (error) {
       console.error('Error in fetchSubmissions:', error);
     }
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortedSubmissions = (submissions) => {
+    const sortedSubmissions = [...submissions];
+    sortedSubmissions.sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Handle special cases
+      if (sortConfig.key === 'new_stain_list.name') {
+        aValue = a.new_stain_list?.name || '';
+        bValue = b.new_stain_list?.name || '';
+      }
+
+      if (!aValue) return 1;
+      if (!bValue) return -1;
+
+      if (sortConfig.key.includes('date')) {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sortedSubmissions;
   };
 
   const handleChange = (e) => {
@@ -238,7 +273,7 @@ export default function StainQCForm() {
   };
 
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
-  const completedSubmissions = submissions.filter(sub => sub.stain_qc);
+  const completedSubmissions = getSortedSubmissions(submissions.filter(sub => sub.stain_qc));
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -248,6 +283,13 @@ export default function StainQCForm() {
       console.error('Error formatting date:', error);
       return '-';
     }
+  };
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
+    }
+    return '';
   };
 
   return (
@@ -428,14 +470,30 @@ export default function StainQCForm() {
         <table className="submissions-table">
           <thead>
             <tr>
-              <th>Stain</th>
-              <th>Date Prepared</th>
-              <th>Tech</th>
-              <th>QC Status</th>
-              <th>Path</th>
-              <th>QC Date</th>
-              <th>Comments</th>
-              <th>Repeat</th>
+              <th onClick={() => handleSort('new_stain_list.name')} className="sortable">
+                Stain{getSortIndicator('new_stain_list.name')}
+              </th>
+              <th onClick={() => handleSort('date_prepared')} className="sortable">
+                Date Prepared{getSortIndicator('date_prepared')}
+              </th>
+              <th onClick={() => handleSort('tech_initials')} className="sortable">
+                Tech{getSortIndicator('tech_initials')}
+              </th>
+              <th onClick={() => handleSort('stain_qc')} className="sortable">
+                QC Status{getSortIndicator('stain_qc')}
+              </th>
+              <th onClick={() => handleSort('path_initials')} className="sortable">
+                Path{getSortIndicator('path_initials')}
+              </th>
+              <th onClick={() => handleSort('date_qc')} className="sortable">
+                QC Date{getSortIndicator('date_qc')}
+              </th>
+              <th onClick={() => handleSort('comments')} className="sortable">
+                Comments{getSortIndicator('comments')}
+              </th>
+              <th onClick={() => handleSort('repeat_stain')} className="sortable">
+                Repeat{getSortIndicator('repeat_stain')}
+              </th>
             </tr>
           </thead>
           <tbody>

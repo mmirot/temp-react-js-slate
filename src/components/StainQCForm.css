@@ -335,6 +335,25 @@
   min-width: 80px;
 }
 
+.submissions-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 20px;
+}
+
+.submissions-table th.sortable:hover {
+  background-color: #edf2f7;
+}
+
+.submissions-table th.sortable::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;
