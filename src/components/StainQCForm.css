@@ -1,3 +1,9 @@
+.App {
+  text-align: center;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+}
+
 .stain-qc-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -57,13 +63,13 @@
 }
 
 .stain-checkboxes {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  max-height: 200px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
@@ -131,6 +137,35 @@ button:hover {
 
 .submissions-table tr.failed:hover {
   background-color: #ffe9e9;
+}
+
+.stains-reference {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+}
+
+.stains-reference h2 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.stains-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.stain-item {
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  text-align: left;
 }
 
 @media (max-width: 768px) {

@@ -271,6 +271,17 @@ export default function StainQCForm() {
           </tbody>
         </table>
       </div>
+
+      <div className="stains-reference">
+        <h2>Available Stains</h2>
+        <div className="stains-list">
+          {stains.map(stain => (
+            <div key={stain.id} className="stain-item">
+              {stain.name}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
