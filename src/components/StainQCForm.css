@@ -139,35 +139,6 @@ button:hover {
   background-color: #ffe9e9;
 }
 
-.stains-reference {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 30px;
-}
-
-.stains-reference h2 {
-  margin-bottom: 15px;
-  color: #2c3e50;
-}
-
-.stains-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-.stain-item {
-  padding: 8px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  text-align: left;
-}
-
 @media (max-width: 768px) {
   .stain-qc-container {
     padding: 10px;
