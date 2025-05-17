@@ -99,6 +99,14 @@ export default function StainQCForm() {
   };
 
   const handlePendingChange = async (submissionId, field, value) => {
+    if (field === 'stain_qc') {
+      const submission = submissions.find(s => s.id === submissionId);
+      if (!submission.path_initials) {
+        alert('Please enter pathologist initials before setting QC status');
+        return;
+      }
+    }
+
     const updates = {
       [field]: value,
       ...(field === 'stain_qc' && { date_qc: new Date().toISOString().split('T')[0] })
@@ -305,8 +313,8 @@ export default function StainQCForm() {
                 <th>Stain</th>
                 <th>Date Prepared</th>
                 <th>Tech</th>
-                <th>QC Status</th>
                 <th>Path Initials</th>
+                <th>QC Status</th>
                 <th>Comments</th>
                 <th>Repeat</th>
               </tr>
@@ -318,22 +326,24 @@ export default function StainQCForm() {
                   <td>{formatDate(sub.date_prepared)}</td>
                   <td>{sub.tech_initials}</td>
                   <td>
-                    <select
-                      value={sub.stain_qc || ''}
-                      onChange={(e) => handlePendingChange(sub.id, 'stain_qc', e.target.value)}
-                    >
-                      <option value="">Pending</option>
-                      <option value="PASS">PASS</option>
-                      <option value="FAIL">FAIL</option>
-                    </select>
-                  </td>
-                  <td>
                     <input
                       type="text"
                       value={sub.path_initials || ''}
                       onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
                       maxLength={3}
+                      required
                     />
+                  </td>
+                  <td>
+                    <select
+                      value={sub.stain_qc || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'stain_qc', e.target.value)}
+                      disabled={!sub.path_initials}
+                    >
+                      <option value="">Pending</option>
+                      <option value="PASS">PASS</option>
+                      <option value="FAIL">FAIL</option>
+                    </select>
                   </td>
                   <td>
                     <input
