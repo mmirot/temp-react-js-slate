@@ -44,7 +44,6 @@ export default function StainQCForm() {
       if (error) {
         console.error('Error fetching stains:', error);
       } else {
-        console.log('Fetched stains:', data);
         setStains(data || []);
       }
     } catch (error) {
@@ -187,16 +186,16 @@ export default function StainQCForm() {
   return (
     <div className="stain-qc-container">
       <div className="form-section">
-        <h2>Stain QC Submission</h2>
         <form onSubmit={handleSubmit} className="stain-qc-form">
+          <button
+            type="button"
+            className="view-toggle-button"
+            onClick={toggleViewMode}
+          >
+            {viewMode === 'dropdown' ? '+' : '-'}
+          </button>
+
           <div className="form-group stain-list">
-            <button
-              type="button"
-              className="view-toggle-button"
-              onClick={toggleViewMode}
-            >
-              {viewMode === 'dropdown' ? '+' : '-'}
-            </button>
             <label>Select Stains:</label>
             {renderStainSelection()}
           </div>
@@ -224,6 +223,17 @@ export default function StainQCForm() {
             />
           </div>
 
+          <div className="form-group">
+            <label>Path Initials:</label>
+            <input
+              type="text"
+              name="path_initials"
+              value={formData.path_initials}
+              onChange={handleChange}
+              maxLength={3}
+            />
+          </div>
+
           {isPathologist && (
             <>
               <div className="form-group">
@@ -240,18 +250,6 @@ export default function StainQCForm() {
               </div>
 
               <div className="form-group">
-                <label>Pathologist Initials:</label>
-                <input
-                  type="text"
-                  name="path_initials"
-                  value={formData.path_initials}
-                  onChange={handleChange}
-                  required
-                  maxLength={3}
-                />
-              </div>
-
-              <div className="form-group">
                 <label>QC Date:</label>
                 <input
                   type="date"
@@ -263,7 +261,7 @@ export default function StainQCForm() {
               </div>
 
               <div className="form-group">
-                <label>Comments (Required if Failed):</label>
+                <label>Comments:</label>
                 <textarea
                   name="comments"
                   value={formData.comments}
@@ -280,22 +278,11 @@ export default function StainQCForm() {
                     checked={formData.repeat_stain}
                     onChange={handleChange}
                   />
-                  Repeat Stain Required
+                  Repeat Required
                 </label>
               </div>
             </>
           )}
-
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                checked={isPathologist}
-                onChange={(e) => setIsPathologist(e.target.checked)}
-              />
-              I am a Pathologist
-            </label>
-          </div>
 
           <button type="submit" className="submit-button">Submit</button>
         </form>
