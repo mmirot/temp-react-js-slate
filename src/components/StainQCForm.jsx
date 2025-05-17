@@ -427,18 +427,6 @@ export default function StainQCForm() {
           <div className="modal-overlay" />
           <div className="stain-modal" ref={modalRef}>
             <h2>Select Multiple Stains</h2>
-            <div className="form-group modal-input">
-              <label>Tech Initials:</label>
-              <input
-                type="text"
-                name="tech_initials"
-                value={formData.tech_initials}
-                onChange={handleChange}
-                required
-                maxLength={3}
-                placeholder="Enter initials"
-              />
-            </div>
             <div className="stain-checkboxes">
               {stains.map(stain => (
                 <label key={stain.id} className="stain-checkbox">
