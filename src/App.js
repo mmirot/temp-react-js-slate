@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TaskForm from './components/TaskForm';
-import TaskList from './components/TaskList';
+import StainQCForm from './components/StainQCForm';
 import './App.css';
 
 function App() {
@@ -9,10 +8,9 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <h1>Daily Task Submission</h1>
+          <h1>Pathology Stain QC Tracking</h1>
           <Routes>
-            <Route path="/" element={<TaskForm />} />
-            <Route path="/tasks" element={<TaskList />} />
+            <Route path="/" element={<StainQCForm />} />
           </Routes>
         </header>
       </div>
