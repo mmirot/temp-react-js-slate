@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import toast from 'react-hot-toast';
 import './StainQCForm.css';
 
 export default function StainQCForm() {
@@ -158,9 +159,11 @@ export default function StainQCForm() {
         throw error;
       }
 
+      toast.success('Submission deleted successfully');
       fetchSubmissions();
     } catch (error) {
-      console.error('Error deleting submission:', error.message);
+      toast.error('Error deleting submission: ' + error.message);
+      console.error('Error deleting submission:', error);
     }
   };
 
@@ -174,14 +177,17 @@ export default function StainQCForm() {
     };
     
     if (!updatedSubmission.path_initials?.trim()) {
+      toast.error('Pathologist initials are required');
       return;
     }
 
     if (!updatedSubmission.stain_qc) {
+      toast.error('QC status (PASS/FAIL) is required');
       return;
     }
 
     if (updatedSubmission.stain_qc === 'FAIL' && !updatedSubmission.comments?.trim()) {
+      toast.error('Comments are required when failing a stain QC');
       return;
     }
 
@@ -209,9 +215,11 @@ export default function StainQCForm() {
         return newUpdates;
       });
 
+      toast.success('QC submission successful!');
       fetchSubmissions();
     } catch (error) {
-      console.error('Error updating submission:', error.message);
+      toast.error('Error updating submission: ' + error.message);
+      console.error('Error updating submission:', error);
     }
   };
 
@@ -233,10 +241,12 @@ export default function StainQCForm() {
     e.preventDefault();
     
     if (selectedStains.size === 0) {
+      toast.error('Please select at least one stain');
       return;
     }
 
     if (!formData.tech_initials.trim()) {
+      toast.error('Tech initials are required');
       return;
     }
 
@@ -260,6 +270,7 @@ export default function StainQCForm() {
         throw error;
       }
 
+      toast.success('Submission successful!');
       setFormData({
         date_prepared: new Date().toISOString().split('T')[0],
         tech_initials: '',
@@ -272,7 +283,8 @@ export default function StainQCForm() {
       setSelectedStains(new Set());
       fetchSubmissions();
     } catch (error) {
-      console.error('Error submitting:', error.message);
+      toast.error('Error submitting: ' + error.message);
+      console.error('Error submitting:', error);
     }
   };
 
