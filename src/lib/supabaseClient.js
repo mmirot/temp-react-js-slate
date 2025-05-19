@@ -3,17 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please click the "Connect to Supabase" button in the top right to set up your connection.');
-}
-
-// Ensure the URL is properly formatted
-const formattedUrl = supabaseUrl.trim().replace(/\/$/, '');
-
-export const supabase = createClient(formattedUrl, supabaseAnonKey, {
+// Configuration options for Supabase client
+const supabaseOptions = {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    storageKey: 'supabase.auth.token',
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    domain: 'svpathlab.com'
   },
   global: {
     headers: {
@@ -23,9 +21,17 @@ export const supabase = createClient(formattedUrl, supabaseAnonKey, {
   db: {
     schema: 'public',
   },
-  // Add proper error handling for network issues
   catchNetworkErrors: true,
-});
+};
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables. Please click the "Connect to Supabase" button in the top right to set up your connection.');
+}
+
+// Ensure the URL is properly formatted
+const formattedUrl = supabaseUrl.trim().replace(/\/$/, '');
+
+export const supabase = createClient(formattedUrl, supabaseAnonKey, supabaseOptions);
 
 // Add a helper function to check connection
 export const checkConnection = async () => {
