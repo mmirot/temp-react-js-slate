@@ -10,22 +10,46 @@ export function useAuth() {
   return useContext(ClerkAuthContext);
 }
 
+// Check if Clerk is available
+const isClerkAvailable = () => {
+  try {
+    return !!window.Clerk;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const ClerkAuthProvider = ({ children }) => {
-  const { isLoaded, userId, sessionId } = useClerkAuth();
-  const { user } = useUser();
-  const clerk = useClerk();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+
+  // Use Clerk hooks if available
+  const clerkAuth = isClerkAvailable() ? useClerkAuth() : { isLoaded: true, userId: null, sessionId: null };
+  const userHook = isClerkAvailable() ? useUser() : { user: null };
+  const clerk = isClerkAvailable() ? useClerk() : null;
+
+  // Extract values safely
+  const { isLoaded = true, userId = null, sessionId = null } = clerkAuth;
+  const clerkUser = userHook?.user;
 
   // Set loading state based on Clerk's isLoaded
   useEffect(() => {
     if (isLoaded) {
       setLoading(false);
+      setUser(clerkUser);
+      setSession(sessionId ? { id: sessionId } : null);
     }
-  }, [isLoaded]);
+  }, [isLoaded, clerkUser, sessionId]);
 
-  // Authentication actions similar to previous Supabase implementation
+  // Authentication actions
   const signIn = async (emailAddress, password) => {
+    if (!clerk) {
+      toast.error('Authentication is not available. Please add a Clerk Publishable Key.');
+      return { success: false, error: 'Authentication not available' };
+    }
+
     try {
       console.log('ClerkAuthContext - Attempting sign in:', emailAddress);
       await clerk.signIn.create({
@@ -42,6 +66,11 @@ export const ClerkAuthProvider = ({ children }) => {
   };
 
   const signUp = async (emailAddress, password) => {
+    if (!clerk) {
+      toast.error('Authentication is not available. Please add a Clerk Publishable Key.');
+      return { success: false, error: 'Authentication not available' };
+    }
+
     try {
       console.log('ClerkAuthContext - Attempting sign up:', emailAddress);
       await clerk.signUp.create({
@@ -58,6 +87,11 @@ export const ClerkAuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    if (!clerk) {
+      toast.error('Authentication is not available. Please add a Clerk Publishable Key.');
+      return;
+    }
+
     try {
       console.log('ClerkAuthContext - Attempting sign out');
       await clerk.signOut();
@@ -69,24 +103,24 @@ export const ClerkAuthProvider = ({ children }) => {
     }
   };
 
-  // Create a value that mirrors the structure of the previous Supabase auth context
-  // for easier integration with existing components
+  // Value for the context
   const value = {
     user: user,
-    session: sessionId ? { id: sessionId } : null,
+    session: session,
     signIn,
     signUp,
     signOut,
     loading,
-    supabaseError: null, // Set to null since we're using Clerk now
-    connectionState: 'connected', // Always connected with Clerk
-    supabase: null, // No longer using Supabase client
+    supabaseError: null,
+    connectionState: 'connected',
+    supabase: null,
   };
 
   console.log('ClerkAuthContext - Current auth state:', { 
     isAuthenticated: !!userId, 
     isLoading: loading,
     userEmail: user?.emailAddresses?.[0]?.emailAddress || 'none',
+    clerkAvailable: isClerkAvailable()
   });
 
   return (
