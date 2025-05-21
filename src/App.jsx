@@ -9,7 +9,7 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/auth';
 import { checkConnection } from './lib/supabaseClient';
 import './App.css';
 
