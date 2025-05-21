@@ -17,18 +17,23 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('AuthContext - Initializing auth state');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('AuthContext - Auth state change:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (event === 'SIGNED_IN') {
+          console.log('AuthContext - User signed in', session?.user?.email);
           toast.success('Signed in successfully');
           navigate('/');
         }
         
         if (event === 'SIGNED_OUT') {
+          console.log('AuthContext - User signed out');
           toast.success('Signed out successfully');
           navigate('/auth');
         }
@@ -36,25 +41,33 @@ export const AuthProvider = ({ children }) => {
     );
 
     // THEN check for existing session
+    console.log('AuthContext - Checking for existing session');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthContext - Session check result:', session ? 'Session found' : 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthContext - Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const signIn = async (email, password) => {
     try {
+      console.log('AuthContext - Attempting sign in:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+      console.log('AuthContext - Sign in successful');
       return { success: true };
     } catch (error) {
+      console.error('AuthContext - Sign in error:', error.message);
       toast.error(error.message);
       return { success: false, error: error.message };
     }
@@ -62,15 +75,18 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password) => {
     try {
+      console.log('AuthContext - Attempting sign up:', email);
       const { error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) throw error;
+      console.log('AuthContext - Sign up successful');
       toast.success('Signup successful! Please check your email for verification.');
       return { success: true };
     } catch (error) {
+      console.error('AuthContext - Sign up error:', error.message);
       toast.error(error.message);
       return { success: false, error: error.message };
     }
@@ -78,9 +94,12 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
+      console.log('AuthContext - Attempting sign out');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      console.log('AuthContext - Sign out successful');
     } catch (error) {
+      console.error('AuthContext - Sign out error:', error.message);
       toast.error(error.message);
     }
   };
@@ -93,6 +112,12 @@ export const AuthProvider = ({ children }) => {
     signOut,
     loading,
   };
+
+  console.log('AuthContext - Current auth state:', { 
+    isAuthenticated: !!user, 
+    isLoading: loading,
+    userEmail: user?.email || 'none'
+  });
 
   return (
     <AuthContext.Provider value={value}>
