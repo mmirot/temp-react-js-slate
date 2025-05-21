@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Check for cached credentials in localStorage with validation
@@ -101,7 +102,7 @@ console.log('Supabase - Connecting to Supabase instance:', formattedUrl.substrin
 
 // Add a connection timestamp to detect stale connections
 let lastConnectionAttempt = Date.now();
-export const getLastConnectionAttempt = () => lastConnectionAttempt;
+const getLastConnectionAttempt = () => lastConnectionAttempt;
 
 // Attempt to create the Supabase client with error handling
 let supabase;
@@ -116,7 +117,7 @@ try {
 }
 
 // Add a helper function to check connection
-export const checkConnection = async () => {
+const checkConnection = async () => {
   lastConnectionAttempt = Date.now();
   
   if (!hasRealCredentials) {
@@ -203,7 +204,7 @@ export const checkConnection = async () => {
 };
 
 // Add a reconnect function that can be called from anywhere
-export const reconnect = async () => {
+const reconnect = async () => {
   console.log('Supabase - Attempting to reconnect...');
   
   // Check for updated environment variables
@@ -261,5 +262,6 @@ if (hasRealCredentials) {
   });
 }
 
+// Export the necessary functions and the Supabase client
 export { checkConnection, reconnect, getLastConnectionAttempt };
 export default supabase;
