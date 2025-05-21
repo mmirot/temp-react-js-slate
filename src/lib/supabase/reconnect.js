@@ -26,14 +26,14 @@ export const reconnect = async () => {
                          (url.searchParams.get('type') === 'recovery' || 
                           url.searchParams.get('type') === 'signup');
       
-      // Only reload if we're not in the middle of an auth flow
-      if (!isAuthFlow) {
+      if (isAuthFlow) {
+        console.log('Supabase - In auth flow, reconnecting without full page reload');
+        // For auth flows, don't reload the full page to preserve params
+        // Instead, try to re-initialize the client
+        return await checkConnection();
+      } else {
         console.log('Supabase - Reloading page to apply new credentials');
         window.location.reload();
-        return true;
-      } else {
-        console.log('Supabase - In auth flow, not reloading to preserve auth state');
-        // Return true since we've updated credentials
         return true;
       }
     } catch (error) {

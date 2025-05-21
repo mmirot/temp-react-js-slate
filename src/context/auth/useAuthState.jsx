@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase, checkConnection } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +53,8 @@ export function useAuthState() {
     }
     
     // Priority check for password reset flows
-    if (isPasswordResetFlow()) {
+    const inResetFlow = isPasswordResetFlow();
+    if (inResetFlow) {
       console.log('AuthContext - Detected password reset flow, prioritizing connection');
     }
     
@@ -101,6 +103,17 @@ export function useAuthState() {
         }
       }
     );
+
+    // If in password reset flow, force connection verification
+    if (inResetFlow) {
+      console.log('AuthContext - In password reset flow, verifying connection first');
+      verifyConnection().then(isConnected => {
+        if (!isConnected) {
+          console.log('AuthContext - Connection issue detected during password reset flow');
+          toast.error('Connection issue detected. Attempting to reconnect...');
+        }
+      });
+    }
 
     // THEN check for existing session
     console.log('AuthContext - Checking for existing session');

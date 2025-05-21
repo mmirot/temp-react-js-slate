@@ -13,9 +13,11 @@ const Auth = () => {
   const [connectionStatus, setConnectionStatus] = useState('checking');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [forcedReconnectAttempted, setForcedReconnectAttempted] = useState(false);
   const [searchParams] = useSearchParams();
   const { user, signIn, signUp, supabase, supabaseError, retryConnection } = useAuth();
 
+  // Priority check for password reset flow
   useEffect(() => {
     // Check if we're in a password reset flow
     const type = searchParams.get('type');
@@ -24,25 +26,40 @@ const Auth = () => {
     if (isRecovery) {
       console.log('Auth - Detected password recovery flow');
       setIsChangingPassword(true);
-      // Wait for connection to be established before proceeding
-      const checkAndReconnect = async () => {
+      
+      // Force connection verification and reconnection for password reset flows
+      const forceConnection = async () => {
+        setConnectionStatus('checking');
+        toast.loading('Establishing secure connection...');
+        
         const isConnected = await checkConnection();
-        if (!isConnected) {
-          console.log('Auth - Reconnecting for password recovery flow');
-          toast.loading('Establishing connection for password reset...');
+        if (!isConnected && !forcedReconnectAttempted) {
+          console.log('Auth - Forcing reconnection for password reset flow');
+          setForcedReconnectAttempted(true);
+          
+          // Try to reconnect
           const reconnected = await reconnect();
+          setConnectionStatus(reconnected ? 'connected' : 'error');
+          
           if (reconnected) {
             toast.success('Connection established! You can now set your new password.');
           } else {
-            toast.error('Failed to connect to Supabase. Please try refreshing the page.');
+            toast.error('Connection failed. Please try again or refresh the page.');
+          }
+        } else {
+          setConnectionStatus(isConnected ? 'connected' : 'error');
+          if (isConnected) {
+            toast.success('Connection established! You can now set your new password.');
           }
         }
+        
+        toast.dismiss();
       };
       
-      checkAndReconnect();
+      forceConnection();
     }
 
-    // Check Supabase connection when component mounts
+    // General connection check
     const verifyConnection = async () => {
       setConnectionStatus('checking');
       try {
@@ -50,7 +67,7 @@ const Auth = () => {
         console.log('Auth - Supabase connection status:', isConnected);
         setConnectionStatus(isConnected ? 'connected' : 'error');
         
-        if (!isConnected) {
+        if (!isConnected && !isRecovery) {
           toast.error('Not connected to Supabase. Authentication will not work.');
         }
       } catch (error) {
@@ -113,8 +130,19 @@ const Auth = () => {
     }
     
     if (connectionStatus === 'error') {
-      toast.error('Cannot change password - No connection to Supabase. Please fix connection issues first.');
-      return;
+      // If connection error in password change flow, force a reconnection attempt
+      toast.error('Connection issue detected. Attempting to reconnect...');
+      setConnectionStatus('checking');
+      const reconnected = await reconnect();
+      
+      if (!reconnected) {
+        toast.error('Cannot change password - No connection to Supabase. Please fix connection issues first.');
+        setConnectionStatus('error');
+        return;
+      }
+      
+      setConnectionStatus('connected');
+      toast.success('Connection restored!');
     }
     
     setIsSubmitting(true);
@@ -203,6 +231,32 @@ const Auth = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
         <div className="w-full max-w-md">
+          {connectionStatus === 'error' && (
+            <div className="mb-6 w-full p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-bold">Connection Error</p>
+                  <p>Cannot complete password reset without connecting to Supabase.</p>
+                </div>
+                <button 
+                  onClick={handleRetryConnection}
+                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                >
+                  Reconnect
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {connectionStatus === 'checking' && (
+            <div className="mb-6 w-full bg-blue-50 border-l-4 border-blue-400 p-4">
+              <div className="flex items-center text-blue-700">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
+                <span>Establishing connection for password reset...</span>
+              </div>
+            </div>
+          )}
+          
           <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
             <h2 className="text-2xl font-bold mb-6 text-center text-indigo-700">Set New Password</h2>
             <form className="mb-0 space-y-6" onSubmit={handlePasswordChange}>
@@ -226,9 +280,9 @@ const Auth = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || connectionStatus !== 'connected'}
                   className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    isSubmitting
+                    isSubmitting || connectionStatus !== 'connected'
                       ? 'bg-indigo-300 cursor-not-allowed'
                       : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                   }`}

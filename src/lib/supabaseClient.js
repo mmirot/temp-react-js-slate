@@ -12,24 +12,42 @@ import { hasRealCredentials } from './supabase/client';
 
 // Detect if we're in a password reset flow by checking URL parameters
 const isPasswordResetFlow = () => {
-  const url = new URL(window.location.href);
-  return url.searchParams.has('type') && 
-         (url.searchParams.get('type') === 'recovery' || 
-          url.searchParams.get('type') === 'signup');
+  try {
+    const url = new URL(window.location.href);
+    return url.searchParams.has('type') && 
+          (url.searchParams.get('type') === 'recovery' || 
+            url.searchParams.get('type') === 'signup');
+  } catch (e) {
+    return false;
+  }
 };
 
-// If in password reset flow, try to reconnect immediately
-if (hasRealCredentials || isPasswordResetFlow()) {
+// Prioritize connection for password reset flows
+const inResetFlow = isPasswordResetFlow();
+if (inResetFlow) {
+  console.log('Supabase - Detected password reset flow, prioritizing connection');
+}
+
+// If in password reset flow or we have credentials, try to connect immediately
+if (hasRealCredentials || inResetFlow) {
   console.log('Supabase - Attempting immediate connection check');
   // Priority connection check for auth flows
   checkConnection().then(isConnected => {
     console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
     
-    // If we're in a password reset flow and connection failed, try reconnecting once
-    if (isPasswordResetFlow() && !isConnected) {
+    // If we're in a password reset flow and connection failed, try reconnecting immediately
+    if (inResetFlow && !isConnected) {
       console.log('Supabase - Detected password reset flow with failed connection. Attempting reconnect...');
       reconnect().then(reconnected => {
         console.log('Supabase reconnection attempt for password reset flow:', reconnected ? 'Successful' : 'Failed');
+        
+        // Reload the page if reconnection was successful
+        if (reconnected) {
+          console.log('Supabase - Reconnection successful, reloading page to apply new connection');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
       });
     }
   });
