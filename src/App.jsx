@@ -6,6 +6,8 @@ import StainQCForm from './components/StainQCForm';
 import StainList from './components/StainList';
 import Auth from './pages/Auth';
 import Navbar from './components/Navbar';
+import Home from './components/Home';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -41,9 +43,10 @@ function App() {
           )}
           <div className="container mx-auto p-4">
             <Routes>
+              <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route 
-                path="/" 
+                path="/daily-qc" 
                 element={
                   <ProtectedRoute>
                     <StainQCForm />
@@ -60,6 +63,7 @@ function App() {
               />
             </Routes>
           </div>
+          <Footer />
         </div>
       </AuthProvider>
     </Router>

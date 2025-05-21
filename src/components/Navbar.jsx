@@ -2,45 +2,53 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import './Navbar.css';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
 
   return (
-    <nav className="bg-indigo-700 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="font-bold text-xl">
-          Daily Stain QC
+    <nav className="navbar">
+      <div className="container mx-auto navbar-container">
+        <Link to="/" className="navbar-logo">
+          SV Pathology Lab
         </Link>
         
-        <div className="space-x-4">
+        <div className="navbar-links">
+          <Link 
+            to="/" 
+            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+          >
+            Home
+          </Link>
+          
           {user ? (
             <>
               <Link 
-                to="/" 
-                className={`${location.pathname === '/' ? 'underline' : ''} hover:text-indigo-200`}
+                to="/daily-qc" 
+                className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
               >
-                Submit QC
+                Daily QC
               </Link>
               <Link 
                 to="/stains" 
-                className={`${location.pathname === '/stains' ? 'underline' : ''} hover:text-indigo-200`}
+                className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
               >
-                View All Stains
+                Stain Library
               </Link>
               <button 
                 onClick={signOut} 
-                className="bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
+                className="sign-out-button"
               >
                 Sign Out
               </button>
-              <span className="ml-2 text-sm opacity-80">({user.email})</span>
+              <span className="user-email">{user.email}</span>
             </>
           ) : (
             <Link 
               to="/auth" 
-              className="bg-indigo-500 px-3 py-1 rounded hover:bg-indigo-600 transition"
+              className="sign-in-button"
             >
               Sign In
             </Link>

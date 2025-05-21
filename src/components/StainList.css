@@ -1,3 +1,4 @@
+
 .stain-list-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -5,33 +6,114 @@
 }
 
 .stain-list-container h1 {
+  color: #2c5282;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.stain-list-description {
+  text-align: center;
   color: #4a5568;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+  max-width: 700px;
+  margin: 0 auto 30px;
+  line-height: 1.6;
+}
+
+.search-bar {
+  max-width: 500px;
+  margin: 0 auto 30px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+
+.search-bar input:focus {
+  border-color: #63b3ed;
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.2);
+  outline: none;
 }
 
 .stains-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
 }
 
 .stain-card {
   background: white;
-  padding: 16px;
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 16px;
-  transition: transform 0.2s;
-  color: #2d3748;
-  border: 1px solid #e9d8fd;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  border-top: 4px solid #4299e1;
 }
 
 .stain-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f8fafc;
-  border-color: #9f7aea;
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stain-card h3 {
+  margin: 0 0 15px;
+  color: #2d3748;
+  font-size: 1.2rem;
+}
+
+.stain-info {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.stain-id, .stain-date {
+  background: #f7fafc;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #4299e1;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.no-results {
+  text-align: center;
+  padding: 40px 0;
+  color: #718096;
+}
+
+@media (max-width: 768px) {
+  .stains-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
 }
