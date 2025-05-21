@@ -1,3 +1,3 @@
 
-// Re-export auth context for compatibility
-export * from './auth/index.js';
+// Re-export clerk auth context for compatibility
+export * from './clerk/index.js';

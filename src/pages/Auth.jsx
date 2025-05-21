@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { 
@@ -6,7 +5,7 @@ import {
   SignUp, 
   useAuth as useClerkAuth 
 } from '@clerk/clerk-react';
-import { useAuth } from '../context/clerk';
+import { useAuth } from '../context/auth';
 
 const Auth = () => {
   const { userId } = useClerkAuth();
