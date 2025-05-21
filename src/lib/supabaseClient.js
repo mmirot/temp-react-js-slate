@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Check for cached credentials in localStorage with validation
@@ -46,8 +45,8 @@ const clearInvalidCredentials = () => {
 
 // Try to use environment variables first, then fallback to cached credentials, then use placeholders
 const cached = getCachedCredentials();
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || (cached?.url) || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (cached?.key) || 'placeholder-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || (cached?.url) || 'https://pbsgsljpqrwrfeddazjx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (cached?.key) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBic2dzbGpwcXJ3cmZlZGRhemp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MTc1OTgsImV4cCI6MjA2MjQ5MzU5OH0.qh3LepTmJrRBUaqyVU5Qn3dNdPD8eqYtIz6iVqsa84c';
 
 // Save valid credentials to localStorage when they are available
 if (supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key') {
@@ -88,7 +87,7 @@ const supabaseOptions = {
   catchNetworkErrors: true,
 };
 
-// Check if we have real environment variables or placeholders
+// Check if we have real credentials or placeholders
 const hasRealCredentials = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key';
 
 if (!hasRealCredentials) {
@@ -263,5 +262,4 @@ if (hasRealCredentials) {
 }
 
 // Export the necessary functions and the Supabase client
-export { checkConnection, reconnect, getLastConnectionAttempt };
-export default supabase;
+export { supabase, checkConnection, reconnect, getLastConnectionAttempt };
