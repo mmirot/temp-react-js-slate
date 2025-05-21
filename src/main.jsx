@@ -25,6 +25,7 @@ if (PUBLISHABLE_KEY) {
   );
 } else {
   console.warn("No Clerk Publishable Key found. Running in limited mode without authentication.");
+  console.info("To enable authentication, please add VITE_CLERK_PUBLISHABLE_KEY to your .env file.");
   root.render(
     <React.StrictMode>
       <App />
