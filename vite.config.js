@@ -30,7 +30,8 @@ export default defineConfig(async ({ mode }) => {
         const { port, host } = server.config.server;
         console.log(`\n🚀 Server running at http://localhost:${port}/`);
         console.log(`\n💡 To start the app, run either:`);
-        console.log(`   - npm run preview`);
+        console.log(`   - npm run start`);
+        console.log(`   - ./start.sh`);
         console.log(`   - vite --port 8080\n`);
       }
     },
