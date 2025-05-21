@@ -1,6 +1,6 @@
 
 import { supabase } from './client';
-import { clearInvalidCredentials } from './credentialUtils';
+import { clearInvalidCredentials, saveCredentialsToCache } from './credentialUtils';
 import { checkConnection } from './connectionCheck';
 
 /**
@@ -16,15 +16,26 @@ export const reconnect = async () => {
   
   // If we have new credentials from env vars, use them
   if (newUrl && newKey) {
-    console.log('Supabase - Detected new credentials, reloading page to apply them');
+    console.log('Supabase - Detected environment variables, saving credentials');
     try {
-      localStorage.setItem('supabase_credentials', JSON.stringify({ 
-        url: newUrl, 
-        key: newKey,
-        timestamp: Date.now()
-      }));
-      window.location.reload();
-      return true;
+      saveCredentialsToCache(newUrl, newKey);
+      
+      // Check if we need to reload the page
+      const url = new URL(window.location.href);
+      const isAuthFlow = url.searchParams.has('type') && 
+                         (url.searchParams.get('type') === 'recovery' || 
+                          url.searchParams.get('type') === 'signup');
+      
+      // Only reload if we're not in the middle of an auth flow
+      if (!isAuthFlow) {
+        console.log('Supabase - Reloading page to apply new credentials');
+        window.location.reload();
+        return true;
+      } else {
+        console.log('Supabase - In auth flow, not reloading to preserve auth state');
+        // Return true since we've updated credentials
+        return true;
+      }
     } catch (error) {
       console.error('Supabase - Failed to save new credentials:', error);
     }

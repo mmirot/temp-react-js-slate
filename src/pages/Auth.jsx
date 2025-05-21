@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { checkConnection, reconnect } from '../lib/supabaseClient';
 
@@ -12,9 +11,36 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('checking');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [searchParams] = useSearchParams();
   const { user, signIn, signUp, supabase, supabaseError, retryConnection } = useAuth();
 
   useEffect(() => {
+    // Check if we're in a password reset flow
+    const type = searchParams.get('type');
+    const isRecovery = type === 'recovery';
+    
+    if (isRecovery) {
+      console.log('Auth - Detected password recovery flow');
+      setIsChangingPassword(true);
+      // Wait for connection to be established before proceeding
+      const checkAndReconnect = async () => {
+        const isConnected = await checkConnection();
+        if (!isConnected) {
+          console.log('Auth - Reconnecting for password recovery flow');
+          toast.loading('Establishing connection for password reset...');
+          const reconnected = await reconnect();
+          if (reconnected) {
+            toast.success('Connection established! You can now set your new password.');
+          } else {
+            toast.error('Failed to connect to Supabase. Please try refreshing the page.');
+          }
+        }
+      };
+      
+      checkAndReconnect();
+    }
+
     // Check Supabase connection when component mounts
     const verifyConnection = async () => {
       setConnectionStatus('checking');
@@ -33,9 +59,9 @@ const Auth = () => {
     };
     
     verifyConnection();
-  }, []);
+  }, [searchParams]);
 
-  if (user) {
+  if (user && !isChangingPassword) {
     return <Navigate to="/" />;
   }
 
@@ -72,6 +98,50 @@ const Auth = () => {
     } catch (error) {
       console.error('Auth form error:', error);
       toast.error(`Authentication error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    if (!password || password.length < 6) {
+      toast.error('Please enter a password (minimum 6 characters)');
+      return;
+    }
+    
+    if (connectionStatus === 'error') {
+      toast.error('Cannot change password - No connection to Supabase. Please fix connection issues first.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      if (!supabase) {
+        await retryConnection();
+        if (!supabase) {
+          throw new Error('Supabase client is not available');
+        }
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Password updated successfully!');
+      setIsChangingPassword(false);
+      
+      // Redirect to homepage after successful password change
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast.error(`Password change failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -126,6 +196,51 @@ const Auth = () => {
       toast.error('Failed to connect to Supabase. Please check your configuration.');
     }
   };
+
+  // Password recovery flow (after clicking email link)
+  if (isChangingPassword) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
+        <div className="w-full max-w-md">
+          <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+            <h2 className="text-2xl font-bold mb-6 text-center text-indigo-700">Set New Password</h2>
+            <form className="mb-0 space-y-6" onSubmit={handlePasswordChange}>
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                  New Password
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="new-password"
+                    name="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                    isSubmitting
+                      ? 'bg-indigo-300 cursor-not-allowed'
+                      : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  }`}
+                >
+                  {isSubmitting ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">

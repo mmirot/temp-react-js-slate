@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase, checkConnection, reconnect } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +31,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Check if we're in a password reset flow
+  const isPasswordResetFlow = () => {
+    try {
+      const url = new URL(window.location.href);
+      return url.searchParams.has('type') && 
+            (url.searchParams.get('type') === 'recovery' || 
+             url.searchParams.get('type') === 'signup');
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
     console.log('AuthContext - Initializing auth state');
     
@@ -44,6 +55,11 @@ export const AuthProvider = ({ children }) => {
       setConnectionState('error');
       setLoading(false);
       return;
+    }
+    
+    // Priority check for password reset flows
+    if (isPasswordResetFlow()) {
+      console.log('AuthContext - Detected password reset flow, prioritizing connection');
     }
     
     // Set up auth state listener FIRST
@@ -81,8 +97,13 @@ export const AuthProvider = ({ children }) => {
         
         if (event === 'PASSWORD_RECOVERY') {
           console.log('AuthContext - Password recovery requested');
-          toast.success('Password reset initiated. Please check your email.');
-          navigate('/auth');
+          toast.success('Password reset link clicked. Please set your new password.');
+          // Stay on auth page for password reset
+        }
+
+        if (event === 'USER_UPDATED') {
+          console.log('AuthContext - User updated');
+          toast.success('Your account has been updated successfully.');
         }
       }
     );
