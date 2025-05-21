@@ -2,23 +2,41 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { componentTagger } from "lovable-tagger";
 
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-  define: {
-    'process.env': {}
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+// Create a dynamic import function for the ESM-only lovable-tagger
+const loadComponentTagger = async (mode) => {
+  if (mode === 'development') {
+    try {
+      const { componentTagger } = await import('lovable-tagger');
+      return componentTagger();
+    } catch (error) {
+      console.error('Failed to load lovable-tagger:', error);
+      return null;
+    }
   }
-}));
+  return null;
+};
+
+export default defineConfig(async ({ mode }) => {
+  // Dynamically load the tagger plugin
+  const taggerPlugin = await loadComponentTagger(mode);
+  
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+    },
+    plugins: [
+      react(),
+      taggerPlugin
+    ].filter(Boolean),
+    define: {
+      'process.env': {}
+    },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    }
+  };
+});
