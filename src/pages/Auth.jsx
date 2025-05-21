@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { checkConnection, reconnect } from '../lib/supabaseClient';

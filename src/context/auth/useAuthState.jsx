@@ -1,22 +1,16 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { supabase, checkConnection, reconnect } from '../lib/supabaseClient';
+import { useState, useEffect } from 'react';
+import { supabase, checkConnection } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const AuthContext = createContext();
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
-export const AuthProvider = ({ children }) => {
+export function useAuthState() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [supabaseError, setSupabaseError] = useState(null);
   const [connectionState, setConnectionState] = useState('checking'); // 'checking', 'connected', 'error'
-  const navigate = useNavigate();
-
+  
   // Function to check connection status
   const verifyConnection = async () => {
     try {
@@ -135,115 +129,14 @@ export const AuthProvider = ({ children }) => {
       console.log('AuthContext - Cleaning up auth listener');
       subscription?.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
-  const signIn = async (email, password) => {
-    try {
-      // Check connection first
-      const connectionOk = await verifyConnection();
-      if (!connectionOk) {
-        toast.error('Cannot sign in - No connection to Supabase. Please check your connection.');
-        return { success: false, error: 'No connection to Supabase' };
-      }
-      
-      console.log('AuthContext - Attempting sign in:', email);
-      const { error, data } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      console.log('AuthContext - Sign in successful');
-      return { success: true, data };
-    } catch (error) {
-      console.error('AuthContext - Sign in error:', error.message);
-      toast.error(error.message);
-      return { success: false, error: error.message };
-    }
-  };
-
-  const signUp = async (email, password) => {
-    try {
-      // Check connection first
-      const connectionOk = await verifyConnection();
-      if (!connectionOk) {
-        toast.error('Cannot sign up - No connection to Supabase. Please check your connection.');
-        return { success: false, error: 'No connection to Supabase' };
-      }
-      
-      console.log('AuthContext - Attempting sign up:', email);
-      const { error, data } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      console.log('AuthContext - Sign up successful');
-      toast.success('Signup successful! Please check your email for verification.');
-      return { success: true, data };
-    } catch (error) {
-      console.error('AuthContext - Sign up error:', error.message);
-      toast.error(error.message);
-      return { success: false, error: error.message };
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      console.log('AuthContext - Attempting sign out');
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      console.log('AuthContext - Sign out successful');
-    } catch (error) {
-      console.error('AuthContext - Sign out error:', error.message);
-      toast.error(error.message);
-    }
-  };
-  
-  const retryConnection = async () => {
-    setSupabaseError(null);
-    setConnectionState('checking');
-    const result = await reconnect();
-    if (result) {
-      toast.success('Connection to Supabase restored!');
-      // Reload auth state
-      const { data, error } = await supabase.auth.getSession();
-      if (!error) {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-      }
-    } else {
-      toast.error('Failed to reconnect to Supabase.');
-      setSupabaseError('Failed to reconnect to Supabase.');
-    }
-    setConnectionState(result ? 'connected' : 'error');
-    return result;
-  };
-
-  const value = {
+  return {
     user,
     session,
-    signIn,
-    signUp,
-    signOut,
     loading,
     supabaseError,
     connectionState,
-    retryConnection,
-    supabase, // Expose supabase client for password reset
+    supabase
   };
-
-  console.log('AuthContext - Current auth state:', { 
-    isAuthenticated: !!user, 
-    isLoading: loading,
-    userEmail: user?.email || 'none',
-    hasError: !!supabaseError,
-    connectionState
-  });
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+}
