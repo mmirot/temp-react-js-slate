@@ -35,7 +35,13 @@ const ProtectedRoute = ({ children }) => {
           <p className="mb-2">There was an issue connecting to Supabase:</p>
           <p className="font-mono bg-red-50 p-2 rounded">{supabaseError}</p>
         </div>
-        <p className="text-gray-600 max-w-md text-center">
+        <button 
+          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </button>
+        <p className="text-gray-600 max-w-md text-center mt-4">
           Please click the "Connect to Supabase" button in the top right corner of the screen to set up your connection.
         </p>
       </div>
