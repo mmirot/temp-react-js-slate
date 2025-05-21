@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -12,7 +11,7 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('checking');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const { user, signIn, signUp, supabaseError, retryConnection } = useAuth();
+  const { user, signIn, signUp, supabase, supabaseError, retryConnection } = useAuth();
 
   useEffect(() => {
     // Check Supabase connection when component mounts
@@ -93,6 +92,10 @@ const Auth = () => {
     setIsSubmitting(true);
     
     try {
+      if (!supabase) {
+        throw new Error('Supabase client is not available');
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/auth',
       });

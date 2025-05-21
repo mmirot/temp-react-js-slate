@@ -15,7 +15,7 @@ export const reconnect = async () => {
   const newKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   
   // If we have new credentials from env vars, use them
-  if (newUrl && newKey && (newUrl !== supabaseUrl || newKey !== supabaseAnonKey)) {
+  if (newUrl && newKey) {
     console.log('Supabase - Detected new credentials, reloading page to apply them');
     try {
       localStorage.setItem('supabase_credentials', JSON.stringify({ 
