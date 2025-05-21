@@ -8,9 +8,10 @@
     "react-router-dom": "^6.21.1"
   },
   "scripts": {
-    "dev": "vite",
+    "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:dev": "vite build --mode development",
+    "serve": "vite preview"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
