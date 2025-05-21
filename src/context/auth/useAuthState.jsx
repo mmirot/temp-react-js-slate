@@ -17,7 +17,7 @@ export function useAuthState() {
     try {
       // Add optional delay before checking connection
       if (withDelay) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased to 1.5 seconds
       }
       
       const isConnected = await checkConnection();
@@ -31,13 +31,26 @@ export function useAuthState() {
     }
   };
 
-  // Check if we're in a password reset flow
-  const isPasswordResetFlow = () => {
+  // Check if we're in a password reset flow or have OTP errors
+  const isPasswordResetOrErrorFlow = () => {
     try {
       const url = new URL(window.location.href);
-      return url.searchParams.has('type') && 
+      
+      // Check for password reset flow
+      const isResetFlow = url.searchParams.has('type') && 
             (url.searchParams.get('type') === 'recovery' || 
              url.searchParams.get('type') === 'signup');
+             
+      // Check for OTP expired error
+      const isOtpError = url.searchParams.has('error_code') && 
+                       url.searchParams.get('error_code') === 'otp_expired';
+      
+      // Also check hash fragment for errors (some auth redirects put params in hash)
+      const hashParams = new URLSearchParams(url.hash.replace('#', ''));
+      const hasHashOtpError = hashParams.has('error_code') && 
+                            hashParams.get('error_code') === 'otp_expired';
+                            
+      return isResetFlow || isOtpError || hasHashOtpError;
     } catch (e) {
       return false;
     }
@@ -57,20 +70,23 @@ export function useAuthState() {
       return;
     }
     
-    // Priority check for password reset flows
-    const inResetFlow = isPasswordResetFlow();
+    // Priority check for auth flows or OTP errors
+    const inSpecialFlow = isPasswordResetOrErrorFlow();
     
     const initAuth = async () => {
-      if (inResetFlow) {
-        console.log('AuthContext - Detected password reset flow, prioritizing connection');
-        // For password reset flows, add a delay to ensure connection is established
-        toast.loading('Establishing secure connection...', { id: 'auth-connection' });
+      if (inSpecialFlow) {
+        console.log('AuthContext - Detected auth flow or error, prioritizing connection');
+        // Add longer delay for auth flows
+        toast.loading('Establishing secure connection...', { id: 'auth-connection', duration: 8000 });
         
-        // Wait for a solid connection with retries
-        const isConnected = await reconnect(true, 5000); // Wait up to 5 seconds
+        // Add initial delay for auth flows
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second initial delay
+        
+        // Wait for a solid connection with retries and longer timeout
+        const isConnected = await reconnect(true, 8000); // Wait up to 8 seconds
         
         if (!isConnected) {
-          console.log('AuthContext - Failed to establish connection for password reset flow after waiting');
+          console.log('AuthContext - Failed to establish connection for auth flow after waiting');
           toast.error('Connection issue detected. Please try again or refresh the page.', { id: 'auth-connection' });
         } else {
           toast.success('Connection established!', { id: 'auth-connection' });
@@ -82,7 +98,7 @@ export function useAuthState() {
         async (event, newSession) => {
           console.log('AuthContext - Auth state change:', event);
           
-          // Small delay to ensure connection is ready
+          // Add a small delay to ensure connection is ready
           setTimeout(async () => {
             // Verify connection on auth state change
             const connectionOk = await verifyConnection();
@@ -122,7 +138,7 @@ export function useAuthState() {
               console.log('AuthContext - User updated');
               toast.success('Your account has been updated successfully.');
             }
-          }, 500); // Small delay to ensure connection is established
+          }, 800); // Increased delay to ensure connection is established
         }
       );
 

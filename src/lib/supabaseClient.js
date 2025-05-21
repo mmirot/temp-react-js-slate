@@ -10,53 +10,66 @@ let connectionCheckInterval;
 // Import the hasRealCredentials from client.js to determine if we should check connection
 import { hasRealCredentials } from './supabase/client';
 
-// Detect if we're in a password reset flow by checking URL parameters
-const isPasswordResetFlow = () => {
+// Detect if we're in a password reset flow or have OTP error by checking URL parameters
+const isPasswordResetOrError = () => {
   try {
     const url = new URL(window.location.href);
-    return url.searchParams.has('type') && 
-          (url.searchParams.get('type') === 'recovery' || 
+    
+    // Check for password reset flow
+    const isResetFlow = url.searchParams.has('type') && 
+           (url.searchParams.get('type') === 'recovery' || 
             url.searchParams.get('type') === 'signup');
+            
+    // Check for OTP expired error
+    const isOtpError = url.searchParams.has('error_code') && 
+                      url.searchParams.get('error_code') === 'otp_expired';
+                      
+    // Also check hash fragment for errors (some auth redirects put params in hash)
+    const hashParams = new URLSearchParams(url.hash.replace('#', ''));
+    const hasHashOtpError = hashParams.has('error_code') && 
+                           hashParams.get('error_code') === 'otp_expired';
+    
+    return isResetFlow || isOtpError || hasHashOtpError;
   } catch (e) {
     return false;
   }
 };
 
-// Prioritize connection for password reset flows
-const inResetFlow = isPasswordResetFlow();
-if (inResetFlow) {
-  console.log('Supabase - Detected password reset flow, prioritizing connection');
+// Prioritize connection for password reset flows and OTP errors
+const inResetFlowOrError = isPasswordResetOrError();
+if (inResetFlowOrError) {
+  console.log('Supabase - Detected auth flow or error, prioritizing connection');
   
-  // For password reset flows, use a delay before everything else
+  // For password reset flows or errors, use a longer delay before everything else
   setTimeout(async () => {
-    console.log('Supabase - Delayed connection check for password reset flow starting');
+    console.log('Supabase - Delayed connection check for auth flow starting');
     // Wait for connection with retries for auth flows
-    const isConnected = await reconnect(true, 5000);
+    const isConnected = await reconnect(true, 8000); // Increase timeout to 8 seconds
     console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
-  }, 1000);
+  }, 1500); // Increased initial delay to 1.5 seconds
 }
 
-// If in password reset flow or we have credentials, try to connect immediately
-if (hasRealCredentials || inResetFlow) {
+// If in password reset flow / error or we have credentials, try to connect immediately
+if (hasRealCredentials || inResetFlowOrError) {
   console.log('Supabase - Attempting immediate connection check');
   
-  // Add small initial delay for all connection attempts
+  // Add increased initial delay for all connection attempts
   setTimeout(async () => {
     // Priority connection check for auth flows
     const isConnected = await checkConnection();
     console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
     
-    // If we're in a password reset flow and connection failed, try reconnecting immediately
-    if (inResetFlow && !isConnected) {
-      console.log('Supabase - Detected password reset flow with failed connection. Attempting reconnect...');
+    // If we're in a password reset flow or have error and connection failed, try reconnecting immediately
+    if (inResetFlowOrError && !isConnected) {
+      console.log('Supabase - Detected auth flow with failed connection. Attempting reconnect...');
       
-      // Add a small delay before reconnection attempt
+      // Add a larger delay before reconnection attempt
       setTimeout(async () => {
-        const reconnected = await reconnect(true, 5000);
-        console.log('Supabase reconnection attempt for password reset flow:', reconnected ? 'Successful' : 'Failed');
-      }, 500);
+        const reconnected = await reconnect(true, 8000); // Increase timeout and wait for connection
+        console.log('Supabase reconnection attempt for auth flow:', reconnected ? 'Successful' : 'Failed');
+      }, 1000); // Increased delay to 1 second
     }
-  }, 500);
+  }, 800); // Increased initial delay to 800ms
   
   // Set up periodic checking
   connectionCheckInterval = setInterval(() => {

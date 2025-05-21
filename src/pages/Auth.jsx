@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/auth';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { checkConnection, reconnect } from '../lib/supabaseClient';
 
@@ -13,8 +13,28 @@ const Auth = () => {
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [forcedReconnectAttempted, setForcedReconnectAttempted] = useState(false);
+  const [otpError, setOtpError] = useState(false);
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { user, signIn, signUp, supabase, supabaseError, retryConnection } = useAuth();
+
+  // Check for OTP expired error in both search params and hash fragment
+  useEffect(() => {
+    const checkForOtpError = () => {
+      const errorCode = searchParams.get('error_code');
+      const hashParams = new URLSearchParams(location.hash.replace('#', ''));
+      const hashErrorCode = hashParams.get('error_code');
+      
+      if (errorCode === 'otp_expired' || hashErrorCode === 'otp_expired') {
+        console.log('Auth - Detected OTP expired error');
+        setOtpError(true);
+        // Don't show changing password form for expired OTP
+        setIsChangingPassword(false);
+      }
+    };
+    
+    checkForOtpError();
+  }, [searchParams, location.hash]);
 
   // Priority check for password reset flow
   useEffect(() => {
@@ -31,16 +51,16 @@ const Auth = () => {
         setConnectionStatus('checking');
         const toastId = toast.loading('Establishing secure connection...');
         
-        // Add an initial delay before checking connection
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Add a longer initial delay before checking connection
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
         
         const isConnected = await checkConnection();
         if (!isConnected && !forcedReconnectAttempted) {
           console.log('Auth - Forcing reconnection for password reset flow');
           setForcedReconnectAttempted(true);
           
-          // Try to reconnect with waiting enabled
-          const reconnected = await reconnect(true, 5000); // Wait up to 5 seconds with retries
+          // Try to reconnect with waiting enabled and increased timeout
+          const reconnected = await reconnect(true, 8000); // Increased to 8 seconds with retries
           setConnectionStatus(reconnected ? 'connected' : 'error');
           
           if (reconnected) {
@@ -66,8 +86,8 @@ const Auth = () => {
       if (!isRecovery) {
         setConnectionStatus('checking');
         try {
-          // Add small delay before checking connection
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Add longer delay before checking connection
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Increased to 1.5 seconds
           const isConnected = await checkConnection();
           console.log('Auth - Supabase connection status:', isConnected);
           setConnectionStatus(isConnected ? 'connected' : 'error');
@@ -142,9 +162,9 @@ const Auth = () => {
       toast.error('Connection issue detected. Attempting to reconnect...');
       setConnectionStatus('checking');
       
-      // Add a delay before reconnecting
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const reconnected = await reconnect(true, 5000); // Wait with retry
+      // Add a longer delay before reconnecting
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
+      const reconnected = await reconnect(true, 8000); // Increased wait time with retry
       
       if (!reconnected) {
         toast.error('Cannot change password - No connection to Supabase. Please try again or refresh the page.');
@@ -156,15 +176,15 @@ const Auth = () => {
       toast.success('Connection restored!');
       
       // Add another small delay before attempting password change
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Increased to 1 second
     }
     
     setIsSubmitting(true);
     
     try {
       if (!supabase) {
-        // Add delay before retry
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Add longer delay before retry
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
         await retryConnection();
         
         if (!supabase) {
@@ -172,7 +192,7 @@ const Auth = () => {
         }
         
         // Add another small delay after connection retry
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Increased to 1 second
       }
 
       const { error } = await supabase.auth.updateUser({
@@ -227,6 +247,9 @@ const Auth = () => {
       
       toast.success('Password reset email sent! Please check your inbox.');
       setIsResettingPassword(false);
+      if (otpError) {
+        setOtpError(false);
+      }
     } catch (error) {
       console.error('Password reset error:', error);
       toast.error(`Password reset failed: ${error.message}`);
@@ -308,6 +331,81 @@ const Auth = () => {
                   }`}
                 >
                   {isSubmitting ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Add a dedicated component to handle the OTP expired error
+  if (otpError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
+        <div className="w-full max-w-md">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Password Reset Link Expired</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>The password reset link you used has expired or is invalid. Please request a new password reset link.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+            <h2 className="text-2xl font-bold mb-6 text-center text-indigo-700">Request New Password Reset</h2>
+            <form className="mb-0 space-y-6" onSubmit={handlePasswordReset}>
+              <div>
+                <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700">
+                  Email Address
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="reset-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || connectionStatus !== 'connected'}
+                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                    isSubmitting || connectionStatus !== 'connected'
+                      ? 'bg-indigo-300 cursor-not-allowed'
+                      : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  }`}
+                >
+                  {isSubmitting ? 'Sending...' : 'Send New Reset Link'}
+                </button>
+              </div>
+              
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpError(false);
+                    setIsResettingPassword(false);
+                  }}
+                  className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
+                >
+                  Back to Sign In
                 </button>
               </div>
             </form>
