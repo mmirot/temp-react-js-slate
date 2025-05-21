@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     
     // Check if Supabase env variables are missing
     const hasEnvVariables = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
     if (!hasEnvVariables) {
       console.log('AuthContext - Missing Supabase environment variables');
       setSupabaseError('Missing Supabase environment variables');
@@ -76,6 +77,11 @@ export const AuthProvider = ({ children }) => {
         
         if (event === 'TOKEN_REFRESHED') {
           console.log('AuthContext - Auth token refreshed');
+        }
+        
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('AuthContext - Password recovery requested');
+          toast.success('Password reset initiated. Please check your email.');
         }
       }
     );
@@ -202,6 +208,7 @@ export const AuthProvider = ({ children }) => {
     supabaseError,
     connectionState,
     retryConnection,
+    supabase, // Expose supabase client for password reset
   };
 
   console.log('AuthContext - Current auth state:', { 
