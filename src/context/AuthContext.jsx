@@ -82,6 +82,7 @@ export const AuthProvider = ({ children }) => {
         if (event === 'PASSWORD_RECOVERY') {
           console.log('AuthContext - Password recovery requested');
           toast.success('Password reset initiated. Please check your email.');
+          navigate('/auth');
         }
       }
     );

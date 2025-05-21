@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -96,8 +97,11 @@ const Auth = () => {
         throw new Error('Supabase client is not available');
       }
 
+      const currentUrl = window.location.origin;
+      console.log('Auth - Reset password redirect URL:', currentUrl + '/auth');
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/auth',
+        redirectTo: currentUrl + '/auth',
       });
       
       if (error) throw error;
