@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
-import supabase from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
 import './StainQCForm.css';
 
