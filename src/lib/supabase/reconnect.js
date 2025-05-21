@@ -28,10 +28,18 @@ export const reconnect = async (waitForConnection = false, timeout = 3000) => {
                          (url.searchParams.get('type') === 'recovery' || 
                           url.searchParams.get('type') === 'signup');
       
-      if (isAuthFlow) {
-        console.log('Supabase - In auth flow, reconnecting without full page reload');
+      // Check for OTP errors in URL or hash
+      const hasOtpError = url.searchParams.has('error_code') && url.searchParams.get('error_code') === 'otp_expired';
+      const hashParams = new URLSearchParams(url.hash.replace('#', ''));
+      const hasHashOtpError = hashParams.has('error_code') && hashParams.get('error_code') === 'otp_expired';
+      
+      if (isAuthFlow || hasOtpError || hasHashOtpError) {
+        console.log('Supabase - In special flow, reconnecting without full page reload');
+        
+        // Add a substantial delay for connection to establish
+        await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds delay
+        
         // For auth flows, don't reload the full page to preserve params
-        // Instead, try to re-initialize the client with delay for connection
         if (waitForConnection) {
           console.log('Supabase - Waiting for connection to establish...');
           return await waitForConnectionEstablished(timeout);
@@ -39,23 +47,9 @@ export const reconnect = async (waitForConnection = false, timeout = 3000) => {
           return await checkConnection();
         }
       } else {
-        // Check if we have error parameters that suggest an expired OTP
-        const hasOtpError = url.searchParams.has('error_code') && 
-                          url.searchParams.get('error_code') === 'otp_expired';
-        
-        if (hasOtpError) {
-          console.log('Supabase - Detected expired OTP error, will not reload page');
-          // For expired OTP, don't reload to preserve error params for UI display
-          if (waitForConnection) {
-            return await waitForConnectionEstablished(timeout);
-          } else {
-            return await checkConnection();
-          }
-        } else {
-          console.log('Supabase - Reloading page to apply new credentials');
-          window.location.reload();
-          return true;
-        }
+        console.log('Supabase - Reloading page to apply new credentials');
+        window.location.reload();
+        return true;
       }
     } catch (error) {
       console.error('Supabase - Failed to save new credentials:', error);
@@ -64,14 +58,26 @@ export const reconnect = async (waitForConnection = false, timeout = 3000) => {
   
   // If credentials failed, try to create a new client instance
   try {
-    // Add an initial delay before trying to get session for auth flows
-    // This gives Supabase client more time to initialize
-    const hasErrorParams = window.location.href.includes('error_code=otp_expired');
-    if (hasErrorParams) {
-      console.log('Supabase - Detected error parameters, adding connection delay');
-      await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay
+    // Add a substantial initial delay before trying to get session for auth flows
+    const urlParams = new URL(window.location.href).searchParams;
+    const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+    
+    const hasAuthParams = urlParams.has('type') || 
+                          urlParams.has('error_code') || 
+                          hashParams.has('error_code');
+                          
+    if (hasAuthParams) {
+      console.log('Supabase - Detected auth parameters, adding extended connection delay');
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay
     }
     
+    // Attempt to establish connection before checking session
+    const isConnected = await checkConnection();
+    if (!isConnected) {
+      console.log('Supabase - Initial connection check failed, will retry');
+    }
+    
+    // Now check session
     const { data, error } = await supabase.auth.getSession();
     if (error) {
       console.error('Supabase - Session verification failed during reconnect:', error);
@@ -101,7 +107,7 @@ const waitForConnectionEstablished = async (maxTimeout = 3000) => {
   const startTime = Date.now();
   
   // Add initial forced delay before first connection attempt
-  await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second initial delay
+  await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second initial delay
   
   // Try connecting after initial delay
   let isConnected = await checkConnection();
@@ -112,12 +118,12 @@ const waitForConnectionEstablished = async (maxTimeout = 3000) => {
   
   // If not connected, wait with multiple retries
   let attempts = 1;
-  const maxAttempts = 5; // Increase max attempts
+  const maxAttempts = 6; // Increase max attempts
   
   while (!isConnected && attempts < maxAttempts && Date.now() - startTime < maxTimeout) {
     console.log(`Supabase - Connection attempt ${attempts}/${maxAttempts}...`);
     // Increase wait time between retries
-    await new Promise(resolve => setTimeout(resolve, 1000 + (attempts * 200))); 
+    await new Promise(resolve => setTimeout(resolve, 1500 + (attempts * 300))); 
     isConnected = await checkConnection();
     attempts++;
   }
@@ -125,4 +131,3 @@ const waitForConnectionEstablished = async (maxTimeout = 3000) => {
   console.log(`Supabase - Connection ${isConnected ? 'established' : 'failed'} after ${attempts} attempts`);
   return isConnected;
 };
-

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/auth';
 import { Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { checkConnection, reconnect } from '../lib/supabaseClient';
+import { checkConnection, reconnect, testConnection } from '../lib/supabaseClient';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +17,8 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { user, signIn, signUp, supabase, supabaseError, retryConnection } = useAuth();
+  const [connectionTested, setConnectionTested] = useState(false);
+  const [manualConnectionTest, setManualConnectionTest] = useState(false);
 
   // Check for OTP expired error in both search params and hash fragment
   useEffect(() => {
@@ -30,6 +32,9 @@ const Auth = () => {
         setOtpError(true);
         // Don't show changing password form for expired OTP
         setIsChangingPassword(false);
+        
+        // Run connection test after detecting OTP error
+        runManualConnectionTest();
       }
     };
     
@@ -52,7 +57,7 @@ const Auth = () => {
         const toastId = toast.loading('Establishing secure connection...');
         
         // Add a longer initial delay before checking connection
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Increased to 3 seconds
         
         const isConnected = await checkConnection();
         if (!isConnected && !forcedReconnectAttempted) {
@@ -60,22 +65,24 @@ const Auth = () => {
           setForcedReconnectAttempted(true);
           
           // Try to reconnect with waiting enabled and increased timeout
-          const reconnected = await reconnect(true, 8000); // Increased to 8 seconds with retries
+          const reconnected = await reconnect(true, 10000); // Increased to 10 seconds with retries
           setConnectionStatus(reconnected ? 'connected' : 'error');
           
           if (reconnected) {
             toast.success('Connection established! You can now set your new password.', { id: toastId });
           } else {
-            toast.error('Connection failed. Please try again or refresh the page.', { id: toastId });
+            toast.error('Connection failed. Please try the Test Connection button below.', { id: toastId });
           }
         } else {
           setConnectionStatus(isConnected ? 'connected' : 'error');
           if (isConnected) {
             toast.success('Connection established! You can now set your new password.', { id: toastId });
           } else {
-            toast.error('Connection issue detected. Please try refreshing the page.', { id: toastId });
+            toast.error('Connection issue detected. Please try the Test Connection button below.', { id: toastId });
           }
         }
+        
+        setConnectionTested(true);
       };
       
       forceConnection();
@@ -83,26 +90,29 @@ const Auth = () => {
 
     // General connection check
     const verifyConnection = async () => {
-      if (!isRecovery) {
+      if (!isRecovery && !otpError) {
         setConnectionStatus('checking');
         try {
           // Add longer delay before checking connection
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Increased to 1.5 seconds
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
           const isConnected = await checkConnection();
           console.log('Auth - Supabase connection status:', isConnected);
           setConnectionStatus(isConnected ? 'connected' : 'error');
           
-          if (!isConnected && !isRecovery) {
+          if (!isConnected) {
             toast.error('Not connected to Supabase. Authentication will not work.');
           }
+          
+          setConnectionTested(true);
         } catch (error) {
           console.error('Auth - Connection check error:', error);
           setConnectionStatus('error');
+          setConnectionTested(true);
         }
       }
     };
     
-    if (!isRecovery) {
+    if (!isRecovery && !otpError) {
       verifyConnection();
     }
   }, [searchParams]);
@@ -269,6 +279,34 @@ const Auth = () => {
     }
   };
 
+  // Function to manually test connection
+  const runManualConnectionTest = async () => {
+    setManualConnectionTest(true);
+    setConnectionStatus('checking');
+    const toastId = toast.loading('Testing connection to Supabase...');
+    
+    try {
+      // Substantial delay before testing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const isConnected = await testConnection();
+      setConnectionStatus(isConnected ? 'connected' : 'error');
+      
+      if (isConnected) {
+        toast.success('Connection to Supabase successful!', { id: toastId });
+      } else {
+        toast.error('Failed to connect to Supabase. Please try again.', { id: toastId });
+      }
+    } catch (error) {
+      console.error('Connection test error:', error);
+      setConnectionStatus('error');
+      toast.error('Connection test error: ' + error.message, { id: toastId });
+    } finally {
+      setManualConnectionTest(false);
+      setConnectionTested(true);
+    }
+  };
+
   // Password recovery flow (after clicking email link)
   if (isChangingPassword) {
     return (
@@ -282,10 +320,11 @@ const Auth = () => {
                   <p>Cannot complete password reset without connecting to Supabase.</p>
                 </div>
                 <button 
-                  onClick={handleRetryConnection}
-                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                  onClick={runManualConnectionTest}
+                  disabled={manualConnectionTest}
+                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50"
                 >
-                  Reconnect
+                  {manualConnectionTest ? 'Testing...' : 'Test Connection'}
                 </button>
               </div>
             </div>
@@ -299,6 +338,35 @@ const Auth = () => {
               </div>
             </div>
           )}
+          
+          {/* Connection test button - always visible in password reset flow */}
+          <div className="mb-6 w-full bg-gray-100 border border-gray-200 p-4 rounded-md">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">Connection Status: 
+                  <span className={`ml-2 ${
+                    connectionStatus === 'connected' ? 'text-green-600' : 
+                    connectionStatus === 'error' ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    {connectionStatus === 'connected' ? 'Connected' : 
+                     connectionStatus === 'error' ? 'Failed' : 'Checking...'}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {connectionTested ? 
+                    'Connection has been tested.' : 
+                    'Connection test has not run yet.'}
+                </p>
+              </div>
+              <button 
+                onClick={runManualConnectionTest}
+                disabled={manualConnectionTest || connectionStatus === 'checking'}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {manualConnectionTest ? 'Testing...' : 'Test Connection'}
+              </button>
+            </div>
+          </div>
           
           <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
             <h2 className="text-2xl font-bold mb-6 text-center text-indigo-700">Set New Password</h2>
@@ -358,6 +426,35 @@ const Auth = () => {
                   <p>The password reset link you used has expired or is invalid. Please request a new password reset link.</p>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* Connection test button - always visible in OTP error flow */}
+          <div className="mb-6 w-full bg-gray-100 border border-gray-200 p-4 rounded-md">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">Connection Status: 
+                  <span className={`ml-2 ${
+                    connectionStatus === 'connected' ? 'text-green-600' : 
+                    connectionStatus === 'error' ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    {connectionStatus === 'connected' ? 'Connected' : 
+                     connectionStatus === 'error' ? 'Failed' : 'Checking...'}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {connectionTested ? 
+                    'Connection has been tested.' : 
+                    'Connection test has not run yet.'}
+                </p>
+              </div>
+              <button 
+                onClick={runManualConnectionTest}
+                disabled={manualConnectionTest || connectionStatus === 'checking'}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {manualConnectionTest ? 'Testing...' : 'Test Connection'}
+              </button>
             </div>
           </div>
           
@@ -425,10 +522,11 @@ const Auth = () => {
               <p className="text-sm">Authentication requires a connection to Supabase.</p>
             </div>
             <button 
-              onClick={handleRetryConnection}
-              className="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600"
+              onClick={runManualConnectionTest}
+              disabled={manualConnectionTest}
+              className="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600 disabled:opacity-50"
             >
-              Retry
+              {manualConnectionTest ? 'Testing...' : 'Test Connection'}
             </button>
           </div>
         </div>
@@ -442,6 +540,35 @@ const Auth = () => {
           </div>
         </div>
       )}
+      
+      {/* Connection test button - always visible */}
+      <div className="mb-6 w-full max-w-md bg-gray-100 border border-gray-200 p-4 rounded-md">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="font-medium">Connection Status: 
+              <span className={`ml-2 ${
+                connectionStatus === 'connected' ? 'text-green-600' : 
+                connectionStatus === 'error' ? 'text-red-600' : 'text-blue-600'
+              }`}>
+                {connectionStatus === 'connected' ? 'Connected' : 
+                 connectionStatus === 'error' ? 'Failed' : 'Checking...'}
+              </span>
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              {connectionTested ? 
+                'Connection has been tested.' : 
+                'Connection test has not run yet.'}
+            </p>
+          </div>
+          <button 
+            onClick={runManualConnectionTest}
+            disabled={manualConnectionTest || connectionStatus === 'checking'}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {manualConnectionTest ? 'Testing...' : 'Test Connection'}
+          </button>
+        </div>
+      </div>
       
       {connectionStatus === 'connected' && (
         <div className="mb-6 w-full max-w-md bg-green-50 border-l-4 border-green-400 p-4 text-green-700">

@@ -17,7 +17,7 @@ export function useAuthState() {
     try {
       // Add optional delay before checking connection
       if (withDelay) {
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased to 1.5 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Increased to 3 seconds
       }
       
       const isConnected = await checkConnection();
@@ -52,6 +52,7 @@ export function useAuthState() {
                             
       return isResetFlow || isOtpError || hasHashOtpError;
     } catch (e) {
+      console.error('Failed to check URL parameters:', e);
       return false;
     }
   };
@@ -79,11 +80,11 @@ export function useAuthState() {
         // Add longer delay for auth flows
         toast.loading('Establishing secure connection...', { id: 'auth-connection', duration: 8000 });
         
-        // Add initial delay for auth flows
-        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second initial delay
+        // Add substantial initial delay for auth flows
+        await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second initial delay
         
         // Wait for a solid connection with retries and longer timeout
-        const isConnected = await reconnect(true, 8000); // Wait up to 8 seconds
+        const isConnected = await reconnect(true, 10000); // Wait up to 10 seconds
         
         if (!isConnected) {
           console.log('AuthContext - Failed to establish connection for auth flow after waiting');
@@ -98,7 +99,7 @@ export function useAuthState() {
         async (event, newSession) => {
           console.log('AuthContext - Auth state change:', event);
           
-          // Add a small delay to ensure connection is ready
+          // Add a substantial delay to ensure connection is ready
           setTimeout(async () => {
             // Verify connection on auth state change
             const connectionOk = await verifyConnection();
@@ -138,15 +139,27 @@ export function useAuthState() {
               console.log('AuthContext - User updated');
               toast.success('Your account has been updated successfully.');
             }
-          }, 800); // Increased delay to ensure connection is established
+          }, 1500); // Increased delay to ensure connection is established
         }
       );
 
-      // THEN check for existing session
+      // THEN check for existing session - with substantial delay for auth flows
       console.log('AuthContext - Checking for existing session');
-      await verifyConnection(true); // Add a delay before checking connection
       
-      supabase.auth.getSession().then(({ data: { session: existingSession }, error }) => {
+      if (inSpecialFlow) {
+        // For auth flows, use a substantial delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } else {
+        // For normal flows, use a smaller delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      await verifyConnection(inSpecialFlow); // Add a delay before checking connection for auth flows
+      
+      // Now try to get the session
+      try {
+        const { data: { session: existingSession }, error } = await supabase.auth.getSession();
+        
         console.log('AuthContext - Session check result:', existingSession ? 'Session found' : 'No session');
         if (error) {
           console.error('AuthContext - Error getting session:', error);
@@ -155,11 +168,11 @@ export function useAuthState() {
         setSession(existingSession);
         setUser(existingSession?.user ?? null);
         setLoading(false);
-      }).catch(error => {
+      } catch (error) {
         console.error('AuthContext - Error getting session:', error);
         setSupabaseError(error.message);
         setLoading(false);
-      });
+      }
 
       return () => {
         console.log('AuthContext - Cleaning up auth listener');
