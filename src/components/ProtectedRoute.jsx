@@ -4,16 +4,17 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading, session, supabaseError } = useAuth();
+  const { user, loading, session, supabaseError, connectionState, retryConnection } = useAuth();
   
   useEffect(() => {
     console.log('ProtectedRoute - Auth State:', { 
       user, 
       loading, 
       session: session ? 'Session exists' : 'No session',
-      supabaseError 
+      supabaseError,
+      connectionState 
     });
-  }, [user, loading, session, supabaseError]);
+  }, [user, loading, session, supabaseError, connectionState]);
 
   // Show a loading state
   if (loading) {
@@ -26,20 +27,20 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Show an error message if there's a Supabase connection error
-  if (supabaseError) {
+  if (supabaseError || connectionState === 'error') {
     console.log('ProtectedRoute - Supabase error:', supabaseError);
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md mb-4">
           <h2 className="font-bold text-lg mb-2">Supabase Connection Error</h2>
           <p className="mb-2">There was an issue connecting to Supabase:</p>
-          <p className="font-mono bg-red-50 p-2 rounded">{supabaseError}</p>
+          <p className="font-mono bg-red-50 p-2 rounded">{supabaseError || 'Connection failed'}</p>
         </div>
         <button 
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-          onClick={() => window.location.reload()}
+          onClick={retryConnection}
         >
-          Try Again
+          Retry Connection
         </button>
         <p className="text-gray-600 max-w-md text-center mt-4">
           Please click the "Connect to Supabase" button in the top right corner of the screen to set up your connection.
