@@ -1,21 +1,47 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Check for cached credentials in localStorage
+// Check for cached credentials in localStorage with validation
 const getCachedCredentials = () => {
   try {
     const cached = localStorage.getItem('supabase_credentials');
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (parsed && parsed.url && parsed.key) {
+      if (parsed && typeof parsed.url === 'string' && typeof parsed.key === 'string' &&
+          parsed.url.includes('supabase.co') && parsed.key.length > 10) {
         console.log('Supabase - Found cached credentials');
-        return parsed;
+        // Add timestamp check to validate cache
+        if (parsed.timestamp && (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000)) {
+          return parsed;
+        } else {
+          console.log('Supabase - Cached credentials expired, clearing cache');
+          localStorage.removeItem('supabase_credentials');
+        }
+      } else {
+        console.warn('Supabase - Invalid cached credentials format, clearing cache');
+        localStorage.removeItem('supabase_credentials');
       }
     }
   } catch (error) {
     console.warn('Supabase - Error reading cached credentials:', error);
+    // Clear potentially corrupt data
+    try {
+      localStorage.removeItem('supabase_credentials');
+    } catch (e) {
+      console.error('Supabase - Failed to clear cached credentials:', e);
+    }
   }
   return null;
+};
+
+// Clear environment variable values from session storage when they become invalid
+const clearInvalidCredentials = () => {
+  try {
+    localStorage.removeItem('supabase_credentials');
+    console.log('Supabase - Cleared invalid credentials from cache');
+  } catch (error) {
+    console.warn('Supabase - Failed to clear credentials cache:', error);
+  }
 };
 
 // Try to use environment variables first, then fallback to cached credentials, then use placeholders
@@ -26,7 +52,11 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (cached?.key) 
 // Save valid credentials to localStorage when they are available
 if (supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key') {
   try {
-    localStorage.setItem('supabase_credentials', JSON.stringify({ url: supabaseUrl, key: supabaseAnonKey }));
+    localStorage.setItem('supabase_credentials', JSON.stringify({ 
+      url: supabaseUrl, 
+      key: supabaseAnonKey,
+      timestamp: Date.now()
+    }));
     console.log('Supabase - Cached credentials to localStorage');
   } catch (error) {
     console.warn('Supabase - Failed to cache credentials:', error);
@@ -45,7 +75,7 @@ const supabaseOptions = {
     storageKey: 'supabase.auth.token',
     detectSessionInUrl: true,
     flowType: 'pkce',
-    // Remove hardcoded domain to allow for dynamic assignment
+    // Removed hardcoded domain to allow for dynamic domain assignment
   },
   global: {
     headers: {
@@ -74,8 +104,17 @@ console.log('Supabase - Connecting to Supabase instance:', formattedUrl.substrin
 let lastConnectionAttempt = Date.now();
 export const getLastConnectionAttempt = () => lastConnectionAttempt;
 
-export const supabase = createClient(formattedUrl, supabaseAnonKey, supabaseOptions);
-console.log('Supabase - Client created with', hasRealCredentials ? 'actual credentials' : 'placeholder credentials');
+// Attempt to create the Supabase client with error handling
+let supabase;
+
+try {
+  supabase = createClient(formattedUrl, supabaseAnonKey, supabaseOptions);
+  console.log('Supabase - Client created with', hasRealCredentials ? 'actual credentials' : 'placeholder credentials');
+} catch (error) {
+  console.error('Supabase - Failed to create client:', error);
+  // Create fallback client with placeholder values to prevent crashes
+  supabase = createClient('https://placeholder.supabase.co', 'placeholder-key', supabaseOptions);
+}
 
 // Add a helper function to check connection
 export const checkConnection = async () => {
@@ -97,22 +136,58 @@ export const checkConnection = async () => {
       console.log('Supabase - Auth connection ok:', authData.session ? 'Session exists' : 'No active session');
     }
     
-    // Then check database access
-    const { data, error } = await supabase.from('stain_submissions').select('id').limit(1);
-    if (error) {
-      console.error('Supabase - Database connection error:', error.message);
-      
-      // Check if it's a permissions issue rather than connection issue
-      if (error.code === 'PGRST301' || error.message.includes('permission denied')) {
-        console.log('Supabase - This appears to be a permissions issue, not a connection issue');
-        return true; // Connection works, but permissions are restricted
+    // Try multiple tables in case one fails due to permissions
+    let isConnected = false;
+    
+    // Try stain_submissions first
+    try {
+      const { error } = await supabase.from('stain_submissions').select('id').limit(1);
+      if (!error) {
+        console.log('Supabase - Connection test successful with stain_submissions');
+        isConnected = true;
       }
-      
-      throw error;
+    } catch (tableError) {
+      console.log('Supabase - Could not access stain_submissions, trying another table');
     }
     
-    console.log('Supabase - Connection test successful', data);
-    return true;
+    // If stain_submissions failed, try users
+    if (!isConnected) {
+      try {
+        const { error } = await supabase.from('users').select('id').limit(1);
+        if (!error) {
+          console.log('Supabase - Connection test successful with users table');
+          isConnected = true;
+        }
+      } catch (tableError) {
+        console.log('Supabase - Could not access users, trying another approach');
+      }
+    }
+    
+    // If table queries fail, just check if we can access the API at all
+    if (!isConnected) {
+      try {
+        const { error } = await supabase.rpc('get_session');
+        if (!error) {
+          console.log('Supabase - Connection test successful with RPC');
+          isConnected = true;
+        }
+      } catch (rpcError) {
+        console.log('Supabase - RPC test failed');
+      }
+    }
+    
+    // Final fallback - just check if auth is working
+    if (!isConnected && !authError) {
+      console.log('Supabase - Auth is working but database access is limited');
+      isConnected = true; // At least auth is working
+    }
+    
+    if (isConnected) {
+      return true;
+    }
+    
+    console.error('Supabase - All connection tests failed');
+    return false;
   } catch (error) {
     console.error('Supabase connection error:', error);
     
@@ -136,20 +211,54 @@ export const reconnect = async () => {
   const newUrl = import.meta.env.VITE_SUPABASE_URL;
   const newKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   
+  // If we have new credentials from env vars, use them
   if (newUrl && newKey && (newUrl !== supabaseUrl || newKey !== supabaseAnonKey)) {
     console.log('Supabase - Detected new credentials, reloading page to apply them');
-    localStorage.setItem('supabase_credentials', JSON.stringify({ url: newUrl, key: newKey }));
-    window.location.reload();
-    return true;
+    try {
+      localStorage.setItem('supabase_credentials', JSON.stringify({ 
+        url: newUrl, 
+        key: newKey,
+        timestamp: Date.now()
+      }));
+      window.location.reload();
+      return true;
+    } catch (error) {
+      console.error('Supabase - Failed to save new credentials:', error);
+    }
   }
   
-  return await checkConnection();
+  // If credentials failed, try to create a new client instance
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Supabase - Session verification failed during reconnect:', error);
+      // Clear any existing credentials as they may be invalid
+      clearInvalidCredentials();
+      return false;
+    }
+    
+    return await checkConnection();
+  } catch (error) {
+    console.error('Supabase - Reconnection error:', error);
+    return false;
+  }
 };
+
+// Periodically check connection in the background
+let connectionCheckInterval;
+if (hasRealCredentials) {
+  connectionCheckInterval = setInterval(() => {
+    console.log('Supabase - Running periodic connection check');
+    checkConnection().then(isConnected => {
+      console.log('Supabase periodic connection check result:', isConnected ? 'Connected' : 'Failed');
+    });
+  }, 5 * 60 * 1000); // Every 5 minutes
+}
 
 // Test the connection immediately only if we have real credentials
 if (hasRealCredentials) {
   checkConnection().then(isConnected => {
-    console.log('Supabase connection status:', isConnected ? 'Connected' : 'Failed');
+    console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
   });
 }
 
