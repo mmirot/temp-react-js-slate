@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import supabase from '../lib/supabaseClient';
 import './StainList.css';
 
 export default function StainList() {

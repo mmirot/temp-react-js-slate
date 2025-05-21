@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Check for cached credentials in localStorage with validation
@@ -262,4 +261,5 @@ if (hasRealCredentials) {
   });
 }
 
-export { supabase as default };
+export { checkConnection, reconnect, getLastConnectionAttempt };
+export default supabase;
