@@ -26,31 +26,37 @@ const isPasswordResetFlow = () => {
 const inResetFlow = isPasswordResetFlow();
 if (inResetFlow) {
   console.log('Supabase - Detected password reset flow, prioritizing connection');
+  
+  // For password reset flows, use a delay before everything else
+  setTimeout(async () => {
+    console.log('Supabase - Delayed connection check for password reset flow starting');
+    // Wait for connection with retries for auth flows
+    const isConnected = await reconnect(true, 5000);
+    console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
+  }, 1000);
 }
 
 // If in password reset flow or we have credentials, try to connect immediately
 if (hasRealCredentials || inResetFlow) {
   console.log('Supabase - Attempting immediate connection check');
-  // Priority connection check for auth flows
-  checkConnection().then(isConnected => {
+  
+  // Add small initial delay for all connection attempts
+  setTimeout(async () => {
+    // Priority connection check for auth flows
+    const isConnected = await checkConnection();
     console.log('Supabase initial connection status:', isConnected ? 'Connected' : 'Failed');
     
     // If we're in a password reset flow and connection failed, try reconnecting immediately
     if (inResetFlow && !isConnected) {
       console.log('Supabase - Detected password reset flow with failed connection. Attempting reconnect...');
-      reconnect().then(reconnected => {
+      
+      // Add a small delay before reconnection attempt
+      setTimeout(async () => {
+        const reconnected = await reconnect(true, 5000);
         console.log('Supabase reconnection attempt for password reset flow:', reconnected ? 'Successful' : 'Failed');
-        
-        // Reload the page if reconnection was successful
-        if (reconnected) {
-          console.log('Supabase - Reconnection successful, reloading page to apply new connection');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
-      });
+      }, 500);
     }
-  });
+  }, 500);
   
   // Set up periodic checking
   connectionCheckInterval = setInterval(() => {

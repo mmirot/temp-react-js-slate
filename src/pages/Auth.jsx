@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/auth';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -30,30 +29,33 @@ const Auth = () => {
       // Force connection verification and reconnection for password reset flows
       const forceConnection = async () => {
         setConnectionStatus('checking');
-        toast.loading('Establishing secure connection...');
+        const toastId = toast.loading('Establishing secure connection...');
+        
+        // Add an initial delay before checking connection
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         const isConnected = await checkConnection();
         if (!isConnected && !forcedReconnectAttempted) {
           console.log('Auth - Forcing reconnection for password reset flow');
           setForcedReconnectAttempted(true);
           
-          // Try to reconnect
-          const reconnected = await reconnect();
+          // Try to reconnect with waiting enabled
+          const reconnected = await reconnect(true, 5000); // Wait up to 5 seconds with retries
           setConnectionStatus(reconnected ? 'connected' : 'error');
           
           if (reconnected) {
-            toast.success('Connection established! You can now set your new password.');
+            toast.success('Connection established! You can now set your new password.', { id: toastId });
           } else {
-            toast.error('Connection failed. Please try again or refresh the page.');
+            toast.error('Connection failed. Please try again or refresh the page.', { id: toastId });
           }
         } else {
           setConnectionStatus(isConnected ? 'connected' : 'error');
           if (isConnected) {
-            toast.success('Connection established! You can now set your new password.');
+            toast.success('Connection established! You can now set your new password.', { id: toastId });
+          } else {
+            toast.error('Connection issue detected. Please try refreshing the page.', { id: toastId });
           }
         }
-        
-        toast.dismiss();
       };
       
       forceConnection();
@@ -61,22 +63,28 @@ const Auth = () => {
 
     // General connection check
     const verifyConnection = async () => {
-      setConnectionStatus('checking');
-      try {
-        const isConnected = await checkConnection();
-        console.log('Auth - Supabase connection status:', isConnected);
-        setConnectionStatus(isConnected ? 'connected' : 'error');
-        
-        if (!isConnected && !isRecovery) {
-          toast.error('Not connected to Supabase. Authentication will not work.');
+      if (!isRecovery) {
+        setConnectionStatus('checking');
+        try {
+          // Add small delay before checking connection
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const isConnected = await checkConnection();
+          console.log('Auth - Supabase connection status:', isConnected);
+          setConnectionStatus(isConnected ? 'connected' : 'error');
+          
+          if (!isConnected && !isRecovery) {
+            toast.error('Not connected to Supabase. Authentication will not work.');
+          }
+        } catch (error) {
+          console.error('Auth - Connection check error:', error);
+          setConnectionStatus('error');
         }
-      } catch (error) {
-        console.error('Auth - Connection check error:', error);
-        setConnectionStatus('error');
       }
     };
     
-    verifyConnection();
+    if (!isRecovery) {
+      verifyConnection();
+    }
   }, [searchParams]);
 
   if (user && !isChangingPassword) {
@@ -133,26 +141,38 @@ const Auth = () => {
       // If connection error in password change flow, force a reconnection attempt
       toast.error('Connection issue detected. Attempting to reconnect...');
       setConnectionStatus('checking');
-      const reconnected = await reconnect();
+      
+      // Add a delay before reconnecting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const reconnected = await reconnect(true, 5000); // Wait with retry
       
       if (!reconnected) {
-        toast.error('Cannot change password - No connection to Supabase. Please fix connection issues first.');
+        toast.error('Cannot change password - No connection to Supabase. Please try again or refresh the page.');
         setConnectionStatus('error');
         return;
       }
       
       setConnectionStatus('connected');
       toast.success('Connection restored!');
+      
+      // Add another small delay before attempting password change
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
     setIsSubmitting(true);
     
     try {
       if (!supabase) {
+        // Add delay before retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await retryConnection();
+        
         if (!supabase) {
           throw new Error('Supabase client is not available');
         }
+        
+        // Add another small delay after connection retry
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       const { error } = await supabase.auth.updateUser({

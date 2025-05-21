@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase, checkConnection } from '../../lib/supabaseClient';
+import { supabase, checkConnection, reconnect } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -13,8 +13,13 @@ export function useAuthState() {
   const [connectionState, setConnectionState] = useState('checking'); // 'checking', 'connected', 'error'
   
   // Function to check connection status
-  const verifyConnection = async () => {
+  const verifyConnection = async (withDelay = false) => {
     try {
+      // Add optional delay before checking connection
+      if (withDelay) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
       const isConnected = await checkConnection();
       setConnectionState(isConnected ? 'connected' : 'error');
       return isConnected;
@@ -54,94 +59,99 @@ export function useAuthState() {
     
     // Priority check for password reset flows
     const inResetFlow = isPasswordResetFlow();
-    if (inResetFlow) {
-      console.log('AuthContext - Detected password reset flow, prioritizing connection');
-    }
     
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('AuthContext - Auth state change:', event);
+    const initAuth = async () => {
+      if (inResetFlow) {
+        console.log('AuthContext - Detected password reset flow, prioritizing connection');
+        // For password reset flows, add a delay to ensure connection is established
+        toast.loading('Establishing secure connection...', { id: 'auth-connection' });
         
-        // Verify connection on auth state change
-        const connectionOk = await verifyConnection();
-        if (!connectionOk) {
-          console.warn('AuthContext - Connection issue detected during auth state change');
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            toast.error('Authentication successful but there seems to be a connection issue with Supabase.');
-          }
-        }
+        // Wait for a solid connection with retries
+        const isConnected = await reconnect(true, 5000); // Wait up to 5 seconds
         
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        
-        if (event === 'SIGNED_IN') {
-          console.log('AuthContext - User signed in', newSession?.user?.email);
-          toast.success('Signed in successfully');
-          navigate('/');
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          console.log('AuthContext - User signed out');
-          toast.success('Signed out successfully');
-          navigate('/auth');
-        }
-        
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('AuthContext - Auth token refreshed');
-        }
-        
-        if (event === 'PASSWORD_RECOVERY') {
-          console.log('AuthContext - Password recovery requested');
-          toast.success('Password reset link clicked. Please set your new password.');
-          // Stay on auth page for password reset
-        }
-
-        if (event === 'USER_UPDATED') {
-          console.log('AuthContext - User updated');
-          toast.success('Your account has been updated successfully.');
+        if (!isConnected) {
+          console.log('AuthContext - Failed to establish connection for password reset flow after waiting');
+          toast.error('Connection issue detected. Please try again or refresh the page.', { id: 'auth-connection' });
+        } else {
+          toast.success('Connection established!', { id: 'auth-connection' });
         }
       }
-    );
+      
+      // Set up auth state listener FIRST
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, newSession) => {
+          console.log('AuthContext - Auth state change:', event);
+          
+          // Small delay to ensure connection is ready
+          setTimeout(async () => {
+            // Verify connection on auth state change
+            const connectionOk = await verifyConnection();
+            if (!connectionOk) {
+              console.warn('AuthContext - Connection issue detected during auth state change');
+              if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                toast.error('Authentication successful but there seems to be a connection issue with Supabase.');
+              }
+            }
+            
+            setSession(newSession);
+            setUser(newSession?.user ?? null);
+            
+            if (event === 'SIGNED_IN') {
+              console.log('AuthContext - User signed in', newSession?.user?.email);
+              toast.success('Signed in successfully');
+              navigate('/');
+            }
+            
+            if (event === 'SIGNED_OUT') {
+              console.log('AuthContext - User signed out');
+              toast.success('Signed out successfully');
+              navigate('/auth');
+            }
+            
+            if (event === 'TOKEN_REFRESHED') {
+              console.log('AuthContext - Auth token refreshed');
+            }
+            
+            if (event === 'PASSWORD_RECOVERY') {
+              console.log('AuthContext - Password recovery requested');
+              toast.success('Password reset link clicked. Please set your new password.');
+              // Stay on auth page for password reset
+            }
 
-    // If in password reset flow, force connection verification
-    if (inResetFlow) {
-      console.log('AuthContext - In password reset flow, verifying connection first');
-      verifyConnection().then(isConnected => {
-        if (!isConnected) {
-          console.log('AuthContext - Connection issue detected during password reset flow');
-          toast.error('Connection issue detected. Attempting to reconnect...');
+            if (event === 'USER_UPDATED') {
+              console.log('AuthContext - User updated');
+              toast.success('Your account has been updated successfully.');
+            }
+          }, 500); // Small delay to ensure connection is established
         }
-      });
-    }
+      );
 
-    // THEN check for existing session
-    console.log('AuthContext - Checking for existing session');
-    verifyConnection().then(connectionOk => {
-      if (connectionOk) {
-        supabase.auth.getSession().then(({ data: { session: existingSession }, error }) => {
-          console.log('AuthContext - Session check result:', existingSession ? 'Session found' : 'No session');
-          if (error) {
-            console.error('AuthContext - Error getting session:', error);
-            setSupabaseError(error.message);
-          }
-          setSession(existingSession);
-          setUser(existingSession?.user ?? null);
-          setLoading(false);
-        }).catch(error => {
+      // THEN check for existing session
+      console.log('AuthContext - Checking for existing session');
+      await verifyConnection(true); // Add a delay before checking connection
+      
+      supabase.auth.getSession().then(({ data: { session: existingSession }, error }) => {
+        console.log('AuthContext - Session check result:', existingSession ? 'Session found' : 'No session');
+        if (error) {
           console.error('AuthContext - Error getting session:', error);
           setSupabaseError(error.message);
-          setLoading(false);
-        });
-      } else {
+        }
+        setSession(existingSession);
+        setUser(existingSession?.user ?? null);
         setLoading(false);
-      }
-    });
+      }).catch(error => {
+        console.error('AuthContext - Error getting session:', error);
+        setSupabaseError(error.message);
+        setLoading(false);
+      });
 
-    return () => {
-      console.log('AuthContext - Cleaning up auth listener');
-      subscription?.unsubscribe();
+      return () => {
+        console.log('AuthContext - Cleaning up auth listener');
+        subscription?.unsubscribe();
+      };
     };
+    
+    initAuth();
   }, []);
 
   return {
