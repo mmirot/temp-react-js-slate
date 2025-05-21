@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/auth';
+import { useAuth } from '../context/clerk';
+import { UserButton } from '@clerk/clerk-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -43,7 +44,12 @@ const Navbar = () => {
               >
                 Sign Out
               </button>
-              <span className="user-email">{user.email}</span>
+              <div className="ml-4">
+                <UserButton afterSignOutUrl="/auth" />
+              </div>
+              {user.emailAddresses && (
+                <span className="user-email">{user.emailAddresses[0]?.emailAddress}</span>
+              )}
             </>
           ) : (
             <Link 

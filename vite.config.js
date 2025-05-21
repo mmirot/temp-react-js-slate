@@ -25,6 +25,17 @@ export default defineConfig(async ({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      // Add a startup message to guide users
+      onListening(server) {
+        const { port, host } = server.config.server;
+        console.log(`\n🚀 Server running at http://localhost:${port}/`);
+        console.log(`\n💡 To start the app, run either:`);
+        console.log(`   - npm run start`);
+        console.log(`   - npm run dev`);
+        console.log(`   - ./start.sh`);
+        console.log(`   - node start.js`);
+        console.log(`   - npx vite --port 8080\n`);
+      }
     },
     plugins: [
       react(),
