@@ -14,10 +14,20 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [supabaseError, setSupabaseError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log('AuthContext - Initializing auth state');
+    
+    // Check if Supabase env variables are missing
+    const hasEnvVariables = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!hasEnvVariables) {
+      console.log('AuthContext - Missing Supabase environment variables');
+      setSupabaseError('Missing Supabase environment variables');
+      setLoading(false);
+      return;
+    }
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -47,11 +57,15 @@ export const AuthProvider = ({ children }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch(error => {
+      console.error('AuthContext - Error getting session:', error);
+      setSupabaseError(error.message);
+      setLoading(false);
     });
 
     return () => {
       console.log('AuthContext - Cleaning up auth listener');
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [navigate]);
 
@@ -111,12 +125,14 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signOut,
     loading,
+    supabaseError,
   };
 
   console.log('AuthContext - Current auth state:', { 
     isAuthenticated: !!user, 
     isLoading: loading,
-    userEmail: user?.email || 'none'
+    userEmail: user?.email || 'none',
+    hasError: !!supabaseError
   });
 
   return (
