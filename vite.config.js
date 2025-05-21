@@ -42,7 +42,7 @@ export default defineConfig(async ({ mode }) => {
       taggerPlugin
     ].filter(Boolean),
     define: {
-      'process.env': {}
+      'process.env': process.env
     },
     resolve: {
       alias: {
