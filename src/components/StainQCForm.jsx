@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
@@ -157,17 +158,22 @@ export default function StainQCForm() {
     }
 
     try {
+      console.log('Attempting to delete submission with ID:', submissionId);
+      
       const { error } = await supabase
         .from('stain_submissions')
         .delete()
         .eq('id', submissionId);
 
       if (error) {
+        console.error('Supabase delete error:', error);
         throw error;
       }
 
+      // Update the local state to remove the deleted submission
+      setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
+      
       toast.success('Submission deleted successfully');
-      fetchSubmissions();
     } catch (error) {
       toast.error('Error deleting submission: ' + error.message);
       console.error('Error deleting submission:', error);
