@@ -8,11 +8,21 @@ import App from './App';
 // Get the publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if the key is available
-if (!PUBLISHABLE_KEY) {
+// Check if we're in the Lovable preview environment
+const isLovablePreview = window.location.hostname.includes('lovable.app') || 
+                         window.location.hostname.includes('localhost');
+
+// For Lovable preview, use a dummy key that allows rendering without authentication
+const dummyKey = 'pk_test_lovable-preview-key';
+
+// Use the environment variable if available, otherwise use a dummy key for Lovable preview
+const effectiveKey = PUBLISHABLE_KEY || (isLovablePreview ? dummyKey : null);
+
+// If no real key is available in production, show an error
+if (!effectiveKey) {
   console.error('Error: Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
   
-  // Display a more detailed error message
+  // Display a detailed error message
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <div style={{ 
@@ -50,15 +60,14 @@ if (!PUBLISHABLE_KEY) {
     </React.StrictMode>
   );
 } else {
-  console.log('Clerk publishable key found. Starting application...');
+  console.log('Starting application with', PUBLISHABLE_KEY ? 'actual' : 'preview', 'Clerk key');
   
   // Create a root instance and render the app normally
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <ClerkProvider 
-        publishableKey={PUBLISHABLE_KEY} 
+        publishableKey={effectiveKey} 
         afterSignOutUrl="/"
-        // Add signInUrl to help with proper routing
         signInUrl="/auth"
       >
         <App />
