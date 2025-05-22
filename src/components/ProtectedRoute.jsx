@@ -4,15 +4,17 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import toast from 'react-hot-toast';
 import ClerkSetupGuide from './ClerkSetupGuide';
+import { useUser } from '@clerk/clerk-react';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
+  const { isSignedIn, isLoaded } = useUser();
   
   // Check if VITE_CLERK_PUBLISHABLE_KEY exists
   const clerkKeyAvailable = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   
   // Show a loading state
-  if (loading) {
+  if (loading || !isLoaded) {
     console.log('ProtectedRoute - Loading auth state...');
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -33,7 +35,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Redirect to auth if no user
-  if (!user) {
+  if (!isSignedIn) {
     console.log('ProtectedRoute - No user found, redirecting to auth page');
     return <Navigate to="/auth" replace />;
   }
