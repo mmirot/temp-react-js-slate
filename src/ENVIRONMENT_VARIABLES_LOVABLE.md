@@ -20,7 +20,7 @@ To fix authentication issues on the production site (svpathlab.com), you need to
    - Verify component paths in Clerk settings match your implementation
 
 3. **Common issues to check:**
-   - Ensure the key starts with `pk_` (publishable key, not secret key)
+   - Ensure the key starts with `pk_live_` (publishable key, not secret key)
    - Verify that the domain is properly configured in Clerk
    - Check that the redirect URLs are correctly set up
    - Confirm Account Portal settings match your implementation
