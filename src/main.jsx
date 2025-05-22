@@ -8,36 +8,19 @@ import App from './App';
 // Get the publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if we're in the Lovable preview environment or on a custom domain without the env var
+// Check if we're in the Lovable preview environment
 const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
-                         
-// For custom domains, we should also enable preview mode if the key is missing
-const isCustomDomainWithoutKey = !PUBLISHABLE_KEY && 
-                               !isLovablePreview && 
-                               window.location.hostname !== '';
 
-// For previews, use a working demo key that allows rendering without authentication
-const dummyKey = 'pk_test_Y29uY2VudHJhdGVkLWNvbGxpZS03Mi5jbGVyay5hY2NvdW50cy5kZXYk';
-
-// Use the environment variable if available, otherwise use a dummy key
-const effectiveKey = PUBLISHABLE_KEY || ((isLovablePreview || isCustomDomainWithoutKey) ? dummyKey : null);
-
-// Log the environment and key status for debugging
+// Log environment information for debugging
 console.log('Environment details:', {
   isLovablePreview,
-  isCustomDomainWithoutKey,
   hasPublishableKey: !!PUBLISHABLE_KEY,
-  usingDummyKey: !PUBLISHABLE_KEY && (isLovablePreview || isCustomDomainWithoutKey),
-  hostname: window.location.hostname,
-  effectiveKey: effectiveKey ? 'Key available' : 'No key available'
+  hostname: window.location.hostname
 });
 
-// If no real key is available in production, show an error
-if (!effectiveKey) {
-  console.error('Error: Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
-  
-  // Display a detailed error message
+if (!PUBLISHABLE_KEY) {
+  // Display a simplified message for missing key in preview mode
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <div style={{ 
@@ -47,41 +30,66 @@ if (!effectiveKey) {
         fontFamily: 'Arial, sans-serif',
         lineHeight: '1.6',
         color: '#333',
-        backgroundColor: '#ffeaea',
+        backgroundColor: '#f0f5ff',
         borderRadius: '8px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        border: '1px solid #ffcaca'
+        border: '1px solid #c3cfe2'
       }}>
-        <h1 style={{ color: '#e53e3e' }}>⚠️ Configuration Error</h1>
-        <p>The Clerk authentication service requires a valid publishable key.</p>
-        <p>Please set the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment variable in your deployment settings.</p>
+        <h1 style={{ color: '#2a4365' }}>Environment Setup Required</h1>
+        <p>To use authentication features, you need to set up your environment variable:</p>
         
         <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #ddd' }}>
-          <h3>How to Fix This Error:</h3>
-          <p><strong>In Lovable:</strong></p>
+          <h3>Next Steps:</h3>
+          <p><strong>In Lovable Preview:</strong></p>
           <ol>
-            <li>This error appears because Lovable is a preview environment and doesn't have access to your environment variables.</li>
-            <li>Continue development and deploy to Netlify or another platform where you'll set the environment variables.</li>
+            <li>This message appears because environment variables aren't available in preview mode</li>
+            <li>Continue development of non-authentication features</li>
+            <li>When ready to deploy, you'll set the environment variable during the publishing process</li>
           </ol>
-          <p><strong>In Netlify:</strong></p>
+          <p><strong>When Publishing:</strong></p>
           <ol>
-            <li>Go to your Netlify dashboard</li>
-            <li>Select your site</li>
-            <li>Navigate to Site settings > Build & deploy > Environment</li>
-            <li>Add <code>VITE_CLERK_PUBLISHABLE_KEY</code> with your value from Clerk</li>
+            <li>Use the "Publish" button in Lovable</li>
+            <li>During deployment, you'll be prompted to set <code>VITE_CLERK_PUBLISHABLE_KEY</code></li>
+            <li>Get your publishable key from the <a href="https://dashboard.clerk.com/" style={{color: '#2563eb', textDecoration: 'underline'}}>Clerk dashboard</a></li>
           </ol>
+        </div>
+        
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <button 
+            onClick={() => {
+              document.getElementById('root').removeChild(document.getElementById('root').firstChild);
+              ReactDOM.createRoot(document.getElementById('root')).render(
+                <React.StrictMode>
+                  <App />
+                </React.StrictMode>
+              );
+            }}
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              padding: '12px 24px',
+              borderRadius: '6px',
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            Continue to App
+          </button>
+          <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#4a5568' }}>
+            Note: Authentication features will not function until the environment variable is set.
+          </p>
         </div>
       </div>
     </React.StrictMode>
   );
 } else {
-  console.log('Starting application with', PUBLISHABLE_KEY ? 'actual' : 'preview', 'Clerk key');
-  
-  // Create a root instance and render the app normally
+  // Render the app with Clerk authentication if key is available
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <ClerkProvider 
-        publishableKey={effectiveKey}
+        publishableKey={PUBLISHABLE_KEY}
         afterSignOutUrl="/"
         signInUrl="/auth"
       >

@@ -12,6 +12,9 @@ const Navbar = () => {
   // Check if we're in the Lovable preview environment
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
+  
+  // Check if Clerk key is available
+  const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
   return (
     <nav className="navbar">
@@ -28,38 +31,52 @@ const Navbar = () => {
             Home
           </Link>
           
-          <SignedIn>
-            <Link 
-              to="/daily-qc" 
-              className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
-            >
-              Daily QC
-            </Link>
-            <Link 
-              to="/stains" 
-              className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
-            >
-              Stain Library
-            </Link>
-            <div className="ml-4">
-              <UserButton afterSignOutUrl="/auth" />
-            </div>
-          </SignedIn>
+          {(hasClerkKey || !isLovablePreview) && (
+            <>
+              <SignedIn>
+                <Link 
+                  to="/daily-qc" 
+                  className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
+                >
+                  Daily QC
+                </Link>
+                <Link 
+                  to="/stains" 
+                  className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
+                >
+                  Stain Library
+                </Link>
+                <div className="ml-4">
+                  <UserButton afterSignOutUrl="/auth" />
+                </div>
+              </SignedIn>
+              
+              <SignedOut>
+                <div className="auth-nav-buttons">
+                  <Link to="/auth" className="sign-in-button">
+                    Sign In
+                  </Link>
+                  <Link to="/auth?sign-up=true" className="sign-up-button ml-2">
+                    Sign Up
+                  </Link>
+                </div>
+              </SignedOut>
+            </>
+          )}
           
-          <SignedOut>
+          {isLovablePreview && !hasClerkKey && (
             <div className="auth-nav-buttons">
               <Link to="/auth" className="sign-in-button">
-                Sign In
-              </Link>
-              <Link to="/auth?sign-up=true" className="sign-up-button ml-2">
-                Sign Up
+                Auth Preview
               </Link>
             </div>
-          </SignedOut>
+          )}
         </div>
 
         {isLovablePreview && (
-          <div className="preview-indicator">Preview Mode</div>
+          <div className="preview-indicator">
+            {!hasClerkKey ? "Preview Mode (No Auth Key)" : "Preview Mode"}
+          </div>
         )}
       </div>
     </nav>

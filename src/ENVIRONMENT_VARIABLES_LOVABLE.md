@@ -3,15 +3,15 @@
 
 ## About Environment Variables in Lovable Preview
 
-When developing in Lovable's preview environment or accessing your app via a custom domain without environment variables, the application doesn't have access to your actual environment variables. This is a security feature and is expected behavior.
+When developing in Lovable's preview environment, the application doesn't have access to your environment variables. This is a security feature and is expected behavior.
 
 ## How This Project Handles Environment Variables
 
 This project has been configured to:
 
 1. Use real environment variables in production (Netlify, Vercel, etc.)
-2. Use a working demo key for preview in the Lovable environment or when accessed via a custom domain without the key
-3. Display descriptive error messages if the variables are missing in production
+2. Display a friendly message when environment variables are missing in the preview environment
+3. Allow you to continue development without authentication features in preview mode
 
 ## Required Environment Variables
 
@@ -37,12 +37,13 @@ When developing locally outside of Lovable:
    ```
 3. Make sure the `.env` file is in your `.gitignore` to avoid exposing sensitive data
 
-## How It Works
+## Development Workflow
 
-The main.jsx file includes logic to:
-- Check if the app is running in Lovable preview or on a custom domain without environment variables
-- Use a working demo key when in preview mode or on a custom domain without the key
-- Use the real key in production
-- Show helpful error messages if the key is missing in production
+During development in the Lovable preview environment:
 
-This allows you to develop in Lovable without seeing authentication errors while ensuring proper security in production.
+1. You'll see an environment setup message when first loading the app
+2. Use the "Continue to App" button to use the app without authentication features
+3. Focus on developing non-authentication parts of your application
+4. When ready to publish, you'll set the environment variables during deployment
+
+This approach ensures your development workflow can continue while maintaining proper security practices.
