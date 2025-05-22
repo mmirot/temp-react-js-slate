@@ -6,10 +6,8 @@ import { UserButton } from '@clerk/clerk-react';
 import './Navbar.css';
 
 const Navbar = () => {
-  // Get the auth context safely with fallback values
-  const auth = useAuth();
-  const user = auth?.user || null;
-  const signOut = auth?.signOut || (() => {});
+  // Use the enhanced useAuth hook that always returns a valid object
+  const { user, signOut, isAuthenticated } = useAuth();
   const location = useLocation();
   
   // Check if Clerk key is available to determine if auth features should be shown
@@ -33,7 +31,7 @@ const Navbar = () => {
             Home
           </Link>
           
-          {user && clerkKeyAvailable ? (
+          {isAuthenticated && clerkKeyAvailable ? (
             <>
               <Link 
                 to="/daily-qc" 
@@ -56,7 +54,7 @@ const Navbar = () => {
               <div className="ml-4">
                 <UserButton afterSignOutUrl="/auth" />
               </div>
-              {user.emailAddresses && (
+              {user && user.emailAddresses && (
                 <span className="user-email">{user.emailAddresses[0]?.emailAddress}</span>
               )}
             </>
