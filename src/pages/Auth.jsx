@@ -1,16 +1,15 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { 
-  SignIn, 
-  SignUp, 
-  useAuth as useClerkAuth 
-} from '@clerk/clerk-react';
 import { useAuth } from '../context/auth';
+import ClerkSetupGuide from '../components/ClerkSetupGuide';
 
 const Auth = () => {
-  const { userId } = useClerkAuth();
-  const { loading } = useAuth();
-
+  const { user, loading } = useAuth();
+  
+  // Check if VITE_CLERK_PUBLISHABLE_KEY exists
+  const clerkKeyAvailable = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -19,8 +18,13 @@ const Auth = () => {
     );
   }
 
+  // If Clerk key is not available, show the setup guide
+  if (!clerkKeyAvailable) {
+    return <ClerkSetupGuide />;
+  }
+
   // If user is already authenticated, redirect to home page
-  if (userId) {
+  if (user) {
     return <Navigate to="/" replace />;
   }
 
@@ -30,41 +34,20 @@ const Auth = () => {
         <div className="p-6">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Welcome to SV Pathology Lab</h2>
           
-          {/* Clerk provides these components out of the box */}
-          {/* Tab navigation for Sign In and Sign Up */}
-          <div className="flex border-b border-gray-200 mb-6">
-            <button 
-              className="flex-1 py-2 px-4 text-center border-b-2 border-indigo-500 font-medium text-indigo-600"
-              id="signin-tab"
-              onClick={() => document.getElementById('clerk-sign-in').style.display = 'block'}
-            >
-              Sign In
-            </button>
-            <button 
-              className="flex-1 py-2 px-4 text-center text-gray-500 font-medium"
-              id="signup-tab"
-              onClick={() => document.getElementById('clerk-sign-up').style.display = 'block'}
-            >
-              Sign Up
-            </button>
+          {/* Simplified authentication UI for now since we're not using Clerk components directly */}
+          <div className="flex justify-center">
+            <p className="text-gray-600 mb-4">
+              Please set up Clerk authentication first. See the setup guide for instructions.
+            </p>
           </div>
           
-          <div id="clerk-sign-in" className="mb-6">
-            <SignIn 
-              routing="path"
-              path="/auth"
-              redirectUrl="/"
-              signUpUrl="/auth/sign-up" 
-            />
-          </div>
-          
-          <div id="clerk-sign-up" style={{ display: 'none' }}>
-            <SignUp 
-              routing="path"
-              path="/auth/sign-up"
-              redirectUrl="/"
-              signInUrl="/auth" 
-            />
+          <div className="mt-6">
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
+            >
+              Return to Home
+            </button>
           </div>
         </div>
       </div>
