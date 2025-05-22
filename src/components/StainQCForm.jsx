@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
@@ -251,16 +250,22 @@ export default function StainQCForm() {
       return;
     }
 
-    const submissions = Array.from(selectedStains).map(stainId => ({
-      stain_id: stainId,
-      date_prepared: formData.date_prepared,
-      tech_initials: formData.tech_initials.trim(),
-      stain_qc: null,
-      path_initials: null,
-      date_qc: null,
-      comments: null,
-      repeat_stain: false
-    }));
+    // Create submissions with proper date format
+    const submissions = Array.from(selectedStains).map(stainId => {
+      // Ensure the date is formatted correctly and preserved as selected
+      const dateStr = formData.date_prepared;
+      
+      return {
+        stain_id: stainId,
+        date_prepared: dateStr, // Use the date string directly without additional parsing
+        tech_initials: formData.tech_initials.trim(),
+        stain_qc: null,
+        path_initials: null,
+        date_qc: null,
+        comments: null,
+        repeat_stain: false
+      };
+    });
 
     try {
       const { error } = await supabase
@@ -298,16 +303,22 @@ export default function StainQCForm() {
       return;
     }
 
-    const submissions = Array.from(tempSelectedStains).map(stainId => ({
-      stain_id: stainId,
-      date_prepared: formData.date_prepared,
-      tech_initials: formData.tech_initials.trim(),
-      stain_qc: null,
-      path_initials: null,
-      date_qc: null,
-      comments: null,
-      repeat_stain: false
-    }));
+    // Create submissions with proper date format
+    const submissions = Array.from(tempSelectedStains).map(stainId => {
+      // Use the date directly as entered by user
+      const dateStr = formData.date_prepared;
+      
+      return {
+        stain_id: stainId,
+        date_prepared: dateStr,
+        tech_initials: formData.tech_initials.trim(),
+        stain_qc: null,
+        path_initials: null,
+        date_qc: null,
+        comments: null,
+        repeat_stain: false
+      };
+    });
 
     try {
       const { error } = await supabase
@@ -359,16 +370,26 @@ export default function StainQCForm() {
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
   const completedSubmissions = getSortedSubmissions(submissions.filter(sub => sub.stain_qc));
 
-  // Fix the date formatting to handle timezone correctly
+  // Improved date formatting function to handle timezone issues
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
-      // Create date with explicit UTC handling to avoid timezone shifting
-      const date = new Date(dateString + 'T00:00:00Z');
-      return date.toLocaleDateString();
+      // Ensure we're parsing the date correctly without timezone offset issues
+      // Format: YYYY-MM-DD for consistent parsing
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
+        const day = parseInt(parts[2], 10);
+        
+        // Create date using UTC to avoid timezone shifts
+        const date = new Date(Date.UTC(year, month, day));
+        return date.toLocaleDateString();
+      }
+      return dateString;
     } catch (error) {
-      console.error('Error formatting date:', error);
-      return '-';
+      console.error('Error formatting date:', error, dateString);
+      return dateString || '-';
     }
   };
 
