@@ -5,9 +5,19 @@ import { useAuth, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/c
 import './Navbar.css';
 
 const Navbar = () => {
-  const { userId, isLoaded } = useAuth();
+  // Use try/catch to handle Clerk errors in preview mode
+  let isAuthenticated = false;
+  let clerkLoaded = false;
+  
+  try {
+    const { userId, isLoaded } = useAuth();
+    isAuthenticated = isLoaded && !!userId;
+    clerkLoaded = isLoaded;
+  } catch (error) {
+    console.log('Clerk auth error in Navbar:', error.message);
+  }
+
   const location = useLocation();
-  const isAuthenticated = isLoaded && !!userId;
   
   // Check if we're in the Lovable preview environment
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
@@ -15,6 +25,9 @@ const Navbar = () => {
   
   // Check if Clerk key is available
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  
+  // In preview mode without a key, show demo navigation
+  const showDemoNav = isLovablePreview && !hasClerkKey;
 
   return (
     <nav className="navbar">
@@ -31,7 +44,29 @@ const Navbar = () => {
             Home
           </Link>
           
-          {(hasClerkKey || !isLovablePreview) && (
+          {showDemoNav ? (
+            // Demo navigation for preview mode
+            <>
+              <Link 
+                to="/daily-qc" 
+                className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
+              >
+                Daily QC
+              </Link>
+              <Link 
+                to="/stains" 
+                className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
+              >
+                Stain Library
+              </Link>
+              <div className="auth-nav-buttons">
+                <Link to="/auth" className="sign-in-button">
+                  Auth Demo
+                </Link>
+              </div>
+            </>
+          ) : (
+            // Normal navigation with Clerk components
             <>
               <SignedIn>
                 <Link 
@@ -62,14 +97,6 @@ const Navbar = () => {
                 </div>
               </SignedOut>
             </>
-          )}
-          
-          {isLovablePreview && !hasClerkKey && (
-            <div className="auth-nav-buttons">
-              <Link to="/auth" className="sign-in-button">
-                Auth Preview
-              </Link>
-            </div>
           )}
         </div>
 

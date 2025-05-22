@@ -19,8 +19,30 @@ console.log('Environment details:', {
   hostname: window.location.hostname
 });
 
-if (!PUBLISHABLE_KEY) {
-  // Display a simplified message for missing key in preview mode
+// Create a function to render the app with appropriate wrapper
+const renderApp = () => {
+  // Always wrap the entire app with ClerkProvider
+  // In preview mode without a key, we'll handle auth state appropriately in components
+  return (
+    <React.StrictMode>
+      <ClerkProvider 
+        publishableKey={PUBLISHABLE_KEY || "placeholder_key_for_preview"} // Use placeholder in preview
+        appearance={{
+          elements: {
+            rootBox: {
+              display: !PUBLISHABLE_KEY && isLovablePreview ? 'none' : 'flex',
+            }
+          }
+        }}
+      >
+        <App />
+      </ClerkProvider>
+    </React.StrictMode>
+  );
+};
+
+// If no publishable key and in preview mode, show the setup message first
+if (!PUBLISHABLE_KEY && isLovablePreview) {
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <div style={{ 
@@ -58,11 +80,7 @@ if (!PUBLISHABLE_KEY) {
           <button 
             onClick={() => {
               document.getElementById('root').removeChild(document.getElementById('root').firstChild);
-              ReactDOM.createRoot(document.getElementById('root')).render(
-                <React.StrictMode>
-                  <App />
-                </React.StrictMode>
-              );
+              ReactDOM.createRoot(document.getElementById('root')).render(renderApp());
             }}
             style={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -85,16 +103,6 @@ if (!PUBLISHABLE_KEY) {
     </React.StrictMode>
   );
 } else {
-  // Render the app with Clerk authentication if key is available
-  ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-      <ClerkProvider 
-        publishableKey={PUBLISHABLE_KEY}
-        afterSignOutUrl="/"
-        signInUrl="/auth"
-      >
-        <App />
-      </ClerkProvider>
-    </React.StrictMode>
-  );
+  // Render the app directly if we have a key or are not in preview mode
+  ReactDOM.createRoot(document.getElementById('root')).render(renderApp());
 }

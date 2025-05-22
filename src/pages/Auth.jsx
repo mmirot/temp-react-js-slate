@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 const Auth = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useClerk();
   const [isResetting, setIsResetting] = useState(false);
   const searchParams = new URLSearchParams(location.search);
   const showSignUp = searchParams.get('sign-up') === 'true';
@@ -19,6 +18,14 @@ const Auth = () => {
   
   // Check if Clerk key is available
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+  // Safely access Clerk functionality
+  let clerk = null;
+  try {
+    clerk = useClerk();
+  } catch (error) {
+    console.log('Clerk not available in Auth page:', error.message);
+  }
   
   // Handle the case where user sees "Welcome back" without sign-in dialog
   const handleResetSession = async () => {
@@ -26,7 +33,12 @@ const Auth = () => {
       setIsResetting(true);
       toast.loading('Resetting your session...', { id: 'reset-session' });
       
-      await signOut();
+      if (clerk && clerk.signOut) {
+        await clerk.signOut();
+      } else {
+        // In preview mode, simulate reset
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       
       toast.success('Session reset. Please sign in again.', { id: 'reset-session' });
             
@@ -41,33 +53,76 @@ const Auth = () => {
     }
   };
 
-  // If no Clerk key in preview mode, show message
+  // If no Clerk key in preview mode, show message with demo UI
   if (isLovablePreview && !hasClerkKey) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="p-6">
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-              Authentication Unavailable in Preview
+              {showSignUp ? 'Create an Account (Demo)' : 'Welcome Back (Demo)'}
             </h2>
             
             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-blue-800 font-semibold">Preview Environment Notice</p>
+              <p className="text-blue-800 font-semibold">Demo Mode Active</p>
               <p className="mt-2 text-sm text-blue-700">
-                Authentication requires the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment variable,
-                which is not accessible in the Lovable preview environment.
+                You're viewing a demo version of the authentication page. 
+                Authentication requires the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment 
+                variable, which will be set during deployment.
               </p>
             </div>
             
             <div className="space-y-4">
-              <p className="text-gray-600">
-                To use authentication features:
-              </p>
-              
-              <ol className="list-decimal pl-5 space-y-2 text-gray-600">
-                <li>When deploying with the "Publish" button, set your Clerk publishable key</li>
-                <li>Visit your deployed site to use full authentication features</li>
-              </ol>
+              {showSignUp ? (
+                <div className="space-y-4">
+                  <div className="form-group">
+                    <label className="block text-gray-700 mb-1">Email</label>
+                    <input type="email" className="w-full p-2 border rounded" placeholder="email@example.com" disabled />
+                  </div>
+                  <div className="form-group">
+                    <label className="block text-gray-700 mb-1">Password</label>
+                    <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
+                  </div>
+                  <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
+                    Sign Up (Demo)
+                  </button>
+                  <p className="text-center text-sm text-gray-500">
+                    Already have an account?{" "}
+                    <Link to="/auth" className="text-blue-600 hover:underline">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="form-group">
+                    <label className="block text-gray-700 mb-1">Email</label>
+                    <input type="email" className="w-full p-2 border rounded" placeholder="email@example.com" disabled />
+                  </div>
+                  <div className="form-group">
+                    <label className="block text-gray-700 mb-1">Password</label>
+                    <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
+                  </div>
+                  <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
+                    Sign In (Demo)
+                  </button>
+                  <div className="mt-4 text-center">
+                    <button 
+                      onClick={handleResetSession}
+                      disabled={isResetting}
+                      className={`text-sm text-blue-600 hover:text-blue-800 underline ${isResetting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {isResetting ? 'Resetting session...' : 'Having trouble signing in? Click here to reset your session'}
+                    </button>
+                  </div>
+                  <p className="text-center text-sm text-gray-500">
+                    Don't have an account?{" "}
+                    <Link to="/auth?sign-up=true" className="text-blue-600 hover:underline">
+                      Sign up
+                    </Link>
+                  </p>
+                </div>
+              )}
               
               <div className="pt-4 mt-2 border-t border-gray-200">
                 <Link 
@@ -84,6 +139,7 @@ const Auth = () => {
     );
   }
 
+  // Regular auth screen with actual Clerk components
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg overflow-hidden">

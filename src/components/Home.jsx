@@ -1,10 +1,15 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import './Home.css';
 
 const Home = () => {
+  // Check if we're in the Lovable preview environment without a Clerk key
+  const isLovablePreview = window.location.hostname.includes('lovable.app') || 
+                         window.location.hostname.includes('localhost');
+  const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const showDemoMode = isLovablePreview && !hasClerkKey;
+
   return (
     <div className="home-container">
       <header className="hero">
@@ -12,22 +17,36 @@ const Home = () => {
           <h1>Silicon Valley Pathology Laboratory</h1>
           <p className="tagline">Providing excellence in pathology diagnostics since 1995</p>
           
-          <SignedOut>
+          {showDemoMode ? (
+            // Demo mode auth buttons
             <div className="auth-buttons">
               <Link to="/auth" className="cta-button">
-                Sign In To Access Tools
+                Auth Demo
               </Link>
-              <Link to="/auth?sign-up=true" className="cta-button-secondary ml-4">
-                Create Account
+              <Link to="/daily-qc" className="cta-button-secondary ml-4">
+                View Daily QC Tool
               </Link>
             </div>
-          </SignedOut>
-          
-          <SignedIn>
-            <Link to="/daily-qc" className="cta-button">
-              Access Daily QC Tool
-            </Link>
-          </SignedIn>
+          ) : (
+            <>
+              <SignedOut>
+                <div className="auth-buttons">
+                  <Link to="/auth" className="cta-button">
+                    Sign In To Access Tools
+                  </Link>
+                  <Link to="/auth?sign-up=true" className="cta-button-secondary ml-4">
+                    Create Account
+                  </Link>
+                </div>
+              </SignedOut>
+              
+              <SignedIn>
+                <Link to="/daily-qc" className="cta-button">
+                  Access Daily QC Tool
+                </Link>
+              </SignedIn>
+            </>
+          )}
         </div>
       </header>
 
@@ -70,9 +89,9 @@ const Home = () => {
         </p>
       </section>
 
-      <SignedIn>
+      {showDemoMode ? (
         <section className="tools">
-          <h2>Laboratory Tools</h2>
+          <h2>Laboratory Tools (Demo Mode)</h2>
           <div className="tools-grid">
             <Link to="/daily-qc" className="tool-card">
               <h3>Daily Stain QC</h3>
@@ -83,21 +102,46 @@ const Home = () => {
               <p>View the complete catalog of available stains.</p>
             </Link>
           </div>
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg text-center">
+            <p className="font-semibold text-blue-800">Demo Mode Active</p>
+            <p className="mt-2 text-sm text-blue-700">
+              You are viewing tools in demo mode. Set the VITE_CLERK_PUBLISHABLE_KEY environment variable
+              during deployment to enable full authentication features.
+            </p>
+          </div>
         </section>
-      </SignedIn>
-      
-      <SignedOut>
-        <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
-          <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
-          <Link to="/auth" className="cta-button inline-block mr-4">
-            Sign In Now
-          </Link>
-          <Link to="/auth?sign-up=true" className="cta-button-secondary inline-block">
-            Create Account
-          </Link>
-        </section>
-      </SignedOut>
+      ) : (
+        <>
+          <SignedIn>
+            <section className="tools">
+              <h2>Laboratory Tools</h2>
+              <div className="tools-grid">
+                <Link to="/daily-qc" className="tool-card">
+                  <h3>Daily Stain QC</h3>
+                  <p>Submit and track daily quality control for laboratory stains.</p>
+                </Link>
+                <Link to="/stains" className="tool-card">
+                  <h3>Stain Library</h3>
+                  <p>View the complete catalog of available stains.</p>
+                </Link>
+              </div>
+            </section>
+          </SignedIn>
+          
+          <SignedOut>
+            <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
+              <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
+              <Link to="/auth" className="cta-button inline-block mr-4">
+                Sign In Now
+              </Link>
+              <Link to="/auth?sign-up=true" className="cta-button-secondary inline-block">
+                Create Account
+              </Link>
+            </section>
+          </SignedOut>
+        </>
+      )}
     </div>
   );
 };

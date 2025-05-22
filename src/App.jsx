@@ -12,6 +12,12 @@ import Footer from './components/Footer';
 import './App.css';
 
 function App() {
+  // Check if we're in the Lovable preview environment without a Clerk key
+  const isLovablePreview = window.location.hostname.includes('lovable.app') || 
+                           window.location.hostname.includes('localhost');
+  const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const showDemoMode = isLovablePreview && !hasClerkKey;
+
   return (
     <Router>
       <div className="App">
@@ -22,33 +28,43 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
             
-            {/* Protected routes */}
-            <Route 
-              path="/daily-qc" 
-              element={
-                <>
-                  <SignedIn>
-                    <StainQCForm />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
-              } 
-            />
-            <Route 
-              path="/stains" 
-              element={
-                <>
-                  <SignedIn>
-                    <StainList />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
-              } 
-            />
+            {showDemoMode ? (
+              // Demo routes in preview mode
+              <>
+                <Route path="/daily-qc" element={<StainQCForm />} />
+                <Route path="/stains" element={<StainList />} />
+              </>
+            ) : (
+              // Protected routes with actual auth
+              <>
+                <Route 
+                  path="/daily-qc" 
+                  element={
+                    <>
+                      <SignedIn>
+                        <StainQCForm />
+                      </SignedIn>
+                      <SignedOut>
+                        <RedirectToSignIn />
+                      </SignedOut>
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/stains" 
+                  element={
+                    <>
+                      <SignedIn>
+                        <StainList />
+                      </SignedIn>
+                      <SignedOut>
+                        <RedirectToSignIn />
+                      </SignedOut>
+                    </>
+                  } 
+                />
+              </>
+            )}
           </Routes>
         </div>
         <Footer />
