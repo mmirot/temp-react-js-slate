@@ -1,6 +1,12 @@
 
-const { spawn } = require('child_process');
-const path = require('path');
+// Using ESM syntax for Node.js script
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Get the command line arguments
 const args = process.argv.slice(2);
