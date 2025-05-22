@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -7,15 +7,24 @@ const Auth = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isResetting, setIsResetting] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const searchParams = new URLSearchParams(location.search);
   const showSignUp = searchParams.get('sign-up') === 'true';
   
-  // Check if we're in the Lovable preview environment
+  // Check if we're in the Lovable preview environment or production
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
+  const isProduction = window.location.hostname === 'svpathlab.com';
   
   // Check if Clerk key is available
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+  useEffect(() => {
+    // Show toast message on production site without a key
+    if (isProduction && !hasClerkKey) {
+      toast.error('Authentication is not configured. Please set up the environment variables.');
+    }
+  }, [isProduction, hasClerkKey]);
 
   // Handle the case where user sees "Welcome back" without sign-in dialog
   const handleResetSession = async () => {
@@ -47,11 +56,15 @@ const Auth = () => {
       ClerkComponents = { SignIn, SignUp };
     } catch (error) {
       console.error('Failed to load Clerk components:', error);
+      setAuthError(true);
+      if (isProduction) {
+        toast.error('Authentication service failed to load. Please check your configuration.');
+      }
     }
   }
 
-  // Showing demo auth UI if no key or in preview mode
-  const showDemoUI = !hasClerkKey || (isLovablePreview && !hasClerkKey);
+  // Showing demo auth UI if no key or in preview mode or if auth error
+  const showDemoUI = !hasClerkKey || (isLovablePreview && !hasClerkKey) || authError;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
@@ -62,17 +75,33 @@ const Auth = () => {
             {showDemoUI && ' (Demo)'}
           </h2>
           
+          {isProduction && !hasClerkKey && (
+            <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-red-700 font-semibold">Authentication Not Configured</p>
+              <p className="mt-2 text-sm text-red-600">
+                The authentication service for svpathlab.com is not properly configured. 
+                The <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment variable must be set in your
+                production environment settings.
+              </p>
+              <p className="mt-2 text-sm text-red-600">
+                Please refer to the deployment documentation for instructions on setting up authentication.
+              </p>
+            </div>
+          )}
+          
           {showDemoUI ? (
             // Demo auth UI
             <div>
-              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-blue-800 font-semibold">Demo Mode Active</p>
-                <p className="mt-2 text-sm text-blue-700">
-                  You're viewing a demo version of the authentication page. 
-                  Authentication requires the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment 
-                  variable, which will be set during deployment.
-                </p>
-              </div>
+              {!isProduction && (
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-blue-800 font-semibold">Demo Mode Active</p>
+                  <p className="mt-2 text-sm text-blue-700">
+                    You're viewing a demo version of the authentication page. 
+                    Authentication requires the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment 
+                    variable, which will be set during deployment.
+                  </p>
+                </div>
+              )}
               
               <div className="space-y-4">
                 {showSignUp ? (
@@ -86,7 +115,7 @@ const Auth = () => {
                       <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
                     </div>
                     <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
-                      Sign Up (Demo)
+                      Sign Up {isProduction ? "(Not Configured)" : "(Demo)"}
                     </button>
                     <p className="text-center text-sm text-gray-500">
                       Already have an account?{" "}
@@ -106,7 +135,7 @@ const Auth = () => {
                       <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
                     </div>
                     <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
-                      Sign In (Demo)
+                      Sign In {isProduction ? "(Not Configured)" : "(Demo)"}
                     </button>
                     <div className="mt-4 text-center">
                       <button 
@@ -134,6 +163,18 @@ const Auth = () => {
                     Back to Home
                   </Link>
                 </div>
+                
+                {isProduction && !hasClerkKey && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h3 className="font-semibold mb-2">How to fix this issue:</h3>
+                    <ol className="text-sm list-decimal pl-4 space-y-1 text-gray-600">
+                      <li>Set the <code>VITE_CLERK_PUBLISHABLE_KEY</code> in your deployment environment</li>
+                      <li>Add svpathlab.com to the allowed domains in your Clerk dashboard</li>
+                      <li>Configure proper redirect URLs in Clerk settings</li>
+                      <li>Redeploy the application</li>
+                    </ol>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

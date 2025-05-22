@@ -8,14 +8,16 @@ import App from './App';
 // Get the publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if we're in the Lovable preview environment
+// Check if we're in the Lovable preview environment or a deployed environment
 const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
+const isProduction = window.location.hostname === 'svpathlab.com';
 
 // Log environment information for debugging
 console.log('Environment details:', {
-  isLovablePreview,
+  environment: isProduction ? 'Production' : (isLovablePreview ? 'Lovable Preview' : 'Other'),
   hasPublishableKey: !!PUBLISHABLE_KEY,
+  publishableKey: PUBLISHABLE_KEY ? PUBLISHABLE_KEY.substring(0, 5) + '...' : 'Not Set',
   hostname: window.location.hostname
 });
 
@@ -23,15 +25,26 @@ console.log('Environment details:', {
 const renderApp = () => {
   // Only wrap with ClerkProvider if we have a valid key
   if (PUBLISHABLE_KEY) {
+    // For production, we log more information about Clerk initialization
+    if (isProduction) {
+      console.log('Initializing Clerk with publishable key');
+    }
+    
     return (
       <React.StrictMode>
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+        <ClerkProvider 
+          publishableKey={PUBLISHABLE_KEY}
+          appearance={{
+            baseTheme: "light"
+          }}
+        >
           <App />
         </ClerkProvider>
       </React.StrictMode>
     );
   } else {
     // No key available, render App directly without ClerkProvider
+    console.log('No Clerk key available, running in demo mode');
     return (
       <React.StrictMode>
         <App />
@@ -41,7 +54,7 @@ const renderApp = () => {
 };
 
 // If no publishable key and in preview mode, show the setup message first
-if (!PUBLISHABLE_KEY && isLovablePreview) {
+if (!PUBLISHABLE_KEY && (isLovablePreview || isProduction)) {
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <div style={{ 
@@ -60,19 +73,25 @@ if (!PUBLISHABLE_KEY && isLovablePreview) {
         <p>To use authentication features, you need to set up your environment variable:</p>
         
         <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #ddd' }}>
-          <h3>Next Steps:</h3>
-          <p><strong>In Lovable Preview:</strong></p>
+          <h3>For {isProduction ? 'Production Site' : 'Lovable Preview'}:</h3>
+          <p><strong>{isProduction ? 'Production Environment' : 'Preview Mode'} Setup:</strong></p>
           <ol>
-            <li>This message appears because environment variables aren't available in preview mode</li>
-            <li>Continue development of non-authentication features</li>
-            <li>When ready to deploy, you'll set the environment variable during the publishing process</li>
-          </ol>
-          <p><strong>When Publishing:</strong></p>
-          <ol>
-            <li>Use the "Publish" button in Lovable</li>
-            <li>During deployment, you'll be prompted to set <code>VITE_CLERK_PUBLISHABLE_KEY</code></li>
+            <li>The VITE_CLERK_PUBLISHABLE_KEY environment variable is not set</li>
+            <li>This key is required for authentication features to work</li>
+            {isProduction && <li>For production deployment, you must set this in your hosting provider's environment settings</li>}
             <li>Get your publishable key from the <a href="https://dashboard.clerk.com/" style={{color: '#2563eb', textDecoration: 'underline'}}>Clerk dashboard</a></li>
           </ol>
+          
+          {isProduction && (
+            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#fffbea', borderRadius: '6px', border: '1px solid #f6e05e' }}>
+              <strong>Important for Production:</strong>
+              <ul>
+                <li>Set VITE_CLERK_PUBLISHABLE_KEY in your deployment environment</li>
+                <li>Make sure your domain (svpathlab.com) is added to the allowed domains in your Clerk dashboard</li>
+                <li>Configure redirect URLs in Clerk to include https://svpathlab.com/auth</li>
+              </ul>
+            </div>
+          )}
         </div>
         
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -92,7 +111,7 @@ if (!PUBLISHABLE_KEY && isLovablePreview) {
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
             }}
           >
-            Continue to App
+            Continue to App in Demo Mode
           </button>
           <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#4a5568' }}>
             Note: Authentication features will not function until the environment variable is set.

@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
+import toast from 'react-hot-toast';
 
 // Create mock auth components for when Clerk is not available
 const MockAuthComponents = {
@@ -17,31 +18,59 @@ const MockAuthComponents = {
 };
 
 const Navbar = () => {
+  const location = useLocation();
+  const [authError, setAuthError] = useState(false);
+  const [lastAuthAttempt, setLastAuthAttempt] = useState(0);
+  
+  // Check if we're in a production environment
+  const isProduction = window.location.hostname === 'svpathlab.com';
+  
   // Check if Clerk is available in the global scope
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   let AuthComponents = MockAuthComponents;
   
   // Only try to import Clerk components if we have a key
-  if (hasClerkKey) {
-    try {
-      // We dynamically import these here to avoid the error when no key is available
-      const { SignedIn, SignedOut, UserButton } = require('@clerk/clerk-react');
-      AuthComponents = { SignedIn, SignedOut, UserButton };
-    } catch (error) {
-      console.log('Error importing Clerk components:', error.message);
-      // Fall back to mock components
+  useEffect(() => {
+    if (hasClerkKey) {
+      try {
+        // Log authentication attempt for debugging
+        console.log('Attempting to load Clerk components with key available');
+        
+        // We dynamically import these here to avoid the error when no key is available
+        const { SignedIn, SignedOut, UserButton } = require('@clerk/clerk-react');
+        AuthComponents = { SignedIn, SignedOut, UserButton };
+        setAuthError(false);
+      } catch (error) {
+        console.error('Error importing Clerk components:', error.message);
+        setAuthError(true);
+        
+        // Show error toast only in production and not too frequently
+        const now = Date.now();
+        if (isProduction && (now - lastAuthAttempt > 10000)) {
+          setLastAuthAttempt(now);
+          toast.error('Authentication service is not available. Please check your environment setup.');
+        }
+        // Fall back to mock components
+      }
     }
-  }
-
+  }, [hasClerkKey, isProduction, lastAuthAttempt]);
+  
   const { SignedIn, SignedOut, UserButton } = AuthComponents;
-  const location = useLocation();
   
   // Check if we're in the Lovable preview environment
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
-                         window.location.hostname.includes('localhost');
+                           window.location.hostname.includes('localhost');
   
   // In preview mode without a key, show demo navigation
-  const showDemoNav = isLovablePreview && !hasClerkKey;
+  const showDemoNav = (isLovablePreview && !hasClerkKey) || authError;
+
+  // Handler for auth button clicks in production without proper setup
+  const handleAuthButtonClick = (e) => {
+    if (isProduction && !hasClerkKey) {
+      e.preventDefault();
+      toast.error('Authentication is not properly configured. Please set up the environment variables.');
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -74,8 +103,12 @@ const Navbar = () => {
                 Stain Library
               </Link>
               <div className="auth-nav-buttons">
-                <Link to="/auth" className="sign-in-button">
-                  Auth Demo
+                <Link 
+                  to="/auth" 
+                  className="sign-in-button"
+                  onClick={handleAuthButtonClick}
+                >
+                  Auth {isProduction ? 'Not Configured' : 'Demo'}
                 </Link>
               </div>
             </>
@@ -129,7 +162,11 @@ const Navbar = () => {
                     Stain Library
                   </Link>
                   <div className="auth-nav-buttons">
-                    <Link to="/auth" className="sign-in-button">
+                    <Link 
+                      to="/auth" 
+                      className="sign-in-button"
+                      onClick={handleAuthButtonClick}
+                    >
                       Sign In
                     </Link>
                   </div>
@@ -139,9 +176,19 @@ const Navbar = () => {
           )}
         </div>
 
+        {authError && (
+          <div className="error-indicator">Auth Error</div>
+        )}
+
         {isLovablePreview && (
           <div className="preview-indicator">
             {!hasClerkKey ? "Preview Mode (No Auth Key)" : "Preview Mode"}
+          </div>
+        )}
+        
+        {isProduction && !hasClerkKey && (
+          <div className="preview-indicator error">
+            Missing Auth Key
           </div>
         )}
       </div>
