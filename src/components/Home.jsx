@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -10,23 +9,31 @@ const MockAuthComponents = {
 };
 
 const Home = () => {
+  // State to hold auth components
+  const [authComponents, setAuthComponents] = useState(MockAuthComponents);
+  
   // Check if Clerk is available in the global scope
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  let AuthComponents = MockAuthComponents;
   
   // Only try to import Clerk components if we have a key
-  if (hasClerkKey) {
-    try {
-      // We dynamically import these here to avoid the error when no key is available
-      const { SignedIn, SignedOut } = require('@clerk/clerk-react');
-      AuthComponents = { SignedIn, SignedOut };
-    } catch (error) {
-      console.log('Error importing Clerk components:', error.message);
-      // Fall back to mock components
+  useEffect(() => {
+    if (hasClerkKey) {
+      try {
+        // Dynamically import Clerk components using import() instead of require
+        import('@clerk/clerk-react').then(({ SignedIn, SignedOut }) => {
+          setAuthComponents({ SignedIn, SignedOut });
+        }).catch(error => {
+          console.log('Error importing Clerk components:', error.message);
+          // Fall back to mock components
+        });
+      } catch (error) {
+        console.log('Error setting up Clerk components:', error.message);
+        // Fall back to mock components
+      }
     }
-  }
+  }, [hasClerkKey]);
 
-  const { SignedIn, SignedOut } = AuthComponents;
+  const { SignedIn, SignedOut } = authComponents;
 
   // Check if we're in the Lovable preview environment without a Clerk key
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 

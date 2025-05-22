@@ -19,6 +19,7 @@ const MockAuthComponents = {
 
 const Navbar = () => {
   const location = useLocation();
+  const [authComponents, setAuthComponents] = useState(MockAuthComponents);
   const [authError, setAuthError] = useState(false);
   const [lastAuthAttempt, setLastAuthAttempt] = useState(0);
   
@@ -27,7 +28,6 @@ const Navbar = () => {
   
   // Check if Clerk is available in the global scope
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  let AuthComponents = MockAuthComponents;
   
   // Only try to import Clerk components if we have a key
   useEffect(() => {
@@ -36,26 +36,29 @@ const Navbar = () => {
         // Log authentication attempt for debugging
         console.log('Attempting to load Clerk components with key available');
         
-        // We dynamically import these here to avoid the error when no key is available
-        const { SignedIn, SignedOut, UserButton } = require('@clerk/clerk-react');
-        AuthComponents = { SignedIn, SignedOut, UserButton };
-        setAuthError(false);
+        // Dynamically import Clerk components using import() instead of require
+        import('@clerk/clerk-react').then(({ SignedIn, SignedOut, UserButton }) => {
+          setAuthComponents({ SignedIn, SignedOut, UserButton });
+          setAuthError(false);
+        }).catch(error => {
+          console.error('Error importing Clerk components:', error.message);
+          setAuthError(true);
+          
+          // Show error toast only in production and not too frequently
+          const now = Date.now();
+          if (isProduction && (now - lastAuthAttempt > 10000)) {
+            setLastAuthAttempt(now);
+            toast.error('Authentication service is not available. Please check your environment setup.');
+          }
+        });
       } catch (error) {
-        console.error('Error importing Clerk components:', error.message);
+        console.error('Error setting up Clerk components:', error.message);
         setAuthError(true);
-        
-        // Show error toast only in production and not too frequently
-        const now = Date.now();
-        if (isProduction && (now - lastAuthAttempt > 10000)) {
-          setLastAuthAttempt(now);
-          toast.error('Authentication service is not available. Please check your environment setup.');
-        }
-        // Fall back to mock components
       }
     }
   }, [hasClerkKey, isProduction, lastAuthAttempt]);
   
-  const { SignedIn, SignedOut, UserButton } = AuthComponents;
+  const { SignedIn, SignedOut, UserButton } = authComponents;
   
   // Check if we're in the Lovable preview environment
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
