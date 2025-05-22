@@ -5,13 +5,16 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import './index.css';
 import App from './App';
 
-// Get the publishable key from environment variables
+// Get the publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Validate the key
+// Validate the publishable key
 if (!PUBLISHABLE_KEY) {
-  console.error('Missing VITE_CLERK_PUBLISHABLE_KEY in environment variables');
+  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in environment variables. Get your key at https://dashboard.clerk.com/last-active?path=api-keys');
 }
+
+// Log key existence for debugging (won't reveal the key itself)
+console.log('Clerk publishable key found:', !!PUBLISHABLE_KEY);
 
 // Create a root instance
 const root = ReactDOM.createRoot(document.getElementById('root'));
