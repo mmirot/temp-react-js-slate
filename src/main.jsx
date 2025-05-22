@@ -8,21 +8,28 @@ import App from './App';
 // Get the publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if we're in the Lovable preview environment
+// Check if we're in the Lovable preview environment or on a custom domain without the env var
 const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
+                         
+// For custom domains, we should also enable preview mode if the key is missing
+const isCustomDomainWithoutKey = !PUBLISHABLE_KEY && 
+                               !isLovablePreview && 
+                               window.location.hostname !== '';
 
-// For Lovable preview, use a dummy key that allows rendering without authentication
+// For previews, use a working demo key that allows rendering without authentication
 const dummyKey = 'pk_test_Y29uY2VudHJhdGVkLWNvbGxpZS03Mi5jbGVyay5hY2NvdW50cy5kZXYk';
 
-// Use the environment variable if available, otherwise use a dummy key for Lovable preview
-const effectiveKey = PUBLISHABLE_KEY || (isLovablePreview ? dummyKey : null);
+// Use the environment variable if available, otherwise use a dummy key
+const effectiveKey = PUBLISHABLE_KEY || ((isLovablePreview || isCustomDomainWithoutKey) ? dummyKey : null);
 
 // Log the environment and key status for debugging
 console.log('Environment:', {
   isLovablePreview,
+  isCustomDomainWithoutKey,
   hasPublishableKey: !!PUBLISHABLE_KEY,
-  usingDummyKey: !PUBLISHABLE_KEY && isLovablePreview,
+  usingDummyKey: !PUBLISHABLE_KEY && (isLovablePreview || isCustomDomainWithoutKey),
+  hostname: window.location.hostname
 });
 
 // If no real key is available in production, show an error
