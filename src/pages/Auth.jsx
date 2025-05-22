@@ -97,6 +97,9 @@ const Auth = () => {
                   You're viewing a demo version of the authentication page. 
                   In production, users will be redirected to the Account Portal at accounts.svpathlab.com.
                 </p>
+                <p className="mt-2 text-sm text-blue-700">
+                  Email authentication only is enabled. Social logins (Google, Facebook, GitHub) have been disabled.
+                </p>
               </div>
               
               <div className="space-y-4">

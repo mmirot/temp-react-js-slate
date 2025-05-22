@@ -9,6 +9,7 @@ Your application is now configured with **Clerk Authentication**:
   - Status: Configured with environment variables
   - Purpose: User authentication, account management
   - Domain setup: Main site and Account Portal
+  - Authentication types: Email only (social logins disabled)
 
 **Note**: Supabase is still configured for database and backend operations, but not for authentication.
 
@@ -40,41 +41,24 @@ Your application is now configured with **Clerk Authentication**:
 3. Navigate to Settings > Environment Variables
 4. Add/verify the environment variables
 
-## Google OAuth Configuration
+## Clerk Configuration
 
-### Fix for "Error 400: invalid_request"
+### Email-Only Authentication
 
-To resolve the Google OAuth error, follow these steps:
+To ensure your application only uses email authentication:
 
-1. **Google Cloud Console Setup:**
-   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
-   - Select your project or create a new one
-   - Navigate to "APIs & Services" > "OAuth consent screen"
-     - Set User Type to "External" if not an internal app
-     - Fill in the required application information
-     - Add scopes: `.../auth/userinfo.email`, `.../auth/userinfo.profile`, and `openid`
-     - Add your domain (svpathlab.com) to authorized domains
-   - Go to "APIs & Services" > "Credentials"
-     - Click "Create Credentials" > "OAuth client ID"
-     - Application type: "Web application"
-     - Add authorized JavaScript origins:
-       - `https://svpathlab.com`
-       - `https://accounts.svpathlab.com`
-     - Add authorized redirect URIs:
-       - Get this from your Clerk dashboard (Google provider section)
-       - Usually follows the format: `https://accounts.svpathlab.com/v1/oauth_callback`
-
-2. **Clerk Dashboard Setup:**
+1. **Clerk Dashboard Setup:**
    - Go to your [Clerk Dashboard](https://dashboard.clerk.com/)
    - Navigate to "Authentication" > "Social connections"
-   - Click on Google provider
-   - Enter the Client ID and Client Secret from your Google Cloud Console
-   - Verify that the redirect URI matches what you set in Google Cloud Console
-   - Save changes
+   - Disable all social providers (Google, Facebook, GitHub, etc.)
+   - Navigate to "Email, Phone, Username" settings
+   - Ensure that "Email address" is enabled
+   - Save your changes
 
-3. **Verify Configuration:**
+2. **Verify Configuration:**
    - Clear browser cache or try in an incognito window
-   - Test the Google sign-in flow again
+   - Test the authentication flow to ensure only email signup/signin is available
+   - Check that no social login buttons appear
 
 ## Troubleshooting
 
@@ -84,12 +68,6 @@ If you encounter authentication issues:
 2. Verify your environment variables are correctly set
 3. Clear browser cache or try in an incognito window
 4. Ensure DNS records are properly configured for Clerk
-
-### Common Google OAuth Errors:
-
-- **invalid_request**: Usually means incorrect redirect URI or client configuration
-- **unauthorized_client**: Client ID or secret is incorrect
-- **access_denied**: User declined permissions or consent screen not properly configured
 
 ## Next Steps
 
