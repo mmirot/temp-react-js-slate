@@ -3,20 +3,21 @@ import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import ClerkSetupGuide from '../components/ClerkSetupGuide';
-import { useUser } from '@clerk/clerk-react';
 
 const Auth = () => {
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signUp, loading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const { isSignedIn, isLoaded } = useUser();
   
-  // Check if VITE_CLERK_PUBLISHABLE_KEY exists
-  const clerkKeyAvailable = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  // Check if VITE_CLERK_PUBLISHABLE_KEY exists and is valid
+  const clerkKeyAvailable = (() => {
+    const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+    return key && key !== 'placeholder_for_dev';
+  })();
   
   // Show a loading state
-  if (loading || !isLoaded) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
@@ -30,7 +31,7 @@ const Auth = () => {
   }
 
   // If user is already authenticated, redirect to home page
-  if (isSignedIn) {
+  if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

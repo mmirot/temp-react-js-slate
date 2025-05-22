@@ -1,49 +1,77 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useClerk, useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import toast from 'react-hot-toast';
 
+// Create a context for our auth state
 const ClerkAuthContext = createContext();
 
+// Helper hook to use the auth context
 export function useAuth() {
   return useContext(ClerkAuthContext);
 }
 
 // Check if Clerk is available and properly initialized
 const isClerkAvailable = () => {
-  const hasKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  console.log('ClerkAuthContext - Checking if Clerk is available:', hasKey ? 'Yes' : 'No');
-  return hasKey;
+  const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const isValid = key && key !== 'placeholder_for_dev';
+  console.log('ClerkAuthContext - Checking if Clerk is available:', isValid ? 'Yes' : 'No');
+  return isValid;
 };
 
+// Create the auth provider component
 export const ClerkAuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const clerk = useClerk();
-  const { isLoaded, user, isSignedIn } = useUser();
-  const { getToken, sessionId } = useClerkAuth();
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
   
-  // Check if Clerk key is available
+  // Check if Clerk is properly available
   const clerkAvailable = isClerkAvailable();
   
-  // Set initial state based on Clerk
   useEffect(() => {
-    console.log('ClerkAuthProvider loaded, isLoaded:', isLoaded, 'isSignedIn:', isSignedIn);
-    
-    if (isLoaded) {
+    // Only try to use Clerk if it's available
+    if (clerkAvailable) {
+      // Dynamically import Clerk hooks to avoid errors when Clerk is not available
+      const initClerk = async () => {
+        try {
+          const { useClerk, useUser, useAuth } = await import('@clerk/clerk-react');
+          
+          const clerk = useClerk();
+          const { isLoaded, user: clerkUser, isSignedIn } = useUser();
+          const { getToken, sessionId } = useAuth();
+          
+          console.log('ClerkAuthProvider loaded, isLoaded:', isLoaded, 'isSignedIn:', isSignedIn);
+          
+          if (isLoaded) {
+            setUser(isSignedIn ? clerkUser : null);
+            setSession(sessionId ? { id: sessionId } : null);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Failed to initialize Clerk:', error);
+          setLoading(false);
+        }
+      };
+      
+      initClerk();
+    } else {
+      // If Clerk is not available, we're not loading
       setLoading(false);
     }
-  }, [isLoaded, isSignedIn]);
+  }, [clerkAvailable]);
 
-  // Authentication actions
+  // Authentication actions that work with Clerk (when available)
   const signIn = async (emailAddress, password) => {
     if (!clerkAvailable) {
-      toast.error('Authentication is not available. Please add a Clerk Publishable Key.');
+      toast.error('Authentication is not available. Please add a valid Clerk Publishable Key.');
       return { success: false, error: 'Authentication not available' };
     }
 
     try {
+      const { useClerk } = await import('@clerk/clerk-react');
+      const clerk = useClerk().clerk;
+      
       if (!clerk) {
         toast.error('Clerk is not initialized properly.');
         return { success: false, error: 'Clerk not initialized' };
@@ -59,7 +87,6 @@ export const ClerkAuthProvider = ({ children }) => {
         navigate('/');
         return { success: true };
       } else {
-        // Handle 2FA or other continuation steps if needed
         toast.info('Additional verification steps required.');
         return { success: false, needsMoreSteps: true };
       }
@@ -72,11 +99,14 @@ export const ClerkAuthProvider = ({ children }) => {
 
   const signUp = async (emailAddress, password) => {
     if (!clerkAvailable) {
-      toast.error('Authentication is not available. Please add a Clerk Publishable Key.');
+      toast.error('Authentication is not available. Please add a valid Clerk Publishable Key.');
       return { success: false, error: 'Authentication not available' };
     }
 
     try {
+      const { useClerk } = await import('@clerk/clerk-react');
+      const clerk = useClerk().clerk;
+      
       if (!clerk) {
         toast.error('Clerk is not initialized properly.');
         return { success: false, error: 'Clerk not initialized' };
@@ -92,7 +122,6 @@ export const ClerkAuthProvider = ({ children }) => {
         navigate('/');
         return { success: true };
       } else {
-        // Handle verification or other continuation steps
         toast.info('Please check your email to verify your account.');
         return { success: false, needsVerification: true };
       }
@@ -104,12 +133,14 @@ export const ClerkAuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    if (!clerkAvailable || !clerk) {
+    if (!clerkAvailable) {
       toast.error('Authentication is not available.');
       return;
     }
 
     try {
+      const { useClerk } = await import('@clerk/clerk-react');
+      const clerk = useClerk().clerk;
       await clerk.signOut();
       toast.success('Signed out successfully!');
       navigate('/auth');
@@ -121,13 +152,13 @@ export const ClerkAuthProvider = ({ children }) => {
 
   // Value for the context
   const value = {
-    user: isSignedIn ? user : null,
-    session: sessionId ? { id: sessionId } : null,
-    loading: loading || !isLoaded,
+    user,
+    session,
+    loading,
     signIn,
     signUp,
     signOut,
-    isAuthenticated: isSignedIn,
+    isAuthenticated: !!user,
     connectionState: clerkAvailable ? 'connected' : 'disconnected',
   };
 
