@@ -17,9 +17,9 @@ const Auth = () => {
           </h2>
           
           {showSignUp ? (
-            <SignUp signInUrl="/auth" />
+            <SignUp signInUrl="/auth" routing="path" />
           ) : (
-            <SignIn signUpUrl="/auth?sign-up=true" />
+            <SignIn signUpUrl="/auth?sign-up=true" routing="path" />
           )}
         </div>
       </div>
