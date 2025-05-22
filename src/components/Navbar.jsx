@@ -64,11 +64,25 @@ const Navbar = () => {
   // In preview mode without a key, show demo navigation
   const showDemoNav = (isLovablePreview && !hasClerkKey) || authError;
 
-  // Handler for auth button clicks in production without proper setup
+  // Handler for auth button clicks in production
   const handleAuthButtonClick = (e) => {
-    if (isProduction && !hasClerkKey) {
+    if (isProduction) {
+      if (!hasClerkKey) {
+        e.preventDefault();
+        toast.error('Authentication is not properly configured. Please set up the environment variables.');
+      } else {
+        // Redirect to Account Portal instead of the local auth page
+        e.preventDefault();
+        window.location.href = 'https://accounts.svpathlab.com/sign-in';
+      }
+    }
+  };
+
+  // Handler for sign up button
+  const handleSignUpClick = (e) => {
+    if (isProduction && hasClerkKey) {
       e.preventDefault();
-      toast.error('Authentication is not properly configured. Please set up the environment variables.');
+      window.location.href = 'https://accounts.svpathlab.com/sign-up';
     }
   };
 
@@ -131,16 +145,24 @@ const Navbar = () => {
                       Stain Library
                     </Link>
                     <div className="ml-4">
-                      <UserButton afterSignOutUrl="/auth" />
+                      <UserButton afterSignOutUrl="https://accounts.svpathlab.com/sign-in" />
                     </div>
                   </SignedIn>
                   
                   <SignedOut>
                     <div className="auth-nav-buttons">
-                      <Link to="/auth" className="sign-in-button">
+                      <Link 
+                        to="/auth" 
+                        className="sign-in-button"
+                        onClick={handleAuthButtonClick}
+                      >
                         Sign In
                       </Link>
-                      <Link to="/auth?sign-up=true" className="sign-up-button ml-2">
+                      <Link 
+                        to="/auth?sign-up=true" 
+                        className="sign-up-button ml-2"
+                        onClick={handleSignUpClick}
+                      >
                         Sign Up
                       </Link>
                     </div>

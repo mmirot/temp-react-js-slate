@@ -14,13 +14,16 @@ To fix authentication issues on the production site (svpathlab.com), you need to
    - This will vary depending on your hosting provider (Netlify, Vercel, etc.)
 
 2. **Configure Clerk for your domain:**
+   - Ensure your Account Portal at `accounts.svpathlab.com` is properly configured
    - Add `svpathlab.com` to the list of allowed domains in your Clerk dashboard
-   - Set up redirect URLs to include `https://svpathlab.com/auth`
+   - Set up redirect URLs to include proper paths
+   - Verify component paths in Clerk settings match your implementation
 
 3. **Common issues to check:**
    - Ensure the key starts with `pk_` (publishable key, not secret key)
    - Verify that the domain is properly configured in Clerk
    - Check that the redirect URLs are correctly set up
+   - Confirm Account Portal settings match your implementation
 
 ## Required Environment Variables
 
@@ -53,10 +56,11 @@ When developing locally outside of Lovable:
 For the svpathlab.com domain specifically:
 
 1. Go to the Clerk Dashboard and navigate to your project
-2. Under "Domains", add svpathlab.com as an allowed domain
-3. Under "Redirect URLs", add https://svpathlab.com/auth as a redirect URL
-4. Copy your publishable key and set it in your hosting provider's environment variables
-5. Redeploy your application to apply the changes
+2. Ensure Account Portal at `accounts.svpathlab.com` is properly configured
+3. Under "Domains", add svpathlab.com as an allowed domain
+4. Under "Paths", ensure your component paths are correctly set to your Account Portal URLs
+5. Copy your publishable key and set it in your hosting provider's environment variables
+6. Redeploy your application to apply the changes
 
 ## Development Workflow
 
@@ -66,4 +70,3 @@ During development in the Lovable preview environment:
 2. You can develop and test all non-authentication features
 3. Authentication-related features will display their UI but won't be functional
 4. When you're ready to deploy, set the environment variables to enable actual authentication
-

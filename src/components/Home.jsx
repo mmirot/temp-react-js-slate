@@ -31,7 +31,30 @@ const Home = () => {
   // Check if we're in the Lovable preview environment without a Clerk key
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
                          window.location.hostname.includes('localhost');
+  const isProduction = window.location.hostname === 'svpathlab.com';
   const showDemoMode = isLovablePreview && !hasClerkKey;
+
+  // Handler for auth buttons in production
+  const handleAuthClick = (e, isSignUp = false) => {
+    if (isProduction && hasClerkKey) {
+      e.preventDefault();
+      const portalUrl = isSignUp 
+        ? 'https://accounts.svpathlab.com/sign-up'
+        : 'https://accounts.svpathlab.com/sign-in';
+      window.location.href = portalUrl;
+    }
+  };
+
+  // Determine auth links based on environment
+  const getAuthLink = (isSignUp = false) => {
+    if (isProduction && hasClerkKey) {
+      return isSignUp 
+        ? 'https://accounts.svpathlab.com/sign-up'
+        : 'https://accounts.svpathlab.com/sign-in';
+    } else {
+      return isSignUp ? '/auth?sign-up=true' : '/auth';
+    }
+  };
 
   return (
     <div className="home-container">
@@ -56,12 +79,20 @@ const Home = () => {
               <>
                 <SignedOut>
                   <div className="auth-buttons">
-                    <Link to="/auth" className="cta-button">
+                    <a 
+                      href={getAuthLink()} 
+                      className="cta-button"
+                      onClick={(e) => handleAuthClick(e)}
+                    >
                       Sign In To Access Tools
-                    </Link>
-                    <Link to="/auth?sign-up=true" className="cta-button-secondary ml-4">
+                    </a>
+                    <a 
+                      href={getAuthLink(true)} 
+                      className="cta-button-secondary ml-4"
+                      onClick={(e) => handleAuthClick(e, true)}
+                    >
                       Create Account
-                    </Link>
+                    </a>
                   </div>
                 </SignedOut>
                 
@@ -170,12 +201,20 @@ const Home = () => {
               <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
                 <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
                 <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
-                <Link to="/auth" className="cta-button inline-block mr-4">
+                <a 
+                  href={getAuthLink()} 
+                  className="cta-button inline-block mr-4"
+                  onClick={(e) => handleAuthClick(e)}
+                >
                   Sign In Now
-                </Link>
-                <Link to="/auth?sign-up=true" className="cta-button-secondary inline-block">
+                </a>
+                <a 
+                  href={getAuthLink(true)} 
+                  className="cta-button-secondary inline-block"
+                  onClick={(e) => handleAuthClick(e, true)}
+                >
                   Create Account
-                </Link>
+                </a>
               </section>
             </SignedOut>
           </>
