@@ -22,6 +22,7 @@ export default function StainQCForm() {
   const [sortConfig, setSortConfig] = useState({ key: 'date_prepared', direction: 'desc' });
   const modalRef = useRef(null);
   const [pendingUpdates, setPendingUpdates] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Get today's date in YYYY-MM-DD format for max date validation
   const today = new Date().toISOString().split('T')[0];
@@ -56,11 +57,13 @@ export default function StainQCForm() {
       
       if (error) {
         console.error('Error fetching stains:', error);
+        toast.error('Failed to load stains list');
       } else {
         setStains(data || []);
       }
     } catch (error) {
       console.error('Error in fetchStains:', error);
+      toast.error('An unexpected error occurred while loading stains');
     }
   };
 
@@ -78,18 +81,16 @@ export default function StainQCForm() {
       
       if (error) {
         console.error('Error fetching submissions:', error);
+        toast.error('Failed to load submissions');
       } else {
         if (data && data.length > 0) {
-          console.log('Sample submission data received:', {
-            id: data[0].id,
-            date_prepared: data[0].date_prepared,
-            tech_initials: data[0].tech_initials
-          });
+          console.log('Submissions data received:', data.length, 'records');
         }
         setSubmissions(data || []);
       }
     } catch (error) {
       console.error('Error in fetchSubmissions:', error);
+      toast.error('An unexpected error occurred while loading submissions');
     }
   };
 
@@ -166,6 +167,7 @@ export default function StainQCForm() {
     }
 
     try {
+      setIsDeleting(true);
       console.log('Attempting to delete submission with ID:', submissionId);
       
       const { error } = await supabase
@@ -175,16 +177,34 @@ export default function StainQCForm() {
 
       if (error) {
         console.error('Supabase delete error:', error);
-        throw error;
+        toast.error(`Error deleting submission: ${error.message}`);
+        return;
+      }
+
+      // Verify the deletion was successful with a select query
+      const { data: checkData } = await supabase
+        .from('stain_submissions')
+        .select('id')
+        .eq('id', submissionId);
+
+      if (checkData && checkData.length > 0) {
+        console.error('Deletion verification failed - record still exists');
+        toast.error('Deletion failed: The record still exists in the database');
+        return;
       }
 
       // Update the local state to remove the deleted submission
       setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
-      
       toast.success('Submission deleted successfully');
+      
+      console.log('Deletion successful. Current submissions count:', 
+        submissions.length - 1);
+      
     } catch (error) {
-      toast.error('Error deleting submission: ' + error.message);
-      console.error('Error deleting submission:', error);
+      console.error('Error in handleDeleteSubmission:', error);
+      toast.error(`Error deleting submission: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -242,7 +262,10 @@ export default function StainQCForm() {
       });
 
       toast.success('QC submission successful!');
-      fetchSubmissions();
+      
+      // Refresh data to ensure consistency with database
+      await fetchSubmissions();
+      
     } catch (error) {
       toast.error('Error updating submission: ' + error.message);
       console.error('Error updating submission:', error);
@@ -638,8 +661,9 @@ export default function StainQCForm() {
                         type="button"
                         className="delete-button"
                         onClick={() => handleDeleteSubmission(sub.id)}
+                        disabled={isDeleting}
                       >
-                        Delete
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                       </button>
                     </div>
                   </td>
@@ -679,6 +703,7 @@ export default function StainQCForm() {
               <th onClick={() => handleSort('repeat_stain')} className="sortable">
                 Repeat{getSortIndicator('repeat_stain')}
               </th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -692,6 +717,16 @@ export default function StainQCForm() {
                 <td>{formatDate(sub.date_qc)}</td>
                 <td>{sub.comments || '-'}</td>
                 <td>{sub.repeat_stain ? 'Yes' : 'No'}</td>
+                <td>
+                  <button
+                    type="button"
+                    className="delete-button"
+                    onClick={() => handleDeleteSubmission(sub.id)}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

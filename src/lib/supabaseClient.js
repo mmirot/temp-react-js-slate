@@ -7,6 +7,7 @@ import { reconnect } from './supabase/reconnect';
 // Log environment variable presence for debugging
 console.log('Supabase URL exists:', !!import.meta.env.VITE_SUPABASE_URL);
 console.log('Supabase key exists:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+console.log('Using Supabase URL:', import.meta.env.VITE_SUPABASE_URL || 'default URL');
 
 // Export everything
 export { 
