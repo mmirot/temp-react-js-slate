@@ -55,7 +55,12 @@ if (!PUBLISHABLE_KEY) {
   // Create a root instance and render the app normally
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <ClerkProvider 
+        publishableKey={PUBLISHABLE_KEY} 
+        afterSignOutUrl="/"
+        // Add signInUrl to help with proper routing
+        signInUrl="/auth"
+      >
         <App />
       </ClerkProvider>
     </React.StrictMode>
