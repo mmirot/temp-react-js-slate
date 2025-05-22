@@ -192,6 +192,11 @@ export default function StainQCForm() {
     const pendingUpdate = pendingUpdates[submissionId] || {};
     const submission = submissions.find(s => s.id === submissionId);
     
+    if (!submission) {
+      toast.error('Submission not found');
+      return;
+    }
+    
     const updatedSubmission = {
       ...submission,
       ...pendingUpdate
