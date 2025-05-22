@@ -12,7 +12,7 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 if (!PUBLISHABLE_KEY) {
   console.error('Error: Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
   
-  // Display a minimal error message
+  // Display a more detailed error message
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <div style={{ 
@@ -30,6 +30,22 @@ if (!PUBLISHABLE_KEY) {
         <h1 style={{ color: '#e53e3e' }}>⚠️ Configuration Error</h1>
         <p>The Clerk authentication service requires a valid publishable key.</p>
         <p>Please set the <code>VITE_CLERK_PUBLISHABLE_KEY</code> environment variable in your deployment settings.</p>
+        
+        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #ddd' }}>
+          <h3>How to Fix This Error:</h3>
+          <p><strong>In Lovable:</strong></p>
+          <ol>
+            <li>This error appears because Lovable is a preview environment and doesn't have access to your environment variables.</li>
+            <li>Continue development and deploy to Netlify or another platform where you'll set the environment variables.</li>
+          </ol>
+          <p><strong>In Netlify:</strong></p>
+          <ol>
+            <li>Go to your Netlify dashboard</li>
+            <li>Select your site</li>
+            <li>Navigate to Site settings > Build & deploy > Environment</li>
+            <li>Add <code>VITE_CLERK_PUBLISHABLE_KEY</code> with your value from Clerk</li>
+          </ol>
+        </div>
       </div>
     </React.StrictMode>
   );
