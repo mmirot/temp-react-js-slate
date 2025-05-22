@@ -1,5 +1,5 @@
 
-// Import and re-export all modules from individual files
+// Import and re-export the database client
 import { supabase, hasRealCredentials } from './supabase/client';
 import { checkConnection } from './supabase/connectionCheck';
 import { reconnect } from './supabase/reconnect';

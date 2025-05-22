@@ -1,7 +1,6 @@
 
 // Re-export clerk auth hooks for convenience
 export { 
-  useAuth, 
   useUser, 
   useClerk, 
   SignedIn, 

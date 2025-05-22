@@ -1,9 +1,7 @@
 
 import React, { createContext, useContext } from 'react';
-import { useAuthState } from './useAuthState';
-import { useAuthActions } from './useAuthActions';
-import { useConnectionManagement } from './useConnectionManagement';
 
+// Create the context
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -11,47 +9,16 @@ export function useAuth() {
 }
 
 export const AuthProvider = ({ children }) => {
-  // Get state and actions from custom hooks
-  const { 
-    user, 
-    session, 
-    loading, 
-    supabaseError, 
-    connectionState, 
-    supabase 
-  } = useAuthState();
+  // The Clerk auth is now the primary system, so we don't need
+  // the Supabase auth state or actions in this context anymore
   
-  const {
-    signIn,
-    signUp,
-    signOut
-  } = useAuthActions();
+  console.log('AuthContext - Using Clerk for authentication');
   
-  const {
-    retryConnection
-  } = useConnectionManagement();
-
-  // Combine all values for the context
+  // Create an empty auth context since Clerk is handling auth directly
   const value = {
-    user,
-    session,
-    signIn,
-    signUp,
-    signOut,
-    loading,
-    supabaseError,
-    connectionState,
-    retryConnection,
-    supabase, // Expose supabase client for password reset
+    // This context is now mostly a placeholder since Clerk handles auth
+    // We could add app-specific auth state here in the future if needed
   };
-
-  console.log('AuthContext - Current auth state:', { 
-    isAuthenticated: !!user, 
-    isLoading: loading,
-    userEmail: user?.email || 'none',
-    hasError: !!supabaseError,
-    connectionState
-  });
 
   return (
     <AuthContext.Provider value={value}>

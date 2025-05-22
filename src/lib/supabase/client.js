@@ -26,15 +26,22 @@ if (!hasRealCredentials) {
 const formattedUrl = supabaseUrl.trim().replace(/\/$/, '');
 console.log('Supabase - Connecting to Supabase instance:', formattedUrl.substring(0, formattedUrl.indexOf('.') + 1) + '***');
 
-// Create Supabase client configuration options
-const supabaseOptions = createClientOptions();
+// Create Supabase client configuration options with auth disabled
+const supabaseOptions = {
+  ...createClientOptions(),
+  auth: {
+    ...createClientOptions().auth,
+    autoRefreshToken: false, // Disable auto refreshing as we're not using Supabase auth
+    persistSession: false,   // Don't persist sessions as we're using Clerk
+  }
+};
 
 // Attempt to create the Supabase client with error handling
 let supabase;
 
 try {
   supabase = createClient(formattedUrl, supabaseAnonKey, supabaseOptions);
-  console.log('Supabase - Client created with', hasRealCredentials ? 'actual credentials' : 'placeholder credentials');
+  console.log('Supabase - Client created for database operations only (auth disabled)');
 } catch (error) {
   console.error('Supabase - Failed to create client:', error);
   // Create fallback client with placeholder values to prevent crashes

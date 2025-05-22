@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase, checkConnection } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';

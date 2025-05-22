@@ -3,17 +3,14 @@
 
 ## Current Configuration
 
-Your application is currently set up with **dual authentication systems**:
+Your application is now configured with **Clerk Authentication**:
 
-1. **Clerk Authentication** (Primary)
-   - Status: Configured with environment variables
-   - Purpose: User authentication, account management
-   - Domain setup: Main site and Account Portal
+- **Clerk Authentication** (Primary)
+  - Status: Configured with environment variables
+  - Purpose: User authentication, account management
+  - Domain setup: Main site and Account Portal
 
-2. **Supabase** (Secondary)
-   - Status: Configured and connected
-   - Purpose: Database, file storage, and backend services
-   - Note: While also capable of authentication, currently used for data services
+**Note**: Supabase is still configured for database and backend operations, but not for authentication.
 
 ## Environment Variables
 
@@ -23,7 +20,7 @@ Your application is currently set up with **dual authentication systems**:
   - Format: Starts with `pk_live_` for production
 
 ### Supabase Connection
-- Supabase credentials are currently cached in the browser
+- Supabase credentials are used for database operations only
 - Used for: Database operations and backend services
 
 ## Setting Environment Variables
@@ -33,7 +30,7 @@ Your application is currently set up with **dual authentication systems**:
 2. Select your site (svpathlab.com)
 3. Navigate to Site settings > Build & deploy > Environment
 4. Ensure the `VITE_CLERK_PUBLISHABLE_KEY` is set correctly
-5. To add Supabase variables if needed:
+5. Optional Supabase variables (for database features only):
    - `VITE_SUPABASE_URL`: Your Supabase project URL
    - `VITE_SUPABASE_ANON_KEY`: Your Supabase anon/public key
 
@@ -96,16 +93,15 @@ If you encounter authentication issues:
 
 ## Next Steps
 
-Given that both authentication systems are present:
+Given that Clerk is your primary auth system:
 
-1. **Decide on primary auth system**: 
-   - Currently configured to use Clerk as primary
-   - Can be switched to use Supabase auth if preferred
+1. **Decide on database access strategy**:
+   - Use Clerk user details with Supabase for data operations
+   - Implement appropriate security measures for database access
 
 2. **Configure application logic**:
-   - Update components to use your preferred auth provider
-   - Consider removing unused auth system if not needed
+   - All components should use Clerk for authentication
+   - Database operations can still use Supabase client
 
-For more detailed setup instructions, refer to the other documentation files:
-- `ENV_CHECKER.md` - For checking Clerk environment variables
+For more detailed setup instructions, refer to:
 - `CLERK_DOMAIN_SETUP.md` - For Clerk domain configuration
