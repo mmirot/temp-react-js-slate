@@ -4,11 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 // Create a context for our auth state
-const ClerkAuthContext = createContext();
+const ClerkAuthContext = createContext(null);
 
 // Helper hook to use the auth context
 export function useAuth() {
-  return useContext(ClerkAuthContext);
+  return useContext(ClerkAuthContext) || { 
+    user: null, 
+    loading: false, 
+    isAuthenticated: false,
+    signIn: () => {},
+    signUp: () => {},
+    signOut: () => {}
+  };
 }
 
 // Check if Clerk is available and properly initialized
@@ -32,12 +39,12 @@ export const ClerkAuthProvider = ({ children }) => {
   useEffect(() => {
     // Only try to use Clerk if it's available
     if (clerkAvailable) {
+      console.log('ClerkAuthProvider - Clerk is available, initializing...');
       // Dynamically import Clerk hooks to avoid errors when Clerk is not available
       const initClerk = async () => {
         try {
           const { useClerk, useUser, useAuth } = await import('@clerk/clerk-react');
           
-          const clerk = useClerk();
           const { isLoaded, user: clerkUser, isSignedIn } = useUser();
           const { getToken, sessionId } = useAuth();
           
@@ -57,6 +64,7 @@ export const ClerkAuthProvider = ({ children }) => {
       initClerk();
     } else {
       // If Clerk is not available, we're not loading
+      console.log('ClerkAuthProvider - Clerk is not available, skipping initialization');
       setLoading(false);
     }
   }, [clerkAvailable]);

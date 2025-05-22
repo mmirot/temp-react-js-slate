@@ -12,11 +12,15 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 console.log('Environment check:');
 console.log('- Clerk key available:', PUBLISHABLE_KEY ? 'Yes' : 'No');
 console.log('- Clerk key length:', PUBLISHABLE_KEY ? PUBLISHABLE_KEY.length : 0);
+console.log('- Clerk key value (first 5 chars):', PUBLISHABLE_KEY ? PUBLISHABLE_KEY.substring(0, 5) : 'N/A');
 console.log('- All env variables:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
 
-// If we don't have a valid publishable key, we need to show an error
-// but still render the app so users can see setup instructions
-if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY === 'placeholder_for_dev') {
+// Check if we have a valid key
+const hasValidKey = PUBLISHABLE_KEY && 
+                    PUBLISHABLE_KEY !== 'placeholder_for_dev' && 
+                    PUBLISHABLE_KEY.startsWith('pk_');
+
+if (!hasValidKey) {
   console.error('No valid Clerk publishable key found! Authentication will not work.');
   console.error('Please check that your .env.local file exists and contains VITE_CLERK_PUBLISHABLE_KEY=pk_...');
 }
@@ -27,7 +31,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 // Render the app with ClerkProvider only if we have a valid key
 root.render(
   <React.StrictMode>
-    {PUBLISHABLE_KEY && PUBLISHABLE_KEY !== 'placeholder_for_dev' ? (
+    {hasValidKey ? (
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <App />
       </ClerkProvider>
@@ -37,4 +41,3 @@ root.render(
     )}
   </React.StrictMode>
 );
-
