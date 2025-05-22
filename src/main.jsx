@@ -24,12 +24,13 @@ const dummyKey = 'pk_test_Y29uY2VudHJhdGVkLWNvbGxpZS03Mi5jbGVyay5hY2NvdW50cy5kZX
 const effectiveKey = PUBLISHABLE_KEY || ((isLovablePreview || isCustomDomainWithoutKey) ? dummyKey : null);
 
 // Log the environment and key status for debugging
-console.log('Environment:', {
+console.log('Environment details:', {
   isLovablePreview,
   isCustomDomainWithoutKey,
   hasPublishableKey: !!PUBLISHABLE_KEY,
   usingDummyKey: !PUBLISHABLE_KEY && (isLovablePreview || isCustomDomainWithoutKey),
-  hostname: window.location.hostname
+  hostname: window.location.hostname,
+  effectiveKey: effectiveKey ? 'Key available' : 'No key available'
 });
 
 // If no real key is available in production, show an error

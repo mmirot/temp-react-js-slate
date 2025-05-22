@@ -80,6 +80,16 @@ const Home = () => {
           </div>
         </section>
       </SignedIn>
+      
+      <SignedOut>
+        <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
+          <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
+          <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
+          <Link to="/auth" className="cta-button inline-block">
+            Sign In Now
+          </Link>
+        </section>
+      </SignedOut>
     </div>
   );
 };
