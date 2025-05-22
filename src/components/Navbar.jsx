@@ -9,6 +9,10 @@ const Navbar = () => {
   const location = useLocation();
   const isAuthenticated = isLoaded && !!userId;
   
+  // Check if we're in the Lovable preview environment
+  const isLovablePreview = window.location.hostname.includes('lovable.app') || 
+                         window.location.hostname.includes('localhost');
+
   return (
     <nav className="navbar">
       <div className="container mx-auto navbar-container">
@@ -43,11 +47,20 @@ const Navbar = () => {
           </SignedIn>
           
           <SignedOut>
-            <Link to="/auth" className="sign-in-button">
-              Sign In
-            </Link>
+            <div className="auth-nav-buttons">
+              <Link to="/auth" className="sign-in-button">
+                Sign In
+              </Link>
+              <Link to="/auth?sign-up=true" className="sign-up-button ml-2">
+                Sign Up
+              </Link>
+            </div>
           </SignedOut>
         </div>
+
+        {isLovablePreview && (
+          <div className="preview-indicator">Preview Mode</div>
+        )}
       </div>
     </nav>
   );

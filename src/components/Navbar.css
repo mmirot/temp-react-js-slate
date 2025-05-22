@@ -14,6 +14,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
+  position: relative;
 }
 
 .navbar-logo {
@@ -49,6 +50,11 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.auth-nav-buttons {
+  display: flex;
+  align-items: center;
+}
+
 .sign-in-button, .sign-out-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -58,11 +64,29 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
 }
 
 .sign-in-button:hover, .sign-out-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sign-up-button {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 7px 15px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.sign-up-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
 }
 
 .sign-out-button {
@@ -73,6 +97,19 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   margin-left: 10px;
+}
+
+.preview-indicator {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background-color: #f97316;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {
@@ -93,5 +130,11 @@
     text-align: center;
     margin-top: 5px;
     margin-left: 0;
+  }
+  
+  .preview-indicator {
+    position: static;
+    margin-top: 5px;
+    display: inline-block;
   }
 }

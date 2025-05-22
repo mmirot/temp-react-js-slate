@@ -13,9 +13,14 @@ const Home = () => {
           <p className="tagline">Providing excellence in pathology diagnostics since 1995</p>
           
           <SignedOut>
-            <Link to="/auth" className="cta-button">
-              Sign In To Access Tools
-            </Link>
+            <div className="auth-buttons">
+              <Link to="/auth" className="cta-button">
+                Sign In To Access Tools
+              </Link>
+              <Link to="/auth?sign-up=true" className="cta-button-secondary ml-4">
+                Create Account
+              </Link>
+            </div>
           </SignedOut>
           
           <SignedIn>
@@ -85,8 +90,11 @@ const Home = () => {
         <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
-          <Link to="/auth" className="cta-button inline-block">
+          <Link to="/auth" className="cta-button inline-block mr-4">
             Sign In Now
+          </Link>
+          <Link to="/auth?sign-up=true" className="cta-button-secondary inline-block">
+            Create Account
           </Link>
         </section>
       </SignedOut>
