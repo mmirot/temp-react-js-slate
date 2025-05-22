@@ -9,36 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      auth_settings: {
-        Row: {
-          created_at: string | null
-          email_autoconfirm: boolean | null
-          email_enabled: boolean | null
-          id: string
-          redirect_urls: string[] | null
-          site_url: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email_autoconfirm?: boolean | null
-          email_enabled?: boolean | null
-          id?: string
-          redirect_urls?: string[] | null
-          site_url: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email_autoconfirm?: boolean | null
-          email_enabled?: boolean | null
-          id?: string
-          redirect_urls?: string[] | null
-          site_url?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       new_stain_list: {
         Row: {
           created_at: string | null
@@ -54,30 +24,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          email: string | null
-          id: string
-          phone: string | null
-          updated_at: string | null
-          username: string | null
-        }
-        Insert: {
-          email?: string | null
-          id: string
-          phone?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          email?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string | null
-          username?: string | null
         }
         Relationships: []
       }
@@ -127,24 +73,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      users: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id?: string
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-        }
-        Relationships: []
       }
     }
     Views: {
