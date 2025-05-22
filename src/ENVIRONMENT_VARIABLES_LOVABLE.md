@@ -9,9 +9,9 @@ When developing in Lovable's preview environment, the application doesn't have a
 
 This project has been configured to:
 
-1. Use real environment variables in production (when deployed)
-2. Display a friendly message when environment variables are missing in the preview environment
-3. Allow you to continue development with a demo mode in the preview environment
+1. Run in demo mode in the preview environment when no environment variables are set
+2. Use real authentication in production when environment variables are properly set
+3. Display clear instructions for setting up environment variables during deployment
 
 ## Required Environment Variables
 
@@ -26,6 +26,7 @@ When you're ready to deploy your application:
 1. Click the "Publish" button in the Lovable interface
 2. During the deployment process, you'll be prompted to set environment variables
 3. Add `VITE_CLERK_PUBLISHABLE_KEY` with your value from the Clerk dashboard
+4. You can get your publishable key from the [Clerk Dashboard](https://dashboard.clerk.dev/) under API Keys
 
 ### In Local Development
 
@@ -42,10 +43,17 @@ When developing locally outside of Lovable:
 
 During development in the Lovable preview environment:
 
-1. You'll see an environment setup message when first loading the app
-2. Use the "Continue to App" button to use the app in demo mode
-3. In demo mode, authentication UI is visible but not functional
-4. You can develop non-authentication parts of your application
-5. When ready to publish, you'll set the environment variables during deployment
+1. The app runs in demo mode with authentication UI mocked
+2. You can develop and test all non-authentication features
+3. Authentication-related features will display their UI but won't be functional
+4. When you're ready to deploy, set the environment variables to enable actual authentication
 
-This approach ensures your development workflow can continue while maintaining proper security practices.
+## Troubleshooting
+
+If you encounter issues with authentication:
+
+1. Confirm your Clerk key is valid and properly formatted (starts with `pk_test_` or `pk_live_`)
+2. Ensure the environment variable is set with the exactly correct name: `VITE_CLERK_PUBLISHABLE_KEY`
+3. If in the Lovable preview, remember that authentication will only be simulated in demo mode
+
+For more information, visit the [Clerk documentation](https://clerk.com/docs).

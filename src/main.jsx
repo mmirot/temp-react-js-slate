@@ -19,26 +19,25 @@ console.log('Environment details:', {
   hostname: window.location.hostname
 });
 
-// Create a function to render the app with appropriate wrapper
+// Create a function to render the app with or without ClerkProvider
 const renderApp = () => {
-  // Always wrap the entire app with ClerkProvider
-  // In preview mode without a key, we'll handle auth state appropriately in components
-  return (
-    <React.StrictMode>
-      <ClerkProvider 
-        publishableKey={PUBLISHABLE_KEY || "placeholder_key_for_preview"} // Use placeholder in preview
-        appearance={{
-          elements: {
-            rootBox: {
-              display: !PUBLISHABLE_KEY && isLovablePreview ? 'none' : 'flex',
-            }
-          }
-        }}
-      >
+  // Only wrap with ClerkProvider if we have a valid key
+  if (PUBLISHABLE_KEY) {
+    return (
+      <React.StrictMode>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+          <App />
+        </ClerkProvider>
+      </React.StrictMode>
+    );
+  } else {
+    // No key available, render App directly without ClerkProvider
+    return (
+      <React.StrictMode>
         <App />
-      </ClerkProvider>
-    </React.StrictMode>
-  );
+      </React.StrictMode>
+    );
+  }
 };
 
 // If no publishable key and in preview mode, show the setup message first
@@ -103,6 +102,6 @@ if (!PUBLISHABLE_KEY && isLovablePreview) {
     </React.StrictMode>
   );
 } else {
-  // Render the app directly if we have a key or are not in preview mode
+  // Render the app directly
   ReactDOM.createRoot(document.getElementById('root')).render(renderApp());
 }

@@ -2,7 +2,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import StainQCForm from './components/StainQCForm';
 import StainList from './components/StainList';
 import Auth from './pages/Auth';
@@ -27,44 +26,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
-            
-            {showDemoMode ? (
-              // Demo routes in preview mode
-              <>
-                <Route path="/daily-qc" element={<StainQCForm />} />
-                <Route path="/stains" element={<StainList />} />
-              </>
-            ) : (
-              // Protected routes with actual auth
-              <>
-                <Route 
-                  path="/daily-qc" 
-                  element={
-                    <>
-                      <SignedIn>
-                        <StainQCForm />
-                      </SignedIn>
-                      <SignedOut>
-                        <RedirectToSignIn />
-                      </SignedOut>
-                    </>
-                  } 
-                />
-                <Route 
-                  path="/stains" 
-                  element={
-                    <>
-                      <SignedIn>
-                        <StainList />
-                      </SignedIn>
-                      <SignedOut>
-                        <RedirectToSignIn />
-                      </SignedOut>
-                    </>
-                  } 
-                />
-              </>
-            )}
+            <Route path="/daily-qc" element={<StainQCForm />} />
+            <Route path="/stains" element={<StainList />} />
           </Routes>
         </div>
         <Footer />
