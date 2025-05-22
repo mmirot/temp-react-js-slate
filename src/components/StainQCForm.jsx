@@ -359,10 +359,13 @@ export default function StainQCForm() {
   const pendingSubmissions = submissions.filter(sub => !sub.stain_qc);
   const completedSubmissions = getSortedSubmissions(submissions.filter(sub => sub.stain_qc));
 
+  // Fix the date formatting to handle timezone correctly
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
-      return new Date(dateString).toLocaleDateString();
+      // Create date with explicit UTC handling to avoid timezone shifting
+      const date = new Date(dateString + 'T00:00:00Z');
+      return date.toLocaleDateString();
     } catch (error) {
       console.error('Error formatting date:', error);
       return '-';
