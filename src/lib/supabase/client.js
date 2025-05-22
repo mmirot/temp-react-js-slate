@@ -7,6 +7,10 @@ import { createClientOptions, updateConnectionAttempt } from './connectionUtils'
 const environmentUrl = import.meta.env.VITE_SUPABASE_URL;
 const environmentKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Log environment variable presence for debugging
+console.log('Supabase - Environment URL exists:', !!environmentUrl);
+console.log('Supabase - Environment key exists:', !!environmentKey);
+
 // Try to use environment variables first, then fallback to cached credentials, then use placeholders
 const cached = getCachedCredentials();
 const supabaseUrl = environmentUrl || (cached?.url) || 'https://pbsgsljpqrwrfeddazjx.supabase.co';
@@ -22,8 +26,9 @@ if (environmentUrl && environmentKey) {
   console.log('Supabase - Using hardcoded credentials');
 }
 
-// Log connection attempt with actual values being used
+// Log actual URL being used (without exposing the full key)
 console.log('Supabase - Connecting to:', supabaseUrl);
+console.log('Supabase - Using anon key:', supabaseAnonKey.substring(0, 10) + '...');
 
 // Check if we have real credentials or placeholders
 const hasRealCredentials = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key';
@@ -31,13 +36,14 @@ const hasRealCredentials = supabaseUrl !== 'https://placeholder.supabase.co' && 
 // Ensure the URL is properly formatted
 const formattedUrl = supabaseUrl.trim().replace(/\/$/, '');
 
-// Create Supabase client configuration options with auth disabled
+// Create Supabase client with proper persistence settings
 const supabaseOptions = {
   ...createClientOptions(),
   auth: {
-    ...createClientOptions().auth,
-    autoRefreshToken: false, // Disable auto refreshing as we're using Clerk
-    persistSession: false,   // Don't persist sessions as we're using Clerk
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: globalThis.localStorage
   }
 };
 

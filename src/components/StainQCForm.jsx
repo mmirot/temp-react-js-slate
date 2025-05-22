@@ -169,11 +169,15 @@ export default function StainQCForm() {
       setIsDeleting(true);
       console.log('Attempting to delete submission with ID:', submissionId);
       
-      // First delete the record from Supabase
-      const { error } = await supabase
+      // Delete the record from Supabase with debugging
+      console.log('Sending delete request to Supabase...');
+      const { error, data } = await supabase
         .from('stain_submissions')
         .delete()
-        .eq('id', submissionId);
+        .eq('id', submissionId)
+        .select();
+      
+      console.log('Delete response:', { error, data });
 
       if (error) {
         console.error('Supabase delete error:', error);
@@ -182,12 +186,11 @@ export default function StainQCForm() {
         return;
       }
 
-      // Update local state without checking if deletion was successful
-      // We trust that if no error was thrown, the deletion was successful
+      // Update local state immediately after successful deletion
       setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
       toast.success('Submission deleted successfully');
       
-      console.log('Deletion successful. Current submissions count:', 
+      console.log('Deletion successful. Remaining submissions count:', 
         submissions.length - 1);
       
     } catch (error) {
