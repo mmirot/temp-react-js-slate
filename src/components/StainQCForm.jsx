@@ -75,6 +75,13 @@ export default function StainQCForm() {
       if (error) {
         console.error('Error fetching submissions:', error);
       } else {
+        if (data && data.length > 0) {
+          console.log('Sample submission data received:', {
+            id: data[0].id,
+            date_prepared: data[0].date_prepared,
+            tech_initials: data[0].tech_initials
+          });
+        }
         setSubmissions(data || []);
       }
     } catch (error) {
@@ -250,14 +257,14 @@ export default function StainQCForm() {
       return;
     }
 
-    // Create submissions with proper date format
+    // Ensure date is in YYYY-MM-DD format with explicit conversion for PostgreSQL
+    const formattedDate = formData.date_prepared;
+    
+    // Create submissions with properly formatted date
     const submissions = Array.from(selectedStains).map(stainId => {
-      // Ensure the date is formatted correctly and preserved as selected
-      const dateStr = formData.date_prepared;
-      
       return {
         stain_id: stainId,
-        date_prepared: dateStr, // Use the date string directly without additional parsing
+        date_prepared: formattedDate,
         tech_initials: formData.tech_initials.trim(),
         stain_qc: null,
         path_initials: null,
@@ -268,6 +275,8 @@ export default function StainQCForm() {
     });
 
     try {
+      console.log('Submitting with date:', formattedDate);
+      
       const { error } = await supabase
         .from('stain_submissions')
         .insert(submissions);
@@ -303,14 +312,14 @@ export default function StainQCForm() {
       return;
     }
 
-    // Create submissions with proper date format
+    // Ensure date is in YYYY-MM-DD format with explicit conversion for PostgreSQL
+    const formattedDate = formData.date_prepared;
+    
+    // Create submissions with properly formatted date
     const submissions = Array.from(tempSelectedStains).map(stainId => {
-      // Use the date directly as entered by user
-      const dateStr = formData.date_prepared;
-      
       return {
         stain_id: stainId,
-        date_prepared: dateStr,
+        date_prepared: formattedDate,
         tech_initials: formData.tech_initials.trim(),
         stain_qc: null,
         path_initials: null,
@@ -321,6 +330,8 @@ export default function StainQCForm() {
     });
 
     try {
+      console.log('Modal submitting with date:', formattedDate);
+      
       const { error } = await supabase
         .from('stain_submissions')
         .insert(submissions);
@@ -373,20 +384,18 @@ export default function StainQCForm() {
   // Improved date formatting function to handle timezone issues
   const formatDate = (dateString) => {
     if (!dateString) return '-';
+    
     try {
-      // Ensure we're parsing the date correctly without timezone offset issues
-      // Format: YYYY-MM-DD for consistent parsing
-      const parts = dateString.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
-        const day = parseInt(parts[2], 10);
-        
-        // Create date using UTC to avoid timezone shifts
-        const date = new Date(Date.UTC(year, month, day));
-        return date.toLocaleDateString();
+      // For PostgreSQL date format like '2025-05-19'
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Use split and create the date to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        // Display the date using the local timezone formatting
+        return new Date(year, month - 1, day).toLocaleDateString();
       }
-      return dateString;
+      
+      // Fallback for other date formats
+      return new Date(dateString).toLocaleDateString();
     } catch (error) {
       console.error('Error formatting date:', error, dateString);
       return dateString || '-';
