@@ -13,10 +13,17 @@ const isLovablePreview = window.location.hostname.includes('lovable.app') ||
                          window.location.hostname.includes('localhost');
 
 // For Lovable preview, use a dummy key that allows rendering without authentication
-const dummyKey = 'pk_test_lovable-preview-key';
+const dummyKey = 'pk_test_Y29uY2VudHJhdGVkLWNvbGxpZS03Mi5jbGVyay5hY2NvdW50cy5kZXYk';
 
 // Use the environment variable if available, otherwise use a dummy key for Lovable preview
 const effectiveKey = PUBLISHABLE_KEY || (isLovablePreview ? dummyKey : null);
+
+// Log the environment and key status for debugging
+console.log('Environment:', {
+  isLovablePreview,
+  hasPublishableKey: !!PUBLISHABLE_KEY,
+  usingDummyKey: !PUBLISHABLE_KEY && isLovablePreview,
+});
 
 // If no real key is available in production, show an error
 if (!effectiveKey) {
@@ -66,7 +73,7 @@ if (!effectiveKey) {
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <ClerkProvider 
-        publishableKey={effectiveKey} 
+        publishableKey={effectiveKey}
         afterSignOutUrl="/"
         signInUrl="/auth"
       >
