@@ -696,7 +696,7 @@ export default function StainQCForm() {
               <th onClick={() => handleSort('repeat_stain')} className="sortable">
                 Repeat{getSortIndicator('repeat_stain')}
               </th>
-              <th>Action</th>
+              {/* Removed the Action column header */}
             </tr>
           </thead>
           <tbody>
@@ -710,16 +710,7 @@ export default function StainQCForm() {
                 <td>{formatDate(sub.date_qc)}</td>
                 <td>{sub.comments || '-'}</td>
                 <td>{sub.repeat_stain ? 'Yes' : 'No'}</td>
-                <td>
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={() => handleDeleteSubmission(sub.id)}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </button>
-                </td>
+                {/* Removed the delete button cell from completed submissions */}
               </tr>
             ))}
           </tbody>
