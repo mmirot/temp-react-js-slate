@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const showSignUp = searchParams.get('sign-up') === 'true';
+  const inviteCode = searchParams.get('invite_code') || '';
   
   // Check if we're in the Lovable preview environment or production
   const isLovablePreview = window.location.hostname.includes('lovable.app') || 
@@ -17,26 +18,34 @@ const Auth = () => {
   // Check if Clerk key is available
   const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+  // Track if this is an invitation-based signup
+  const [isInvitation, setIsInvitation] = useState(!!inviteCode);
+
   useEffect(() => {
     if (isProduction && hasClerkKey) {
-      // Redirect to the Account Portal
-      const portalUrl = showSignUp 
+      // Redirect to the Account Portal with invitation code if present
+      const baseUrl = showSignUp 
         ? 'https://accounts.svpathlab.com/sign-up'
         : 'https://accounts.svpathlab.com/sign-in';
+      
+      // Append invitation code if present
+      const portalUrl = inviteCode 
+        ? `${baseUrl}?invite_code=${encodeURIComponent(inviteCode)}`
+        : baseUrl;
       
       console.log(`Redirecting to Account Portal: ${portalUrl}`);
       window.location.href = portalUrl;
     } else if (isProduction && !hasClerkKey) {
       toast.error('Authentication is not configured. Please set up the environment variables.');
     }
-  }, [isProduction, hasClerkKey, showSignUp]);
+  }, [isProduction, hasClerkKey, showSignUp, inviteCode]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-            {showSignUp ? 'Create an Account' : 'Welcome Back'}
+            {showSignUp ? (isInvitation ? 'Accept Invitation' : 'Create an Account') : 'Welcome Back'}
             {isLovablePreview && ' (Demo)'}
           </h2>
           
@@ -68,13 +77,20 @@ const Auth = () => {
                   
                   <button 
                     onClick={() => {
-                      window.location.href = showSignUp 
+                      const baseUrl = showSignUp 
                         ? 'https://accounts.svpathlab.com/sign-up'
                         : 'https://accounts.svpathlab.com/sign-in';
+                      
+                      // Append invitation code if present
+                      const portalUrl = inviteCode 
+                        ? `${baseUrl}?invite_code=${encodeURIComponent(inviteCode)}`
+                        : baseUrl;
+                      
+                      window.location.href = portalUrl;
                     }}
                     className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-indigo-700 transition"
                   >
-                    Continue to {showSignUp ? 'Sign Up' : 'Sign In'}
+                    Continue to {showSignUp ? (isInvitation ? 'Accept Invitation' : 'Sign Up') : 'Sign In'}
                   </button>
                 </div>
               )}
@@ -98,11 +114,19 @@ const Auth = () => {
                   In production, users will be redirected to the Account Portal at accounts.svpathlab.com.
                 </p>
                 <p className="mt-2 text-sm text-blue-700">
-                  Email authentication only is enabled. Social logins (Google, Facebook, GitHub) have been disabled.
+                  {isInvitation 
+                    ? "Invitation-only registration is enabled. Users must be invited by an administrator."
+                    : "Email authentication only is enabled. Social logins (Google, Facebook, GitHub) have been disabled."}
                 </p>
               </div>
               
               <div className="space-y-4">
+                {isInvitation && (
+                  <div className="p-3 bg-green-50 rounded-lg text-center mb-4">
+                    <p className="text-green-800">Invitation Code: {inviteCode}</p>
+                    <p className="text-sm text-green-700 mt-1">This invitation will allow you to create an account</p>
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="block text-gray-700 mb-1">Email</label>
                   <input type="email" className="w-full p-2 border rounded" placeholder="email@example.com" disabled />
@@ -112,17 +136,20 @@ const Auth = () => {
                   <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
                 </div>
                 <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
-                  {showSignUp ? "Sign Up" : "Sign In"} (Demo)
+                  {showSignUp ? (isInvitation ? "Accept Invitation" : "Sign Up") : "Sign In"} (Demo)
                 </button>
-                <p className="text-center text-sm text-gray-500">
-                  {showSignUp ? "Already have an account? " : "Don't have an account? "}
-                  <Link 
-                    to={showSignUp ? "/auth" : "/auth?sign-up=true"} 
-                    className="text-blue-600 hover:underline"
-                  >
-                    {showSignUp ? "Sign in" : "Sign up"}
-                  </Link>
-                </p>
+                
+                {!isInvitation && (
+                  <p className="text-center text-sm text-gray-500">
+                    {showSignUp ? "Already have an account? " : "Don't have an account? "}
+                    <Link 
+                      to={showSignUp ? "/auth" : "/auth?sign-up=true"} 
+                      className="text-blue-600 hover:underline"
+                    >
+                      {showSignUp ? "Sign in" : "Sign up"}
+                    </Link>
+                  </p>
+                )}
                 
                 <div className="pt-4 mt-2 border-t border-gray-200">
                   <Link 

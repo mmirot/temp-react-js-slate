@@ -18,12 +18,14 @@ To fix authentication issues on the production site (svpathlab.com), you need to
    - Add `svpathlab.com` to the list of allowed domains in your Clerk dashboard
    - Set up redirect URLs to include proper paths
    - Verify component paths in Clerk settings match your implementation
+   - **Enable invitation-only mode** (see CLERK_INVITATION_SETUP.md)
 
 3. **Common issues to check:**
    - Ensure the key starts with `pk_live_` (publishable key, not secret key)
    - Verify that the domain is properly configured in Clerk
    - Check that the redirect URLs are correctly set up
    - Confirm Account Portal settings match your implementation
+   - Verify invitation-only mode is enabled if you want to restrict registration
 
 ## Required Environment Variables
 
@@ -70,19 +72,13 @@ For the svpathlab.com domain to work with Clerk authentication:
    - Add `https://accounts.svpathlab.com/sign-in`
    - Add `https://accounts.svpathlab.com/sign-up`
 
-## Path Configuration
+## Invitation-Only Access
 
-In the Clerk Dashboard under Paths:
+To restrict new user registration to invitation-only:
 
-1. Set `<SignIn />` component to redirect to `https://accounts.svpathlab.com/sign-in`
-2. Set `<SignUp />` component to redirect to `https://accounts.svpathlab.com/sign-up`
-3. Configure the sign out flow to redirect users to `https://accounts.svpathlab.com/sign-in`
+1. Go to the Clerk Dashboard > User & Authentication > Email, Phone, Username
+2. Scroll to the "Invitations" section
+3. Enable "Allow sign ups with invitations only"
+4. Generate invitation links from the Clerk Dashboard > User & Authentication > Invitations
 
-## Testing the Configuration
-
-After setting up both domains and environment variables:
-
-1. Open `svpathlab.com` in a private/incognito window
-2. Click on "Sign In" - you should be redirected to `accounts.svpathlab.com/sign-in`
-3. After successful authentication, you should be redirected back to `svpathlab.com`
-4. If any step fails, check browser console for specific error messages
+For more details, see the CLERK_INVITATION_SETUP.md file in your project.
