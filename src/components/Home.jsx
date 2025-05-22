@@ -1,28 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/auth';
-import toast from 'react-hot-toast';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import './Home.css';
-import ClerkSetupGuide from './ClerkSetupGuide';
 
 const Home = () => {
-  const { user } = useAuth();
-  // Check if Clerk key is available
-  const clerkKeyAvailable = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-  // Function to show a toast message about missing Clerk key
-  const showClerkKeyMessage = () => {
-    toast.error(
-      "Authentication is not set up. Please add a Clerk Publishable Key to use protected features.",
-      { duration: 6000, id: 'home-clerk-key-missing' }
-    );
-  };
-
-  // If no Clerk key is available, show the setup guide
-  if (!clerkKeyAvailable) {
-    return <ClerkSetupGuide />;
-  }
-
   return (
     <div className="home-container">
       <header className="hero">
@@ -30,15 +12,17 @@ const Home = () => {
           <h1>Silicon Valley Pathology Laboratory</h1>
           <p className="tagline">Providing excellence in pathology diagnostics since 1995</p>
           
-          {!user ? (
+          <SignedOut>
             <Link to="/auth" className="cta-button">
               Sign In To Access Tools
             </Link>
-          ) : (
+          </SignedOut>
+          
+          <SignedIn>
             <Link to="/daily-qc" className="cta-button">
               Access Daily QC Tool
             </Link>
-          )}
+          </SignedIn>
         </div>
       </header>
 
@@ -81,7 +65,7 @@ const Home = () => {
         </p>
       </section>
 
-      {user && (
+      <SignedIn>
         <section className="tools">
           <h2>Laboratory Tools</h2>
           <div className="tools-grid">
@@ -95,14 +79,7 @@ const Home = () => {
             </Link>
           </div>
         </section>
-      )}
-      
-      {!clerkKeyAvailable && (
-        <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 mb-6">
-          <p className="font-bold">Authentication Not Available</p>
-          <p>To enable authentication features, please set the VITE_CLERK_PUBLISHABLE_KEY environment variable.</p>
-        </div>
-      )}
+      </SignedIn>
     </div>
   );
 };
