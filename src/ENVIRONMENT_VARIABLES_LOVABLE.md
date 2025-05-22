@@ -51,22 +51,38 @@ When developing locally outside of Lovable:
    ```
 3. Make sure the `.env` file is in your `.gitignore` to avoid exposing sensitive data
 
-## Production Setup for svpathlab.com
+## Domain Configuration for svpathlab.com
 
-For the svpathlab.com domain specifically:
+For the svpathlab.com domain to work with Clerk authentication:
 
-1. Go to the Clerk Dashboard and navigate to your project
-2. Ensure Account Portal at `accounts.svpathlab.com` is properly configured
-3. Under "Domains", add svpathlab.com as an allowed domain
-4. Under "Paths", ensure your component paths are correctly set to your Account Portal URLs
-5. Copy your publishable key and set it in your hosting provider's environment variables
-6. Redeploy your application to apply the changes
+1. Go to the [Clerk Dashboard](https://dashboard.clerk.com/) > Domains
+2. Configure two domains:
+   - **Application Domain:** Add `svpathlab.com` as your main application domain
+   - **Account Portal Domain:** Set `accounts.svpathlab.com` as your account portal domain
+   
+3. After adding both domains, ensure:
+   - The domains are marked as "Ready" in the Clerk dashboard
+   - You've verified ownership if required by Clerk
+   - Both domains have proper DNS records configured
 
-## Development Workflow
+4. Under Redirect URLs settings:
+   - Add `https://svpathlab.com/*` to allow redirecting back to any page
+   - Add `https://accounts.svpathlab.com/sign-in`
+   - Add `https://accounts.svpathlab.com/sign-up`
 
-During development in the Lovable preview environment:
+## Path Configuration
 
-1. The app runs in demo mode with authentication UI mocked
-2. You can develop and test all non-authentication features
-3. Authentication-related features will display their UI but won't be functional
-4. When you're ready to deploy, set the environment variables to enable actual authentication
+In the Clerk Dashboard under Paths:
+
+1. Set `<SignIn />` component to redirect to `https://accounts.svpathlab.com/sign-in`
+2. Set `<SignUp />` component to redirect to `https://accounts.svpathlab.com/sign-up`
+3. Configure the sign out flow to redirect users to `https://accounts.svpathlab.com/sign-in`
+
+## Testing the Configuration
+
+After setting up both domains and environment variables:
+
+1. Open `svpathlab.com` in a private/incognito window
+2. Click on "Sign In" - you should be redirected to `accounts.svpathlab.com/sign-in`
+3. After successful authentication, you should be redirected back to `svpathlab.com`
+4. If any step fails, check browser console for specific error messages
