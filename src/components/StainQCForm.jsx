@@ -22,6 +22,9 @@ export default function StainQCForm() {
   const [sortConfig, setSortConfig] = useState({ key: 'date_prepared', direction: 'desc' });
   const modalRef = useRef(null);
   const [pendingUpdates, setPendingUpdates] = useState({});
+  
+  // Get today's date in YYYY-MM-DD format for max date validation
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     fetchStains();
@@ -131,6 +134,11 @@ export default function StainQCForm() {
     if (type === 'checkbox') {
       finalValue = checked;
     } else if (type === 'date') {
+      // Additional validation for date
+      if (name === 'date_prepared' && value > today) {
+        toast.error('Date cannot be in the future');
+        return;
+      }
       finalValue = value || null;
     } else {
       finalValue = value;
@@ -263,9 +271,13 @@ export default function StainQCForm() {
       return;
     }
 
-    // Don't process the date - just use the value as is
-    // This preserves the selected date without timezone adjustments
+    // Validate date is not in the future
     const selectedDate = formData.date_prepared;
+    if (selectedDate > today) {
+      toast.error('Date prepared cannot be in the future');
+      return;
+    }
+    
     console.log('Selected date from input:', selectedDate);
     
     // Create submissions with the selected date
@@ -321,9 +333,12 @@ export default function StainQCForm() {
       return;
     }
 
-    // Don't process the date - just use the value as is
-    // This preserves the selected date without timezone adjustments
+    // Validate date is not in the future
     const selectedDate = formData.date_prepared;
+    if (selectedDate > today) {
+      toast.error('Date prepared cannot be in the future');
+      return;
+    }
     
     // Create submissions with the selected date
     const submissions = Array.from(tempSelectedStains).map(stainId => {
@@ -471,6 +486,7 @@ export default function StainQCForm() {
               value={formData.date_prepared || ''}
               onChange={handleChange}
               required
+              max={today} 
             />
           </div>
 
@@ -505,6 +521,17 @@ export default function StainQCForm() {
                 required
                 maxLength={3}
                 placeholder="Enter initials"
+              />
+            </div>
+            <div className="form-group modal-input">
+              <label>Date Prepared:</label>
+              <input
+                type="date"
+                name="date_prepared"
+                value={formData.date_prepared || ''}
+                onChange={handleChange}
+                required
+                max={today}
               />
             </div>
             <div className="stain-checkboxes">
