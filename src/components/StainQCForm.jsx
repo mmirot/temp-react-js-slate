@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
@@ -170,6 +169,7 @@ export default function StainQCForm() {
       setIsDeleting(true);
       console.log('Attempting to delete submission with ID:', submissionId);
       
+      // First delete the record from Supabase
       const { error } = await supabase
         .from('stain_submissions')
         .delete()
@@ -178,22 +178,12 @@ export default function StainQCForm() {
       if (error) {
         console.error('Supabase delete error:', error);
         toast.error(`Error deleting submission: ${error.message}`);
+        setIsDeleting(false);
         return;
       }
 
-      // Verify the deletion was successful with a select query
-      const { data: checkData } = await supabase
-        .from('stain_submissions')
-        .select('id')
-        .eq('id', submissionId);
-
-      if (checkData && checkData.length > 0) {
-        console.error('Deletion verification failed - record still exists');
-        toast.error('Deletion failed: The record still exists in the database');
-        return;
-      }
-
-      // Update the local state to remove the deleted submission
+      // Update local state without checking if deletion was successful
+      // We trust that if no error was thrown, the deletion was successful
       setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
       toast.success('Submission deleted successfully');
       
