@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import toast from 'react-hot-toast';
 import './Home.css';
+import ClerkSetupGuide from './ClerkSetupGuide';
 
 const Home = () => {
   const { user } = useAuth();
@@ -17,6 +18,11 @@ const Home = () => {
     );
   };
 
+  // If no Clerk key is available, show the setup guide
+  if (!clerkKeyAvailable) {
+    return <ClerkSetupGuide />;
+  }
+
   return (
     <div className="home-container">
       <header className="hero">
@@ -24,26 +30,14 @@ const Home = () => {
           <h1>Silicon Valley Pathology Laboratory</h1>
           <p className="tagline">Providing excellence in pathology diagnostics since 1995</p>
           
-          {clerkKeyAvailable ? (
-            // Normal authentication flow
-            !user ? (
-              <Link to="/auth" className="cta-button">
-                Sign In To Access Tools
-              </Link>
-            ) : (
-              <Link to="/daily-qc" className="cta-button">
-                Access Daily QC Tool
-              </Link>
-            )
+          {!user ? (
+            <Link to="/auth" className="cta-button">
+              Sign In To Access Tools
+            </Link>
           ) : (
-            // No Clerk key available
-            <button 
-              onClick={showClerkKeyMessage} 
-              className="cta-button"
-              style={{ backgroundColor: '#f56565', cursor: 'not-allowed' }}
-            >
-              Authentication Not Available
-            </button>
+            <Link to="/daily-qc" className="cta-button">
+              Access Daily QC Tool
+            </Link>
           )}
         </div>
       </header>

@@ -3,6 +3,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import toast from 'react-hot-toast';
+import ClerkSetupGuide from './ClerkSetupGuide';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -20,14 +21,15 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // If Clerk key is not available, show a helpful message
+  // If Clerk key is not available, show the setup guide
   if (!clerkKeyAvailable) {
     console.error('ProtectedRoute - No Clerk key available, protected route cannot be accessed');
     toast.error('Authentication is not set up. Please add a Clerk Publishable Key.', {
       duration: 6000,
       id: 'missing-clerk-key',
     });
-    return <Navigate to="/" replace />;
+    
+    return <ClerkSetupGuide />;
   }
 
   // Redirect to auth if no user
