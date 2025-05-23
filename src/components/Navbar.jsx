@@ -96,10 +96,13 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
+    <nav className="wpa-navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          Medical Labs Inc.
+          <div className="logo-content">
+            <span className="logo-main">Silicon Valley</span>
+            <span className="logo-sub">Pathology</span>
+          </div>
         </Link>
         
         {/* Mobile menu button */}
@@ -153,7 +156,7 @@ const Navbar = () => {
                 className="lab-portal-btn"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Lab Portal (Demo)
+                Lab Portal
               </Link>
             </div>
           ) : (

@@ -1,28 +1,31 @@
 
-.footer {
-  background-color: #1e293b;
+/* WPA Labs Footer Recreation */
+.wpa-footer {
+  background: #2c3e50;
   color: white;
   padding: 60px 0 30px;
   margin-top: 0;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .footer-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 40px;
-  padding: 0 20px;
   margin-bottom: 40px;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .footer-section h3 {
   font-size: 1.3rem;
   margin-bottom: 20px;
-  color: #f59e0b;
+  color: #28a745;
   font-weight: 600;
-  border-bottom: 2px solid #f59e0b;
+  border-bottom: 2px solid #28a745;
   padding-bottom: 8px;
   display: inline-block;
 }
@@ -30,13 +33,14 @@
 .footer-section p {
   margin-bottom: 8px;
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.6;
 }
 
 .footer-section ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .footer-section ul li {
@@ -44,41 +48,41 @@
 }
 
 .footer-section ul li a {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   transition: color 0.3s ease;
   font-size: 0.95rem;
 }
 
 .footer-section ul li a:hover {
-  color: #f59e0b;
+  color: #28a745;
 }
 
-.copyright {
+.footer-bottom {
   text-align: center;
   padding-top: 30px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
-.copyright a {
-  color: #f59e0b;
+.footer-bottom p {
+  margin-bottom: 10px;
+}
+
+.footer-bottom a {
+  color: #28a745;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.copyright a:hover {
-  color: #fbbf24;
+.footer-bottom a:hover {
+  color: #20c997;
   text-decoration: underline;
 }
 
 @media (max-width: 768px) {
-  .footer {
+  .wpa-footer {
     padding: 40px 0 20px;
   }
   
