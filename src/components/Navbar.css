@@ -1,133 +1,108 @@
-
-/* WPA Labs Navbar Recreation */
-.wpa-navbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.navbar {
+  background-color: #2c5282;
+  color: white;
+  padding: 15px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   position: sticky;
   top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid #e9ecef;
+  z-index: 100;
 }
 
 .navbar-container {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  height: 80px;
+  position: relative;
 }
 
 .navbar-logo {
-  text-decoration: none;
-  color: inherit;
-}
-
-.logo-content {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.logo-main {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #0056b3;
-  letter-spacing: -0.5px;
-}
-
-.logo-sub {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #28a745;
+  color: white;
+  text-decoration: none;
   letter-spacing: 0.5px;
 }
 
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
 }
 
 .nav-link {
-  color: #495057;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
-  padding: 10px 0;
-  position: relative;
-  transition: color 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .nav-link:hover {
-  color: #0056b3;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.active {
-  color: #0056b3;
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: #0056b3;
-  border-radius: 2px;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .auth-nav-buttons {
-  margin-left: 20px;
+  display: flex;
+  align-items: center;
 }
 
-.lab-portal-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+.sign-in-button, .sign-out-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 4px;
   font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.2);
-  display: inline-block;
-}
-
-.lab-portal-btn:hover {
-  background: linear-gradient(135deg, #218838 0%, #17a2b8 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-}
-
-/* Mobile menu button */
-.mobile-menu-btn {
-  display: none;
-  flex-direction: column;
-  background: none;
-  border: none;
   cursor: pointer;
-  padding: 5px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
 }
 
-.mobile-menu-btn span {
-  width: 25px;
-  height: 3px;
-  background: #495057;
-  margin: 3px 0;
-  border-radius: 2px;
-  transition: 0.3s;
+.sign-in-button:hover, .sign-out-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Error and preview indicators */
+.sign-up-button {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 7px 15px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.sign-up-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.sign-out-button {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.user-email {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 10px;
+}
+
 .error-indicator {
   position: absolute;
   top: -10px;
   right: 80px;
-  background-color: #dc3545;
+  background-color: #e53e3e;
   color: white;
   font-size: 0.65rem;
   font-weight: bold;
@@ -140,7 +115,7 @@
   position: absolute;
   top: -10px;
   right: 20px;
-  background-color: #fd7e14;
+  background-color: #f97316;
   color: white;
   font-size: 0.65rem;
   font-weight: bold;
@@ -150,7 +125,7 @@
 }
 
 .preview-indicator.error {
-  background-color: #dc3545;
+  background-color: #e53e3e;
   animation: pulse 2s infinite;
 }
 
@@ -166,72 +141,29 @@
   }
 }
 
-/* Mobile Responsive */
 @media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
+  .navbar-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
   }
   
   .navbar-links {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    flex-direction: column;
-    gap: 0;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-100%);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
   }
   
-  .navbar-links.mobile-open {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  .nav-link {
-    width: 100%;
+  .user-email {
+    display: block;
     text-align: center;
-    padding: 15px;
-    border-bottom: 1px solid #e9ecef;
-  }
-  
-  .auth-nav-buttons {
+    margin-top: 5px;
     margin-left: 0;
-    margin-top: 10px;
-    width: 100%;
   }
   
-  .lab-portal-btn {
-    width: 100%;
-    text-align: center;
-  }
-  
-  .logo-main {
-    font-size: 1.5rem;
-  }
-  
-  .logo-sub {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar-container {
-    padding: 0 15px;
-    height: 70px;
-  }
-  
-  .logo-main {
-    font-size: 1.3rem;
-  }
-  
-  .logo-sub {
-    font-size: 0.9rem;
+  .preview-indicator {
+    position: static;
+    margin-top: 5px;
+    display: inline-block;
   }
 }

@@ -22,7 +22,6 @@ const Navbar = () => {
   const [authComponents, setAuthComponents] = useState(MockAuthComponents);
   const [authError, setAuthError] = useState(false);
   const [lastAuthAttempt, setLastAuthAttempt] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Check if we're in a production environment
   const isProduction = window.location.hostname === 'svpathlab.com';
@@ -68,97 +67,60 @@ const Navbar = () => {
   // In preview mode without a key, show demo navigation
   const showDemoNav = (isLovablePreview && !hasClerkKey) || authError;
 
-  // Handler for auth button clicks
+  // Handler for auth button clicks in production
   const handleAuthButtonClick = (e) => {
     if (isProduction) {
       if (!hasClerkKey) {
         e.preventDefault();
         toast.error('Authentication is not properly configured. Please set up the environment variables.');
       } else {
-        // Redirect to the Daily QC page instead of external auth
+        // Redirect to Account Portal instead of the local auth page
         e.preventDefault();
-        window.location.href = 'https://svpathlab.com/daily-qc';
+        window.location.href = 'https://accounts.svpathlab.com/sign-in';
       }
     }
-  };
-
-  // Handler for navigation link clicks
-  const handleNavClick = (e, href) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      const targetId = href.substring(1);
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    setMobileMenuOpen(false);
   };
 
   return (
-    <nav className="wpa-navbar">
-      <div className="navbar-container">
+    <nav className="navbar">
+      <div className="container mx-auto navbar-container">
         <Link to="/" className="navbar-logo">
-          <div className="logo-content">
-            <span className="logo-main">Silicon Valley</span>
-            <span className="logo-sub">Pathology</span>
-          </div>
+          SV Pathology Lab
         </Link>
         
-        {/* Mobile menu button */}
-        <button 
-          className="mobile-menu-btn"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-
-        <div className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="navbar-links">
           <Link 
             to="/" 
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
           >
             Home
           </Link>
           
-          <a 
-            href="#services" 
-            className="nav-link"
-            onClick={(e) => handleNavClick(e, '#services')}
-          >
-            Services
-          </a>
-          
-          <a 
-            href="#about" 
-            className="nav-link"
-            onClick={(e) => handleNavClick(e, '#about')}
-          >
-            About
-          </a>
-          
-          <a 
-            href="#contact" 
-            className="nav-link"
-            onClick={(e) => handleNavClick(e, '#contact')}
-          >
-            Contact
-          </a>
-          
           {showDemoNav ? (
             // Demo navigation for preview mode
-            <div className="auth-nav-buttons">
+            <>
               <Link 
                 to="/daily-qc" 
-                className="lab-portal-btn"
-                onClick={() => setMobileMenuOpen(false)}
+                className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
               >
-                Lab Portal
+                Daily QC
               </Link>
-            </div>
+              <Link 
+                to="/stains" 
+                className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
+              >
+                Stain Library
+              </Link>
+              <div className="auth-nav-buttons">
+                <Link 
+                  to="/auth" 
+                  className="sign-in-button"
+                  onClick={handleAuthButtonClick}
+                >
+                  Auth {isProduction ? 'Not Configured' : 'Demo'}
+                </Link>
+              </div>
+            </>
           ) : (
             // Normal navigation with proper auth state handling
             <>
@@ -168,45 +130,58 @@ const Navbar = () => {
                     <Link 
                       to="/daily-qc" 
                       className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
-                      onClick={() => setMobileMenuOpen(false)}
                     >
                       Daily QC
                     </Link>
                     <Link 
                       to="/stains" 
                       className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
-                      onClick={() => setMobileMenuOpen(false)}
                     >
                       Stain Library
                     </Link>
                     <div className="ml-4">
-                      <UserButton afterSignOutUrl="/" />
+                      <UserButton afterSignOutUrl="https://accounts.svpathlab.com/sign-in" />
                     </div>
                   </SignedIn>
                   
                   <SignedOut>
                     <div className="auth-nav-buttons">
-                      <a 
-                        href="https://svpathlab.com/daily-qc"
-                        className="lab-portal-btn"
+                      <Link 
+                        to="/auth" 
+                        className="sign-in-button"
                         onClick={handleAuthButtonClick}
                       >
-                        Lab Portal
-                      </a>
+                        Sign In
+                      </Link>
+                      {/* Sign Up button removed for invitation-only system */}
                     </div>
                   </SignedOut>
                 </>
               ) : (
                 // Fallback links when no clerk key is available
-                <div className="auth-nav-buttons">
-                  <a 
-                    href="https://svpathlab.com/daily-qc"
-                    className="lab-portal-btn"
-                    onClick={handleAuthButtonClick}
+                <>
+                  <Link 
+                    to="/daily-qc" 
+                    className={`nav-link ${location.pathname === '/daily-qc' ? 'active' : ''}`}
                   >
-                    Lab Portal
-                  </a>
-                </div>
+                    Daily QC
+                  </Link>
+                  <Link 
+                    to="/stains" 
+                    className={`nav-link ${location.pathname === '/stains' ? 'active' : ''}`}
+                  >
+                    Stain Library
+                  </Link>
+                  <div className="auth-nav-buttons">
+                    <Link 
+                      to="/auth" 
+                      className="sign-in-button"
+                      onClick={handleAuthButtonClick}
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                </>
               )}
             </>
           )}
