@@ -7,7 +7,6 @@ const Auth = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const showSignUp = searchParams.get('sign-up') === 'true';
   const inviteCode = searchParams.get('invite_code') || '';
   
   // Check if we're in the Lovable preview environment or production
@@ -24,7 +23,7 @@ const Auth = () => {
   useEffect(() => {
     if (isProduction && hasClerkKey) {
       // Redirect to the Account Portal with invitation code if present
-      const baseUrl = showSignUp 
+      const baseUrl = isInvitation 
         ? 'https://accounts.svpathlab.com/sign-up'
         : 'https://accounts.svpathlab.com/sign-in';
       
@@ -38,14 +37,14 @@ const Auth = () => {
     } else if (isProduction && !hasClerkKey) {
       toast.error('Authentication is not configured. Please set up the environment variables.');
     }
-  }, [isProduction, hasClerkKey, showSignUp, inviteCode]);
+  }, [isProduction, hasClerkKey, isInvitation, inviteCode]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-            {showSignUp ? (isInvitation ? 'Accept Invitation' : 'Create an Account') : 'Welcome Back'}
+            {isInvitation ? 'Accept Invitation' : 'Welcome Back'}
             {isLovablePreview && ' (Demo)'}
           </h2>
           
@@ -77,7 +76,7 @@ const Auth = () => {
                   
                   <button 
                     onClick={() => {
-                      const baseUrl = showSignUp 
+                      const baseUrl = isInvitation 
                         ? 'https://accounts.svpathlab.com/sign-up'
                         : 'https://accounts.svpathlab.com/sign-in';
                       
@@ -90,7 +89,7 @@ const Auth = () => {
                     }}
                     className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-indigo-700 transition"
                   >
-                    Continue to {showSignUp ? (isInvitation ? 'Accept Invitation' : 'Sign Up') : 'Sign In'}
+                    Continue to {isInvitation ? 'Accept Invitation' : 'Sign In'}
                   </button>
                 </div>
               )}
@@ -116,7 +115,7 @@ const Auth = () => {
                 <p className="mt-2 text-sm text-blue-700">
                   {isInvitation 
                     ? "Invitation-only registration is enabled. Users must be invited by an administrator."
-                    : "Email authentication only is enabled. Social logins (Google, Facebook, GitHub) have been disabled."}
+                    : "The system is configured for invitation-only access. Regular sign-ups are disabled."}
                 </p>
               </div>
               
@@ -136,18 +135,12 @@ const Auth = () => {
                   <input type="password" className="w-full p-2 border rounded" placeholder="********" disabled />
                 </div>
                 <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
-                  {showSignUp ? (isInvitation ? "Accept Invitation" : "Sign Up") : "Sign In"} (Demo)
+                  {isInvitation ? "Accept Invitation" : "Sign In"} (Demo)
                 </button>
                 
                 {!isInvitation && (
-                  <p className="text-center text-sm text-gray-500">
-                    {showSignUp ? "Already have an account? " : "Don't have an account? "}
-                    <Link 
-                      to={showSignUp ? "/auth" : "/auth?sign-up=true"} 
-                      className="text-blue-600 hover:underline"
-                    >
-                      {showSignUp ? "Sign in" : "Sign up"}
-                    </Link>
+                  <p className="text-center text-sm mt-4 text-gray-500">
+                    Access is by invitation only. Contact an administrator for an invitation link.
                   </p>
                 )}
                 

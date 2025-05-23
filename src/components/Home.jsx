@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
@@ -42,24 +43,19 @@ const Home = () => {
   const showDemoMode = isLovablePreview && !hasClerkKey;
 
   // Handler for auth buttons in production
-  const handleAuthClick = (e, isSignUp = false) => {
+  const handleAuthClick = (e) => {
     if (isProduction && hasClerkKey) {
       e.preventDefault();
-      const portalUrl = isSignUp 
-        ? 'https://accounts.svpathlab.com/sign-up'
-        : 'https://accounts.svpathlab.com/sign-in';
-      window.location.href = portalUrl;
+      window.location.href = 'https://accounts.svpathlab.com/sign-in';
     }
   };
 
   // Determine auth links based on environment
-  const getAuthLink = (isSignUp = false) => {
+  const getAuthLink = () => {
     if (isProduction && hasClerkKey) {
-      return isSignUp 
-        ? 'https://accounts.svpathlab.com/sign-up'
-        : 'https://accounts.svpathlab.com/sign-in';
+      return 'https://accounts.svpathlab.com/sign-in';
     } else {
-      return isSignUp ? '/auth?sign-up=true' : '/auth';
+      return '/auth';
     }
   };
 
@@ -93,13 +89,7 @@ const Home = () => {
                     >
                       Sign In To Access Tools
                     </a>
-                    <a 
-                      href={getAuthLink(true)} 
-                      className="cta-button-secondary ml-4"
-                      onClick={(e) => handleAuthClick(e, true)}
-                    >
-                      Create Account
-                    </a>
+                    {/* Create Account button removed for invitation-only system */}
                   </div>
                 </SignedOut>
                 
@@ -207,20 +197,13 @@ const Home = () => {
             <SignedOut>
               <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
                 <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
-                <p className="mb-4">Sign in to access our laboratory management tools and quality control systems.</p>
+                <p className="mb-4">Access to our laboratory management tools is by invitation only. Please contact an administrator for access.</p>
                 <a 
                   href={getAuthLink()} 
-                  className="cta-button inline-block mr-4"
+                  className="cta-button inline-block"
                   onClick={(e) => handleAuthClick(e)}
                 >
                   Sign In Now
-                </a>
-                <a 
-                  href={getAuthLink(true)} 
-                  className="cta-button-secondary inline-block"
-                  onClick={(e) => handleAuthClick(e, true)}
-                >
-                  Create Account
                 </a>
               </section>
             </SignedOut>

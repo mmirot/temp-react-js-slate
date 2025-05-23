@@ -81,14 +81,6 @@ const Navbar = () => {
     }
   };
 
-  // Handler for sign up button
-  const handleSignUpClick = (e) => {
-    if (isProduction && hasClerkKey) {
-      e.preventDefault();
-      window.location.href = 'https://accounts.svpathlab.com/sign-up';
-    }
-  };
-
   return (
     <nav className="navbar">
       <div className="container mx-auto navbar-container">
@@ -161,13 +153,7 @@ const Navbar = () => {
                       >
                         Sign In
                       </Link>
-                      <Link 
-                        to="/auth?sign-up=true" 
-                        className="sign-up-button ml-2"
-                        onClick={handleSignUpClick}
-                      >
-                        Sign Up
-                      </Link>
+                      {/* Sign Up button removed for invitation-only system */}
                     </div>
                   </SignedOut>
                 </>

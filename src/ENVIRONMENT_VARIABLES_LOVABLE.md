@@ -7,7 +7,7 @@ When developing in Lovable's preview environment, the application doesn't have a
 
 ## For Production at svpathlab.com
 
-To fix authentication issues on the production site (svpathlab.com), you need to:
+To properly configure authentication on the production site (svpathlab.com), you need to:
 
 1. **Set the environment variable in your hosting provider:**
    - Add `VITE_CLERK_PUBLISHABLE_KEY` with your Clerk publishable key
