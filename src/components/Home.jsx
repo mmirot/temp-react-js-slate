@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
@@ -50,7 +49,7 @@ const Home = () => {
     }
   };
 
-  // Determine auth links based on environment
+  // Determine auth link based on environment
   const getAuthLink = () => {
     if (isProduction && hasClerkKey) {
       return 'https://accounts.svpathlab.com/sign-in';
@@ -82,14 +81,7 @@ const Home = () => {
               <>
                 <SignedOut>
                   <div className="auth-buttons">
-                    <a 
-                      href={getAuthLink()} 
-                      className="cta-button"
-                      onClick={(e) => handleAuthClick(e)}
-                    >
-                      Sign In To Access Tools
-                    </a>
-                    {/* Create Account button removed for invitation-only system */}
+                    {/* Removed Sign In button here */}
                   </div>
                 </SignedOut>
                 
@@ -195,17 +187,7 @@ const Home = () => {
             </SignedIn>
             
             <SignedOut>
-              <section className="get-started mt-8 p-6 bg-blue-50 rounded-lg">
-                <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
-                <p className="mb-4">Access to our laboratory management tools is by invitation only. Please contact an administrator for access.</p>
-                <a 
-                  href={getAuthLink()} 
-                  className="cta-button inline-block"
-                  onClick={(e) => handleAuthClick(e)}
-                >
-                  Sign In Now
-                </a>
-              </section>
+              {/* Removed "Ready to Get Started?" section completely */}
             </SignedOut>
           </>
         ) : (
