@@ -36,6 +36,7 @@ export type Database = {
           id: string
           lb_slide_number: string
           path_initials: string | null
+          range_group_id: string | null
           std_slide_number: string
           tech_initials: string
           time_minutes: number | null
@@ -48,6 +49,7 @@ export type Database = {
           id?: string
           lb_slide_number: string
           path_initials?: string | null
+          range_group_id?: string | null
           std_slide_number: string
           tech_initials: string
           time_minutes?: number | null
@@ -60,6 +62,7 @@ export type Database = {
           id?: string
           lb_slide_number?: string
           path_initials?: string | null
+          range_group_id?: string | null
           std_slide_number?: string
           tech_initials?: string
           time_minutes?: number | null

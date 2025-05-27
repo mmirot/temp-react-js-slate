@@ -110,17 +110,19 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <div className="action-buttons">
+                  <div className="action-buttons flex flex-col gap-1">
                     <button
                       type="button"
                       onClick={handleModeToggle}
-                      className="submit-button"
+                      className="submit-button h-9"
+                      style={{width: '90px', height: '36px'}}
                     >
                       {isRangeMode ? 'Single' : 'Range'}
                     </button>
                     <button 
                       type="submit" 
-                      className="submit-button"
+                      className="submit-button h-9"
+                      style={{width: '90px', height: '36px'}}
                     >
                       {isRangeMode ? 'Submit Range' : 'Submit'}
                     </button>
