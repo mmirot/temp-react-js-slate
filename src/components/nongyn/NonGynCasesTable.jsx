@@ -39,15 +39,15 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
       
       <form onSubmit={handleSubmit} className="w-full">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 table-fixed min-w-[800px]">
+          <table className="w-full border-collapse border border-gray-300 table-fixed min-w-[580px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left w-[220px]">Accession Number</th>
-                <th className="border border-gray-300 p-2 text-left w-[140px]">Date Prepared</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">Tech Initials</th>
-                <th className="border border-gray-300 p-2 text-left w-[110px]">Std Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[110px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[120px]">Action</th>
+                <th className="border border-gray-300 p-2 text-left w-[120px]">Accession Number</th>
+                <th className="border border-gray-300 p-2 text-left w-[130px]">Date Prepared</th>
+                <th className="border border-gray-300 p-2 text-left w-[80px]">Tech Initials</th>
+                <th className="border border-gray-300 p-2 text-left w-[80px]">Std Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[80px]">LB Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[90px]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -63,7 +63,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                         name="accession_number"
                         value={formData.accession_number || ''}
                         onChange={handleAccessionChange}
-                        placeholder=""
+                        maxLength={5}
                         required
                         className="flex-1 px-1 py-1 border border-l-0 rounded-r focus:outline-none focus:ring-1 focus:ring-blue-500 min-w-0 text-xs"
                       />
@@ -93,7 +93,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     value={formData.tech_initials || ''}
                     onChange={handleChange}
                     maxLength={3}
-                    placeholder=""
                     required
                     className="w-full px-1 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
                   />
@@ -105,7 +104,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     value={formData.std_slide_number || ''}
                     onChange={handleChange}
                     min="1"
-                    placeholder=""
+                    max="999"
+                    maxLength={3}
                     required
                     className="w-full px-1 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
                   />
@@ -117,7 +117,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     value={formData.lb_slide_number || ''}
                     onChange={handleChange}
                     min="1"
-                    placeholder=""
+                    max="999"
+                    maxLength={3}
                     required
                     className="w-full px-1 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
                   />

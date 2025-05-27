@@ -176,17 +176,27 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   };
 
   const handlePendingSubmit = async (submissionId) => {
-    const updates = pendingUpdates[submissionId];
+    const updates = pendingUpdates[submissionId] || {};
     
-    // Check if there are any actual changes to submit
-    if (!updates || Object.keys(updates).length === 0) {
-      toast.error('No changes to submit');
+    // Get the current submission data to check for existing values
+    const submissions = await getCurrentSubmissions();
+    const currentSubmission = submissions.find(s => s.id === submissionId);
+    
+    if (!currentSubmission) {
+      toast.error('Submission not found');
       return;
     }
 
+    // Merge pending updates with current submission values
+    const finalData = {
+      date_screened: updates.date_screened || currentSubmission.date_screened,
+      path_initials: updates.path_initials || currentSubmission.path_initials,
+      time_minutes: updates.time_minutes !== undefined ? updates.time_minutes : currentSubmission.time_minutes
+    };
+
     // Validate required fields
-    const pathInitials = updates.path_initials?.trim();
-    const dateScreened = updates.date_screened;
+    const pathInitials = finalData.path_initials?.trim();
+    const dateScreened = finalData.date_screened;
 
     if (!pathInitials) {
       toast.error('Path initials are required');
@@ -209,7 +219,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         .update({
           date_screened: dateScreened,
           path_initials: pathInitials,
-          time_minutes: updates.time_minutes || null
+          time_minutes: finalData.time_minutes || null
         })
         .eq('id', submissionId);
 
@@ -253,6 +263,24 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       console.error('Error deleting submission:', error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const getCurrentSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('non_gyn_submissions')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error in getCurrentSubmissions:', error);
+      return [];
     }
   };
 
