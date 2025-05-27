@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import StainQCForm from './components/StainQCForm';
 import StainList from './components/StainList';
+import NonGynForm from './components/NonGynForm';
 import Auth from './pages/Auth';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -28,6 +29,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/daily-qc" element={<StainQCForm />} />
             <Route path="/stains" element={<StainList />} />
+            <Route path="/non-gyn-tracking" element={<NonGynForm />} />
           </Routes>
         </div>
         <Footer />

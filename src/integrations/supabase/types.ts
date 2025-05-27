@@ -27,6 +27,45 @@ export type Database = {
         }
         Relationships: []
       }
+      non_gyn_submissions: {
+        Row: {
+          accession_number: string
+          created_at: string
+          date_prepared: string
+          date_screened: string | null
+          id: string
+          lb_slide_number: string
+          path_initials: string | null
+          std_slide_number: string
+          tech_initials: string
+          time_minutes: number | null
+        }
+        Insert: {
+          accession_number: string
+          created_at?: string
+          date_prepared: string
+          date_screened?: string | null
+          id?: string
+          lb_slide_number: string
+          path_initials?: string | null
+          std_slide_number: string
+          tech_initials: string
+          time_minutes?: number | null
+        }
+        Update: {
+          accession_number?: string
+          created_at?: string
+          date_prepared?: string
+          date_screened?: string | null
+          id?: string
+          lb_slide_number?: string
+          path_initials?: string | null
+          std_slide_number?: string
+          tech_initials?: string
+          time_minutes?: number | null
+        }
+        Relationships: []
+      }
       stain_submissions: {
         Row: {
           comments: string | null
