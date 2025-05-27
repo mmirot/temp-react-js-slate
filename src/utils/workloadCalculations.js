@@ -3,10 +3,12 @@
 import { formatDate } from './dateUtils';
 
 // Calculate slide total: Standard slides + 0.5 × LB slides
-// Treat null, undefined, or empty string as 0
+// Treat null, undefined, empty string, or "0" as 0
 export const calculateSlideTotal = (stdSlides = 0, lbSlides = 0) => {
-  const stdNum = parseInt(stdSlides) || 0;
-  const lbNum = parseInt(lbSlides) || 0;
+  // Convert to number, treating null, undefined, empty string as 0
+  const stdNum = (stdSlides === null || stdSlides === undefined || stdSlides === '') ? 0 : parseInt(stdSlides) || 0;
+  const lbNum = (lbSlides === null || lbSlides === undefined || lbSlides === '') ? 0 : parseInt(lbSlides) || 0;
+  
   return stdNum + (lbNum * 0.5);
 };
 

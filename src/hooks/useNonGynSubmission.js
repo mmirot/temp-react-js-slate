@@ -33,8 +33,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const validateSlideNumbers = (stdSlides, lbSlides) => {
     // Convert to numbers, treating empty/null/undefined as 0
-    const stdNum = parseInt(stdSlides) || 0;
-    const lbNum = parseInt(lbSlides) || 0;
+    const stdNum = (stdSlides === null || stdSlides === undefined || stdSlides === '') ? 0 : parseInt(stdSlides) || 0;
+    const lbNum = (lbSlides === null || lbSlides === undefined || lbSlides === '') ? 0 : parseInt(lbSlides) || 0;
     
     // At least one must be positive (greater than 0)
     if (stdNum <= 0 && lbNum <= 0) {
@@ -93,8 +93,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
           accession_number: accessionNumber,
           date_prepared: dataToSubmit.date_prepared,
           tech_initials: dataToSubmit.tech_initials.trim(),
-          std_slide_number: dataToSubmit.std_slide_number.trim() || '0',
-          lb_slide_number: dataToSubmit.lb_slide_number.trim() || '0',
+          std_slide_number: dataToSubmit.std_slide_number === '' ? '0' : (dataToSubmit.std_slide_number || '0'),
+          lb_slide_number: dataToSubmit.lb_slide_number === '' ? '0' : (dataToSubmit.lb_slide_number || '0'),
           date_screened: null,
           path_initials: null,
           time_minutes: null
@@ -143,8 +143,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       accession_number: accessionNumber,
       date_prepared: dataToSubmit.date_prepared,
       tech_initials: dataToSubmit.tech_initials.trim(),
-      std_slide_number: dataToSubmit.std_slide_number.trim() || '0',
-      lb_slide_number: dataToSubmit.lb_slide_number.trim() || '0',
+      std_slide_number: dataToSubmit.std_slide_number === '' ? '0' : (dataToSubmit.std_slide_number || '0'),
+      lb_slide_number: dataToSubmit.lb_slide_number === '' ? '0' : (dataToSubmit.lb_slide_number || '0'),
       date_screened: null,
       path_initials: null,
       time_minutes: null
