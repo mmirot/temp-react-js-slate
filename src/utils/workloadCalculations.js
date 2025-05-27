@@ -9,15 +9,22 @@ export const calculateSlideTotal = (stdSlides = 0, lbSlides = 0) => {
   const stdNum = (stdSlides === null || stdSlides === undefined || stdSlides === '') ? 0 : parseInt(stdSlides) || 0;
   const lbNum = (lbSlides === null || lbSlides === undefined || lbSlides === '') ? 0 : parseInt(lbSlides) || 0;
   
-  return stdNum + (lbNum * 0.5);
+  const total = stdNum + (lbNum * 0.5);
+  console.log('🧮 Slide calculation - Std:', stdSlides, '→', stdNum, 'LB:', lbSlides, '→', lbNum, 'Total:', total);
+  
+  return total;
 };
 
 // Aggregate daily workload data by pathologist and date
 export const aggregateDailyWorkload = (submissions) => {
+  console.log('📊 Starting aggregation for', submissions.length, 'submissions');
   const aggregated = {};
   
-  submissions.forEach(submission => {
-    if (!submission.date_screened || !submission.path_initials) return;
+  submissions.forEach((submission, index) => {
+    if (!submission.date_screened || !submission.path_initials) {
+      console.log(`⚠️ Skipping submission ${index} - missing date_screened or path_initials:`, submission);
+      return;
+    }
     
     const key = `${submission.path_initials}-${submission.date_screened}`;
     
@@ -32,6 +39,7 @@ export const aggregateDailyWorkload = (submissions) => {
         date_prepared_earliest: submission.date_prepared,
         date_prepared_latest: submission.date_prepared
       };
+      console.log('📝 Created new aggregation entry for:', key);
     }
     
     const entry = aggregated[key];
@@ -41,6 +49,14 @@ export const aggregateDailyWorkload = (submissions) => {
       submission.std_slide_number, 
       submission.lb_slide_number
     );
+    
+    console.log(`📋 Processing submission ${index}:`, {
+      accession: submission.accession_number,
+      std_slides: submission.std_slide_number,
+      lb_slides: submission.lb_slide_number,
+      slide_total: submissionSlideTotal,
+      time_minutes: submission.time_minutes
+    });
     
     // Add to slide total
     entry.slide_total += submissionSlideTotal;
@@ -58,16 +74,25 @@ export const aggregateDailyWorkload = (submissions) => {
     if (submission.date_prepared > entry.date_prepared_latest) {
       entry.date_prepared_latest = submission.date_prepared;
     }
+    
+    console.log(`📈 Updated aggregation for ${key}:`, {
+      slide_total: entry.slide_total,
+      time_minutes: entry.time_minutes,
+      case_count: entry.case_count
+    });
   });
   
   // Convert to array and add limit calculation
-  return Object.values(aggregated).map(entry => ({
+  const result = Object.values(aggregated).map(entry => ({
     ...entry,
     limit: (entry.slide_total <= 100 && entry.time_minutes <= 480) ? 'NO' : 'YES',
     date_prepared_display: entry.date_prepared_earliest === entry.date_prepared_latest 
       ? formatDate(entry.date_prepared_earliest)
       : `${formatDate(entry.date_prepared_earliest)} - ${formatDate(entry.date_prepared_latest)}`
   }));
+  
+  console.log('🏁 Final aggregation result:', result);
+  return result;
 };
 
 // Sort aggregated workload data

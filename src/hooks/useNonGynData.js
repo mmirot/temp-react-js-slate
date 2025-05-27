@@ -25,6 +25,7 @@ export const useNonGynData = () => {
       } else {
         if (data && data.length > 0) {
           console.log('Non-gyn submissions data received:', data.length, 'records');
+          console.log('Sample data structure:', data.slice(0, 2));
         }
         setSubmissions(data || []);
       }
@@ -48,21 +49,25 @@ export const useNonGynData = () => {
     }
 
     try {
-      // Simple delete all records approach
+      console.log('🗑️ SUPABASE TRANSMISSION - Delete All:', 'Deleting all records from non_gyn_submissions');
+      
+      // Use a more reliable delete all approach
       const { error } = await supabase
         .from('non_gyn_submissions')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // This will match all real records
+        .gte('created_at', '1900-01-01T00:00:00Z');
 
       if (error) {
+        console.error('❌ SUPABASE ERROR - Delete All:', error);
         throw error;
       }
 
+      console.log('✅ SUPABASE SUCCESS - Delete All: All records deleted successfully');
       toast.success('All workload data deleted successfully');
       fetchSubmissions();
     } catch (error) {
+      console.error('❌ SUPABASE ERROR - Delete All operation failed:', error);
       toast.error('Error deleting workload data: ' + error.message);
-      console.error('Error deleting all submissions:', error);
     }
   };
 
@@ -70,14 +75,25 @@ export const useNonGynData = () => {
   
   // Transform completed submissions into daily aggregated workload data
   const completedSubmissions = submissions.filter(sub => sub.date_screened);
+  console.log('📊 Processing completed submissions for aggregation:', completedSubmissions.length, 'records');
+  
+  if (completedSubmissions.length > 0) {
+    console.log('📋 Sample completed submission data:', completedSubmissions.slice(0, 2));
+  }
+  
   const aggregatedWorkload = aggregateDailyWorkload(completedSubmissions);
   const sortedAggregatedWorkload = sortAggregatedData(aggregatedWorkload, sortConfig);
+
+  console.log('📈 Final aggregated workload data:', sortedAggregatedWorkload.length, 'entries');
+  if (sortedAggregatedWorkload.length > 0) {
+    console.log('📝 Sample aggregated entry:', sortedAggregatedWorkload[0]);
+  }
 
   return {
     submissions,
     sortConfig,
     pendingSubmissions,
-    completedSubmissions: sortedAggregatedWorkload, // Now returns aggregated data
+    completedSubmissions: sortedAggregatedWorkload,
     fetchSubmissions,
     handleSort,
     handleDeleteAll

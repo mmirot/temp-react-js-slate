@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
@@ -36,17 +35,32 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     const stdNum = (stdSlides === null || stdSlides === undefined || stdSlides === '') ? 0 : parseInt(stdSlides) || 0;
     const lbNum = (lbSlides === null || lbSlides === undefined || lbSlides === '') ? 0 : parseInt(lbSlides) || 0;
     
+    console.log('🔍 Validating slide numbers - Std:', stdSlides, '→', stdNum, 'LB:', lbSlides, '→', lbNum);
+    
     // At least one must be positive (greater than 0)
     if (stdNum <= 0 && lbNum <= 0) {
+      console.log('❌ Validation failed: Both slide numbers are zero or negative');
       return false;
     }
     
+    console.log('✅ Slide validation passed');
     return true;
   };
 
   const validateDateScreened = (dateScreened, datePrepared) => {
     // Date screened must be greater than or equal to date prepared
-    return dateScreened >= datePrepared;
+    const isValid = dateScreened >= datePrepared;
+    console.log('🗓️ Date validation - Screened:', dateScreened, 'Prepared:', datePrepared, 'Valid:', isValid);
+    return isValid;
+  };
+
+  // Helper function to properly convert slide numbers for storage
+  const convertSlideNumber = (slideValue) => {
+    if (slideValue === null || slideValue === undefined || slideValue === '') {
+      return 0; // Store as number 0
+    }
+    const num = parseInt(slideValue);
+    return isNaN(num) ? 0 : num;
   };
 
   const handleSubmit = async (e, customFormData = null) => {
@@ -87,24 +101,33 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
         const accessionNumbers = parseAccessionRange(dataToSubmit.accession_number, prefix);
         
-        console.log('Creating multiple cases for range:', accessionNumbers);
+        console.log('📋 Creating multiple cases for range:', accessionNumbers);
         
-        const submissions = accessionNumbers.map(accessionNumber => ({
-          accession_number: accessionNumber,
-          date_prepared: dataToSubmit.date_prepared,
-          tech_initials: dataToSubmit.tech_initials.trim(),
-          std_slide_number: dataToSubmit.std_slide_number === '' ? '0' : (dataToSubmit.std_slide_number || '0'),
-          lb_slide_number: dataToSubmit.lb_slide_number === '' ? '0' : (dataToSubmit.lb_slide_number || '0'),
-          date_screened: null,
-          path_initials: null,
-          time_minutes: null
-        }));
+        const submissions = accessionNumbers.map(accessionNumber => {
+          const stdNum = convertSlideNumber(dataToSubmit.std_slide_number);
+          const lbNum = convertSlideNumber(dataToSubmit.lb_slide_number);
+          
+          const submission = {
+            accession_number: accessionNumber,
+            date_prepared: dataToSubmit.date_prepared,
+            tech_initials: dataToSubmit.tech_initials.trim(),
+            std_slide_number: stdNum.toString(),
+            lb_slide_number: lbNum.toString(),
+            date_screened: null,
+            path_initials: null,
+            time_minutes: null
+          };
+          
+          console.log('📤 SUPABASE TRANSMISSION - Range submission:', submission);
+          return submission;
+        });
 
         const { error } = await supabase
           .from('non_gyn_submissions')
           .insert(submissions);
 
         if (error) {
+          console.error('❌ SUPABASE ERROR - Range submission:', error);
           if (error.code === '23505') {
             toast.error('One or more accession numbers already exist');
             return;
@@ -112,14 +135,15 @@ export const useNonGynSubmission = (fetchSubmissions) => {
           throw error;
         }
 
+        console.log('✅ SUPABASE SUCCESS - Range submission:', accessionNumbers.length, 'records inserted');
         toast.success(`${accessionNumbers.length} non-gyn cases submitted successfully!`);
         if (!customFormData) {
           resetFormData();
         }
         fetchSubmissions();
       } catch (error) {
+        console.error('❌ Range submission error:', error);
         toast.error('Error submitting range: ' + error.message);
-        console.error('Error submitting range:', error);
       }
       return;
     }
@@ -139,25 +163,29 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       }
     }
     
+    const stdNum = convertSlideNumber(dataToSubmit.std_slide_number);
+    const lbNum = convertSlideNumber(dataToSubmit.lb_slide_number);
+    
     const submission = {
       accession_number: accessionNumber,
       date_prepared: dataToSubmit.date_prepared,
       tech_initials: dataToSubmit.tech_initials.trim(),
-      std_slide_number: dataToSubmit.std_slide_number === '' ? '0' : (dataToSubmit.std_slide_number || '0'),
-      lb_slide_number: dataToSubmit.lb_slide_number === '' ? '0' : (dataToSubmit.lb_slide_number || '0'),
+      std_slide_number: stdNum.toString(),
+      lb_slide_number: lbNum.toString(),
       date_screened: null,
       path_initials: null,
       time_minutes: null
     };
 
     try {
-      console.log('Submitting non-gyn case with accession:', accessionNumber);
+      console.log('📤 SUPABASE TRANSMISSION - Single submission:', submission);
       
       const { error } = await supabase
         .from('non_gyn_submissions')
         .insert([submission]);
 
       if (error) {
+        console.error('❌ SUPABASE ERROR - Single submission:', error);
         if (error.code === '23505') {
           toast.error(`Accession number ${accessionNumber} already exists`);
           return;
@@ -165,18 +193,20 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         throw error;
       }
 
+      console.log('✅ SUPABASE SUCCESS - Single submission:', accessionNumber);
       toast.success('Non-gyn case submitted successfully!');
       if (!customFormData) {
         resetFormData();
       }
       fetchSubmissions();
     } catch (error) {
+      console.error('❌ Single submission error:', error);
       toast.error('Error submitting: ' + error.message);
-      console.error('Error submitting:', error);
     }
   };
 
   const handlePendingChange = (submissionId, field, value) => {
+    console.log('📝 Pending update change:', submissionId, field, value);
     setPendingUpdates(prev => ({
       ...prev,
       [submissionId]: {
@@ -235,19 +265,31 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     }
 
     try {
+      const updateData = {
+        date_screened: dateScreened,
+        path_initials: pathInitials,
+        time_minutes: finalData.time_minutes || null
+      };
+      
+      console.log('📤 SUPABASE TRANSMISSION - Pending completion:', submissionId, updateData);
+      console.log('📊 Original submission data:', {
+        accession_number: currentSubmission.accession_number,
+        std_slide_number: currentSubmission.std_slide_number,
+        lb_slide_number: currentSubmission.lb_slide_number,
+        date_prepared: currentSubmission.date_prepared
+      });
+
       const { error } = await supabase
         .from('non_gyn_submissions')
-        .update({
-          date_screened: dateScreened,
-          path_initials: pathInitials,
-          time_minutes: finalData.time_minutes || null
-        })
+        .update(updateData)
         .eq('id', submissionId);
 
       if (error) {
+        console.error('❌ SUPABASE ERROR - Pending completion:', error);
         throw error;
       }
 
+      console.log('✅ SUPABASE SUCCESS - Pending completion:', submissionId);
       toast.success('Screening completed successfully!');
       setPendingUpdates(prev => {
         const newUpdates = { ...prev };
@@ -256,8 +298,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       });
       fetchSubmissions();
     } catch (error) {
+      console.error('❌ Pending completion error:', error);
       toast.error('Error completing screening: ' + error.message);
-      console.error('Error updating submission:', error);
     }
   };
 
@@ -268,20 +310,24 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
     setIsDeleting(true);
     try {
+      console.log('📤 SUPABASE TRANSMISSION - Delete submission:', submissionId);
+      
       const { error } = await supabase
         .from('non_gyn_submissions')
         .delete()
         .eq('id', submissionId);
 
       if (error) {
+        console.error('❌ SUPABASE ERROR - Delete submission:', error);
         throw error;
       }
 
+      console.log('✅ SUPABASE SUCCESS - Delete submission:', submissionId);
       toast.success('Submission deleted successfully');
       fetchSubmissions();
     } catch (error) {
+      console.error('❌ Delete submission error:', error);
       toast.error('Error deleting submission: ' + error.message);
-      console.error('Error deleting submission:', error);
     } finally {
       setIsDeleting(false);
     }
