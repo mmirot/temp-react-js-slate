@@ -31,8 +31,14 @@ export const aggregateDailyWorkload = (submissions) => {
     
     const entry = aggregated[key];
     
-    // Add to slide total (1 std slide + 0.5 for each LB slide)
-    entry.slide_total += calculateSlideTotal(1, 1);
+    // Calculate slide total properly for each submission
+    const submissionSlideTotal = calculateSlideTotal(
+      parseInt(submission.std_slide_number) || 1, 
+      parseInt(submission.lb_slide_number) || 1
+    );
+    
+    // Add to slide total
+    entry.slide_total += submissionSlideTotal;
     
     // Add to time minutes
     entry.time_minutes += submission.time_minutes || 0;

@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
-import { generateAccessionPrefix } from '../utils/accessionUtils';
+import { generateAccessionPrefix, parseAccessionRange, validateAccessionRange } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
   const [formData, setFormData] = useState({
@@ -61,7 +62,55 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       return;
     }
 
-    // Ensure accession number has proper prefix
+    // Handle range input for accession numbers
+    if (dataToSubmit.accession_number.includes('-') || dataToSubmit.accession_number.includes(',')) {
+      if (!validateAccessionRange(dataToSubmit.accession_number)) {
+        toast.error('Invalid accession number range format');
+        return;
+      }
+
+      try {
+        const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
+        const accessionNumbers = parseAccessionRange(dataToSubmit.accession_number, prefix);
+        
+        console.log('Creating multiple cases for range:', accessionNumbers);
+        
+        const submissions = accessionNumbers.map(accessionNumber => ({
+          accession_number: accessionNumber,
+          date_prepared: dataToSubmit.date_prepared,
+          tech_initials: dataToSubmit.tech_initials.trim(),
+          std_slide_number: dataToSubmit.std_slide_number.trim(),
+          lb_slide_number: dataToSubmit.lb_slide_number.trim(),
+          date_screened: null,
+          path_initials: null,
+          time_minutes: null
+        }));
+
+        const { error } = await supabase
+          .from('non_gyn_submissions')
+          .insert(submissions);
+
+        if (error) {
+          if (error.code === '23505') {
+            toast.error('One or more accession numbers already exist');
+            return;
+          }
+          throw error;
+        }
+
+        toast.success(`${accessionNumbers.length} non-gyn cases submitted successfully!`);
+        if (!customFormData) {
+          resetFormData();
+        }
+        fetchSubmissions();
+      } catch (error) {
+        toast.error('Error submitting range: ' + error.message);
+        console.error('Error submitting range:', error);
+      }
+      return;
+    }
+
+    // Single accession number submission
     const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
     let accessionNumber = dataToSubmit.accession_number;
     if (!accessionNumber.startsWith(prefix)) {
@@ -87,7 +136,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         .insert([submission]);
 
       if (error) {
-        if (error.code === '23505') { // Unique violation
+        if (error.code === '23505') {
           toast.error(`Accession number ${accessionNumber} already exists`);
           return;
         }
@@ -121,22 +170,28 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const handlePendingSubmit = async (submissionId) => {
     const updates = pendingUpdates[submissionId];
-    if (!updates) {
+    
+    // Check if there are any actual changes to submit
+    if (!updates || Object.keys(updates).length === 0) {
       toast.error('No changes to submit');
       return;
     }
 
-    if (!updates.path_initials?.trim()) {
+    // Validate required fields
+    const pathInitials = updates.path_initials?.trim();
+    const dateScreened = updates.date_screened;
+
+    if (!pathInitials) {
       toast.error('Path initials are required');
       return;
     }
 
-    if (!updates.date_screened) {
+    if (!dateScreened) {
       toast.error('Date screened is required');
       return;
     }
 
-    if (isDateInFuture(updates.date_screened)) {
+    if (isDateInFuture(dateScreened)) {
       toast.error('Date screened cannot be in the future');
       return;
     }
@@ -145,8 +200,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       const { error } = await supabase
         .from('non_gyn_submissions')
         .update({
-          date_screened: updates.date_screened,
-          path_initials: updates.path_initials.trim(),
+          date_screened: dateScreened,
+          path_initials: pathInitials,
           time_minutes: updates.time_minutes || null
         })
         .eq('id', submissionId);
