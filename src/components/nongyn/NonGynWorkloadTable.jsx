@@ -28,22 +28,22 @@ const NonGynWorkloadTable = ({
     <div className="submissions-section">
       <h2>Non-Gyn Workload log</h2>
       <div className="overflow-x-auto">
-        <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[700px]">
+        <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[750px]">
           <thead>
             <tr className="bg-gray-100">
-              <th onClick={() => handleSort('path_initials')} className="sortable border border-gray-300 p-2 text-left w-[80px] cursor-pointer hover:bg-gray-200">
+              <th onClick={() => handleSort('path_initials')} className="sortable border border-gray-300 p-2 text-left w-[90px] cursor-pointer hover:bg-gray-200">
                 Path{getSortIndicator('path_initials')}
               </th>
-              <th onClick={() => handleSort('date_screened')} className="sortable border border-gray-300 p-2 text-left w-[130px] cursor-pointer hover:bg-gray-200">
+              <th onClick={() => handleSort('date_screened')} className="sortable border border-gray-300 p-2 text-left w-[140px] cursor-pointer hover:bg-gray-200">
                 Date Screened{getSortIndicator('date_screened')}
               </th>
-              <th onClick={() => handleSort('slide_total')} className="sortable border border-gray-300 p-2 text-left w-[100px] cursor-pointer hover:bg-gray-200">
+              <th onClick={() => handleSort('slide_total')} className="sortable border border-gray-300 p-2 text-left w-[110px] cursor-pointer hover:bg-gray-200">
                 Slide Total{getSortIndicator('slide_total')}
               </th>
-              <th onClick={() => handleSort('time_minutes')} className="sortable border border-gray-300 p-2 text-left w-[80px] cursor-pointer hover:bg-gray-200">
+              <th onClick={() => handleSort('time_minutes')} className="sortable border border-gray-300 p-2 text-left w-[90px] cursor-pointer hover:bg-gray-200">
                 Time Min{getSortIndicator('time_minutes')}
               </th>
-              <th onClick={() => handleSort('limit')} className="sortable border border-gray-300 p-2 text-left w-[70px] cursor-pointer hover:bg-gray-200">
+              <th onClick={() => handleSort('limit')} className="sortable border border-gray-300 p-2 text-left w-[80px] cursor-pointer hover:bg-gray-200">
                 Limit{getSortIndicator('limit')}
               </th>
               <th onClick={() => handleSort('date_prepared_earliest')} className="sortable border border-gray-300 p-2 text-left w-[140px] cursor-pointer hover:bg-gray-200">
