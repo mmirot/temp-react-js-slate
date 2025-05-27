@@ -31,7 +31,7 @@ const NonGynCasesTable = ({
           <input
             type="date"
             name="date_prepared"
-            value={formData.date_prepared || ''}
+            value={formData.date_prepared || today}
             onChange={handleChange}
             required
             max={today} 
