@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { formatDate } from '../../utils/dateUtils';
+import { formatDate, getTodayDateString } from '../../utils/dateUtils';
 
 const ScreeningPendingTable = ({ 
   pendingSubmissions, 
@@ -15,6 +15,8 @@ const ScreeningPendingTable = ({
   if (!pendingSubmissions || pendingSubmissions.length === 0) {
     return null;
   }
+
+  const today = getTodayDateString();
 
   return (
     <div className="submissions-section pending-section">
@@ -40,8 +42,9 @@ const ScreeningPendingTable = ({
               <td>
                 <input
                   type="date"
-                  value={getSubmissionValue(sub, 'date_screened') || ''}
+                  value={getSubmissionValue(sub, 'date_screened') || today}
                   onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
+                  max={today}
                   required
                 />
               </td>
