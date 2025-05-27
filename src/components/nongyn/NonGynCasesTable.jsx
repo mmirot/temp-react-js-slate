@@ -12,7 +12,7 @@ const NonGynCasesTable = ({
 
   return (
     <div className="submissions-section">
-      <h2>Non-gyn cases</h2>
+      <h2>Enter case slides</h2>
       <form onSubmit={handleSubmit} className="stain-qc-form">
         <div className="form-group">
           <label>Accession #:</label>

@@ -40,6 +40,8 @@ export default function NonGynForm() {
 
   return (
     <div className="stain-qc-container">
+      <h1 className="text-3xl font-bold text-center mb-6 text-blue-800">Non-Gyn Workload</h1>
+      
       <div className="form-section">
         <NonGynCasesTable
           formData={formData}

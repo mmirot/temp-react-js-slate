@@ -18,7 +18,7 @@ const NonGynWorkloadTable = ({
   if (!completedSubmissions || completedSubmissions.length === 0) {
     return (
       <div className="submissions-section">
-        <h2>Non-Gyn workload</h2>
+        <h2>Non-Gyn Workload log</h2>
         <p className="text-center my-4 text-gray-500">No completed screenings yet.</p>
       </div>
     );
@@ -26,7 +26,7 @@ const NonGynWorkloadTable = ({
 
   return (
     <div className="submissions-section">
-      <h2>Non-Gyn workload</h2>
+      <h2>Non-Gyn Workload log</h2>
       <table className="submissions-table">
         <thead>
           <tr>

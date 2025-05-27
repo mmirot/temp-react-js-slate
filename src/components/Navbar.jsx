@@ -49,7 +49,7 @@ const Navbar = () => {
             Stain Library
           </Link>
           <Link to="/non-gyn-tracking" className={`nav-link ${isActive('/non-gyn-tracking')}`}>
-            Non-Gyn Tracking
+            Non-Gyn Workload
           </Link>
         </div>
 
