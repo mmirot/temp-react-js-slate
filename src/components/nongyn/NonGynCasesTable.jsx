@@ -26,17 +26,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
 
   return (
     <div className="form-section mb-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Non-Gyn Case Entry</h2>
-        <button
-          type="button"
-          onClick={handleModeToggle}
-          className="submit-button"
-          style={{width: '100px', fontSize: '14px'}}
-        >
-          {isRangeMode ? 'Single' : 'Range'}
-        </button>
-      </div>
+      <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
       
       <form onSubmit={handleSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
@@ -62,7 +52,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleAccessionChange}
                       maxLength={10}
                       required
-                      style={{width: '180px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       placeholder="Enter accession number"
                     />
@@ -77,7 +66,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleChange}
                       max={getTodayDateString()}
                       required
-                      style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -91,7 +79,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleChange}
                       maxLength={3}
                       required
-                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -103,10 +90,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       name="std_slide_number"
                       value={formData.std_slide_number || ''}
                       onChange={handleChange}
-                      min="1"
+                      min="0"
                       max="999"
-                      required
-                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -118,22 +103,28 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       name="lb_slide_number"
                       value={formData.lb_slide_number || ''}
                       onChange={handleChange}
-                      min="1"
+                      min="0"
                       max="999"
-                      required
-                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <button 
-                    type="submit" 
-                    className="submit-button"
-                    style={{width: '90px', fontSize: '14px'}}
-                  >
-                    {isRangeMode ? 'Submit Range' : 'Submit'}
-                  </button>
+                  <div className="action-buttons">
+                    <button
+                      type="button"
+                      onClick={handleModeToggle}
+                      className="submit-button"
+                    >
+                      {isRangeMode ? 'Single' : 'Range'}
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="submit-button"
+                    >
+                      {isRangeMode ? 'Submit Range' : 'Submit'}
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

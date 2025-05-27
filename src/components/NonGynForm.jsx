@@ -21,7 +21,8 @@ export default function NonGynForm() {
     completedSubmissions, 
     sortConfig,
     fetchSubmissions, 
-    handleSort 
+    handleSort,
+    handleDeleteAll
   } = useNonGynData();
 
   // Form submission and validation logic
@@ -64,6 +65,7 @@ export default function NonGynForm() {
         completedSubmissions={completedSubmissions}
         sortConfig={sortConfig}
         handleSort={handleSort}
+        handleDeleteAll={handleDeleteAll}
       />
     </div>
   );

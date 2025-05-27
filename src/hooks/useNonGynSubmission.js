@@ -30,6 +30,19 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     });
   };
 
+  const validateSlideNumbers = (stdSlides, lbSlides) => {
+    // Convert to numbers, treating empty/null as 0
+    const stdNum = parseInt(stdSlides) || 0;
+    const lbNum = parseInt(lbSlides) || 0;
+    
+    // At least one must be positive
+    if (stdNum <= 0 && lbNum <= 0) {
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSubmit = async (e, customFormData = null) => {
     e.preventDefault();
     
@@ -45,13 +58,9 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       return;
     }
 
-    if (!dataToSubmit.std_slide_number.trim()) {
-      toast.error('Standard slide number is required');
-      return;
-    }
-
-    if (!dataToSubmit.lb_slide_number.trim()) {
-      toast.error('LB slide number is required');
+    // Validate slide numbers - at least one must be positive
+    if (!validateSlideNumbers(dataToSubmit.std_slide_number, dataToSubmit.lb_slide_number)) {
+      toast.error('At least one slide number (Std or LB) must be a positive integer');
       return;
     }
 
@@ -78,8 +87,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
           accession_number: accessionNumber,
           date_prepared: dataToSubmit.date_prepared,
           tech_initials: dataToSubmit.tech_initials.trim(),
-          std_slide_number: dataToSubmit.std_slide_number.trim(),
-          lb_slide_number: dataToSubmit.lb_slide_number.trim(),
+          std_slide_number: dataToSubmit.std_slide_number.trim() || '0',
+          lb_slide_number: dataToSubmit.lb_slide_number.trim() || '0',
           date_screened: null,
           path_initials: null,
           time_minutes: null
@@ -128,8 +137,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       accession_number: accessionNumber,
       date_prepared: dataToSubmit.date_prepared,
       tech_initials: dataToSubmit.tech_initials.trim(),
-      std_slide_number: dataToSubmit.std_slide_number.trim(),
-      lb_slide_number: dataToSubmit.lb_slide_number.trim(),
+      std_slide_number: dataToSubmit.std_slide_number.trim() || '0',
+      lb_slide_number: dataToSubmit.lb_slide_number.trim() || '0',
       date_screened: null,
       path_initials: null,
       time_minutes: null
@@ -210,6 +219,12 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
     if (isDateInFuture(dateScreened)) {
       toast.error('Date screened cannot be in the future');
+      return;
+    }
+
+    // Validate that date screened is >= date prepared
+    if (dateScreened < currentSubmission.date_prepared) {
+      toast.error('Date screened must be greater than or equal to date prepared');
       return;
     }
 

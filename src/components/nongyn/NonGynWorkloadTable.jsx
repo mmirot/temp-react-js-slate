@@ -6,7 +6,8 @@ import { formatDate } from '../../utils/dateUtils';
 const NonGynWorkloadTable = ({ 
   completedSubmissions,
   sortConfig,
-  handleSort
+  handleSort,
+  handleDeleteAll
 }) => {
   const getSortIndicator = (key) => {
     if (sortConfig.key === key) {
@@ -26,7 +27,16 @@ const NonGynWorkloadTable = ({
 
   return (
     <div className="submissions-section">
-      <h2>Non-Gyn Workload log</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2>Non-Gyn Workload log</h2>
+        <button
+          type="button"
+          onClick={handleDeleteAll}
+          className="delete-button"
+        >
+          Delete All
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[750px]">
           <thead>
@@ -74,7 +84,8 @@ const NonGynWorkloadTable = ({
 NonGynWorkloadTable.propTypes = {
   completedSubmissions: PropTypes.array.isRequired,
   sortConfig: PropTypes.object.isRequired,
-  handleSort: PropTypes.func.isRequired
+  handleSort: PropTypes.func.isRequired,
+  handleDeleteAll: PropTypes.func.isRequired
 };
 
 export default NonGynWorkloadTable;

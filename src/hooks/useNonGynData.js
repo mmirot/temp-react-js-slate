@@ -42,6 +42,29 @@ export const useNonGynData = () => {
     setSortConfig({ key, direction });
   };
 
+  const handleDeleteAll = async () => {
+    if (!confirm('Are you sure you want to delete ALL workload data? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('non_gyn_submissions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('All workload data deleted successfully');
+      fetchSubmissions();
+    } catch (error) {
+      toast.error('Error deleting workload data: ' + error.message);
+      console.error('Error deleting all submissions:', error);
+    }
+  };
+
   const pendingSubmissions = submissions.filter(sub => !sub.date_screened);
   
   // Transform completed submissions into daily aggregated workload data
@@ -55,6 +78,7 @@ export const useNonGynData = () => {
     pendingSubmissions,
     completedSubmissions: sortedAggregatedWorkload, // Now returns aggregated data
     fetchSubmissions,
-    handleSort
+    handleSort,
+    handleDeleteAll
   };
 };
