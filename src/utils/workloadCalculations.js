@@ -3,8 +3,11 @@
 import { formatDate } from './dateUtils';
 
 // Calculate slide total: Standard slides + 0.5 × LB slides
-export const calculateSlideTotal = (stdSlides = 1, lbSlides = 1) => {
-  return stdSlides + (lbSlides * 0.5);
+// Treat null, undefined, or empty string as 0
+export const calculateSlideTotal = (stdSlides = 0, lbSlides = 0) => {
+  const stdNum = parseInt(stdSlides) || 0;
+  const lbNum = parseInt(lbSlides) || 0;
+  return stdNum + (lbNum * 0.5);
 };
 
 // Aggregate daily workload data by pathologist and date
@@ -31,10 +34,10 @@ export const aggregateDailyWorkload = (submissions) => {
     
     const entry = aggregated[key];
     
-    // Calculate slide total properly for each submission
+    // Calculate slide total properly for each submission, treating null/empty as 0
     const submissionSlideTotal = calculateSlideTotal(
-      parseInt(submission.std_slide_number) || 1, 
-      parseInt(submission.lb_slide_number) || 1
+      submission.std_slide_number, 
+      submission.lb_slide_number
     );
     
     // Add to slide total

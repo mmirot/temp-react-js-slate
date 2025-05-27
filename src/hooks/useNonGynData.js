@@ -48,10 +48,11 @@ export const useNonGynData = () => {
     }
 
     try {
+      // Use a simple delete query that will delete all records
       const { error } = await supabase
         .from('non_gyn_submissions')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+        .gte('created_at', '1900-01-01'); // This will match all records
 
       if (error) {
         throw error;

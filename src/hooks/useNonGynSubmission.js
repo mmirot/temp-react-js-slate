@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
@@ -31,16 +32,21 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   };
 
   const validateSlideNumbers = (stdSlides, lbSlides) => {
-    // Convert to numbers, treating empty/null as 0
+    // Convert to numbers, treating empty/null/undefined as 0
     const stdNum = parseInt(stdSlides) || 0;
     const lbNum = parseInt(lbSlides) || 0;
     
-    // At least one must be positive
+    // At least one must be positive (greater than 0)
     if (stdNum <= 0 && lbNum <= 0) {
       return false;
     }
     
     return true;
+  };
+
+  const validateDateScreened = (dateScreened, datePrepared) => {
+    // Date screened must be greater than or equal to date prepared
+    return dateScreened >= datePrepared;
   };
 
   const handleSubmit = async (e, customFormData = null) => {
@@ -223,7 +229,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     }
 
     // Validate that date screened is >= date prepared
-    if (dateScreened < currentSubmission.date_prepared) {
+    if (!validateDateScreened(dateScreened, currentSubmission.date_prepared)) {
       toast.error('Date screened must be greater than or equal to date prepared');
       return;
     }
