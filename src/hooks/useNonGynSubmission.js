@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
@@ -245,7 +246,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       time_minutes: updates.time_minutes !== undefined ? updates.time_minutes : currentSubmission.time_minutes
     };
 
-    // Validate required fields
+    // Validate required fields - only path_initials and date_screened are required
     const pathInitials = finalData.path_initials?.trim();
     const dateScreened = finalData.date_screened;
 
@@ -274,6 +275,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       const updateData = {
         date_screened: dateScreened,
         path_initials: pathInitials,
+        // Time minutes is optional - can be null
         time_minutes: finalData.time_minutes || null
       };
       
