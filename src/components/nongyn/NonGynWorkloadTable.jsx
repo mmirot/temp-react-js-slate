@@ -30,43 +30,35 @@ const NonGynWorkloadTable = ({
       <table className="submissions-table">
         <thead>
           <tr>
-            <th onClick={() => handleSort('accession_number')} className="sortable">
-              Accession #{getSortIndicator('accession_number')}
-            </th>
-            <th onClick={() => handleSort('date_prepared')} className="sortable">
-              Date Prepared{getSortIndicator('date_prepared')}
-            </th>
-            <th onClick={() => handleSort('tech_initials')} className="sortable">
-              Tech{getSortIndicator('tech_initials')}
-            </th>
-            <th onClick={() => handleSort('std_slide_number')} className="sortable">
-              Std Slide #{getSortIndicator('std_slide_number')}
-            </th>
-            <th onClick={() => handleSort('lb_slide_number')} className="sortable">
-              LB Slide #{getSortIndicator('lb_slide_number')}
+            <th onClick={() => handleSort('path_initials')} className="sortable">
+              Path{getSortIndicator('path_initials')}
             </th>
             <th onClick={() => handleSort('date_screened')} className="sortable">
               Date Screened{getSortIndicator('date_screened')}
             </th>
-            <th onClick={() => handleSort('path_initials')} className="sortable">
-              Path{getSortIndicator('path_initials')}
+            <th onClick={() => handleSort('slide_total')} className="sortable">
+              Slide Total{getSortIndicator('slide_total')}
             </th>
             <th onClick={() => handleSort('time_minutes')} className="sortable">
               Time Min{getSortIndicator('time_minutes')}
             </th>
+            <th onClick={() => handleSort('limit')} className="sortable">
+              Limit{getSortIndicator('limit')}
+            </th>
+            <th onClick={() => handleSort('date_prepared_earliest')} className="sortable">
+              Date Prepared{getSortIndicator('date_prepared_earliest')}
+            </th>
           </tr>
         </thead>
         <tbody>
-          {completedSubmissions.map(sub => (
-            <tr key={sub.id}>
-              <td>{sub.accession_number}</td>
-              <td>{formatDate(sub.date_prepared)}</td>
-              <td>{sub.tech_initials}</td>
-              <td>{sub.std_slide_number}</td>
-              <td>{sub.lb_slide_number}</td>
-              <td>{formatDate(sub.date_screened)}</td>
-              <td>{sub.path_initials}</td>
-              <td>{sub.time_minutes || '-'}</td>
+          {completedSubmissions.map(entry => (
+            <tr key={entry.id}>
+              <td>{entry.path_initials}</td>
+              <td>{formatDate(entry.date_screened)}</td>
+              <td>{entry.slide_total.toFixed(1)}</td>
+              <td>{entry.time_minutes || 0}</td>
+              <td className={`limit-${entry.limit.toLowerCase()}`}>{entry.limit}</td>
+              <td>{entry.date_prepared_display}</td>
             </tr>
           ))}
         </tbody>

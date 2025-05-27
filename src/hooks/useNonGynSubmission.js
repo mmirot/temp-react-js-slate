@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
+import { generateAccessionPrefix } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
   const [formData, setFormData] = useState({
@@ -30,59 +30,74 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, customFormData = null) => {
     e.preventDefault();
     
-    if (!formData.accession_number.trim()) {
+    const dataToSubmit = customFormData || formData;
+    
+    if (!dataToSubmit.accession_number.trim()) {
       toast.error('Accession number is required');
       return;
     }
 
-    if (!formData.tech_initials.trim()) {
+    if (!dataToSubmit.tech_initials.trim()) {
       toast.error('Tech initials are required');
       return;
     }
 
-    if (!formData.std_slide_number.trim()) {
+    if (!dataToSubmit.std_slide_number.trim()) {
       toast.error('Standard slide number is required');
       return;
     }
 
-    if (!formData.lb_slide_number.trim()) {
+    if (!dataToSubmit.lb_slide_number.trim()) {
       toast.error('LB slide number is required');
       return;
     }
 
     // Validate date is not in the future
-    if (isDateInFuture(formData.date_prepared)) {
+    if (isDateInFuture(dataToSubmit.date_prepared)) {
       toast.error('Date prepared cannot be in the future');
       return;
     }
+
+    // Ensure accession number has proper prefix
+    const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
+    let accessionNumber = dataToSubmit.accession_number;
+    if (!accessionNumber.startsWith(prefix)) {
+      accessionNumber = `${prefix}${accessionNumber}`;
+    }
     
     const submission = {
-      accession_number: formData.accession_number.trim(),
-      date_prepared: formData.date_prepared,
-      tech_initials: formData.tech_initials.trim(),
-      std_slide_number: formData.std_slide_number.trim(),
-      lb_slide_number: formData.lb_slide_number.trim(),
+      accession_number: accessionNumber.trim(),
+      date_prepared: dataToSubmit.date_prepared,
+      tech_initials: dataToSubmit.tech_initials.trim(),
+      std_slide_number: dataToSubmit.std_slide_number.trim(),
+      lb_slide_number: dataToSubmit.lb_slide_number.trim(),
       date_screened: null,
       path_initials: null,
       time_minutes: null
     };
 
     try {
-      console.log('Submitting non-gyn case with date:', formData.date_prepared);
+      console.log('Submitting non-gyn case with accession:', accessionNumber);
       
       const { error } = await supabase
         .from('non_gyn_submissions')
         .insert([submission]);
 
       if (error) {
+        if (error.code === '23505') { // Unique violation
+          toast.error(`Accession number ${accessionNumber} already exists`);
+          return;
+        }
         throw error;
       }
 
       toast.success('Non-gyn case submitted successfully!');
-      resetFormData();
+      if (!customFormData) {
+        resetFormData();
+      }
       fetchSubmissions();
     } catch (error) {
       toast.error('Error submitting: ' + error.message);

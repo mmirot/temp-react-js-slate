@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
-import { getSortedData } from '../utils/sortUtils';
+import { aggregateDailyWorkload, sortAggregatedData } from '../utils/workloadCalculations';
 
 export const useNonGynData = () => {
   const [submissions, setSubmissions] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: 'date_prepared', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'date_screened', direction: 'desc' });
   
   useEffect(() => {
     fetchSubmissions();
@@ -43,16 +43,17 @@ export const useNonGynData = () => {
   };
 
   const pendingSubmissions = submissions.filter(sub => !sub.date_screened);
-  const completedSubmissions = getSortedData(
-    submissions.filter(sub => sub.date_screened),
-    sortConfig
-  );
+  
+  // Transform completed submissions into daily aggregated workload data
+  const completedSubmissions = submissions.filter(sub => sub.date_screened);
+  const aggregatedWorkload = aggregateDailyWorkload(completedSubmissions);
+  const sortedAggregatedWorkload = sortAggregatedData(aggregatedWorkload, sortConfig);
 
   return {
     submissions,
     sortConfig,
     pendingSubmissions,
-    completedSubmissions,
+    completedSubmissions: sortedAggregatedWorkload, // Now returns aggregated data
     fetchSubmissions,
     handleSort
   };
