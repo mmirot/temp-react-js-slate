@@ -10,7 +10,7 @@ export const generateAccessionPrefix = (dateString = null) => {
   return `CN${lastTwoDigits}-`;
 };
 
-// Parse range input like "001-005" or "001,003,005-007"
+// Parse range input like "1-5" or "1,3,5-7" (no leading zeros required)
 export const parseAccessionRange = (rangeInput, prefix) => {
   if (!rangeInput.trim()) return [];
   
@@ -19,7 +19,7 @@ export const parseAccessionRange = (rangeInput, prefix) => {
   
   for (const part of parts) {
     if (part.includes('-')) {
-      // Handle range like "001-005"
+      // Handle range like "1-5"
       const [start, end] = part.split('-').map(num => num.trim());
       const startNum = parseInt(start);
       const endNum = parseInt(end);
@@ -29,7 +29,8 @@ export const parseAccessionRange = (rangeInput, prefix) => {
       }
       
       for (let i = startNum; i <= endNum; i++) {
-        const paddedNum = i.toString().padStart(start.length, '0');
+        // Format with leading zeros to match typical accession number format (3 digits)
+        const paddedNum = i.toString().padStart(3, '0');
         accessionNumbers.push(`${prefix}${paddedNum}`);
       }
     } else {
@@ -38,14 +39,16 @@ export const parseAccessionRange = (rangeInput, prefix) => {
       if (isNaN(num)) {
         throw new Error(`Invalid number: ${part}`);
       }
-      accessionNumbers.push(`${prefix}${part}`);
+      // Format with leading zeros to match typical accession number format (3 digits)
+      const paddedNum = num.toString().padStart(3, '0');
+      accessionNumbers.push(`${prefix}${paddedNum}`);
     }
   }
   
   return accessionNumbers;
 };
 
-// Validate accession range input
+// Validate accession range input (allows numbers without leading zeros)
 export const validateAccessionRange = (rangeInput) => {
   if (!rangeInput.trim()) return false;
   
@@ -58,12 +61,12 @@ export const validateAccessionRange = (rangeInput) => {
         const startNum = parseInt(start);
         const endNum = parseInt(end);
         
-        if (isNaN(startNum) || isNaN(endNum) || startNum > endNum) {
+        if (isNaN(startNum) || isNaN(endNum) || startNum > endNum || startNum < 1) {
           return false;
         }
       } else {
         const num = parseInt(part);
-        if (isNaN(num)) {
+        if (isNaN(num) || num < 1) {
           return false;
         }
       }

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
@@ -112,13 +111,21 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
     // Single accession number submission
     const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
-    let accessionNumber = dataToSubmit.accession_number;
+    let accessionNumber = dataToSubmit.accession_number.trim();
+    
+    // For single numbers, format with leading zeros and add prefix if not already present
     if (!accessionNumber.startsWith(prefix)) {
-      accessionNumber = `${prefix}${accessionNumber}`;
+      // If it's just a number, pad it and add prefix
+      const num = parseInt(accessionNumber);
+      if (!isNaN(num)) {
+        accessionNumber = `${prefix}${num.toString().padStart(3, '0')}`;
+      } else {
+        accessionNumber = `${prefix}${accessionNumber}`;
+      }
     }
     
     const submission = {
-      accession_number: accessionNumber.trim(),
+      accession_number: accessionNumber,
       date_prepared: dataToSubmit.date_prepared,
       tech_initials: dataToSubmit.tech_initials.trim(),
       std_slide_number: dataToSubmit.std_slide_number.trim(),
