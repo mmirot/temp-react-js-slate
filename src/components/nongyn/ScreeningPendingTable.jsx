@@ -56,7 +56,7 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
                     max={today}
                     required
-                    style={{width: '120px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                     className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>
@@ -67,7 +67,7 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
                     maxLength={3}
                     required
-                    style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    style={{width: '80px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                     className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>
@@ -78,7 +78,7 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'time_minutes', parseInt(e.target.value) || null)}
                     min="0"
                     max="999"
-                    style={{width: '70px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    style={{width: '70px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                     className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>

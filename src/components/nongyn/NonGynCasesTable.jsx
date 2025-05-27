@@ -32,7 +32,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           type="button"
           onClick={handleModeToggle}
           className="submit-button"
-          style={{width: '80px', height: '35px', fontSize: '14px'}}
+          style={{width: '100px', fontSize: '14px'}}
         >
           {isRangeMode ? 'Single' : 'Range'}
         </button>
@@ -62,15 +62,10 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleAccessionChange}
                       maxLength={10}
                       required
-                      style={{width: '180px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '180px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       placeholder="Enter accession number"
                     />
-                    {isRangeMode && (
-                      <small className="text-gray-600" style={{fontSize: '12px'}}>
-                        Range format: 1-5 or 1,3,5-7
-                      </small>
-                    )}
                   </div>
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -82,7 +77,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleChange}
                       max={getTodayDateString()}
                       required
-                      style={{width: '120px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -96,7 +91,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleChange}
                       maxLength={3}
                       required
-                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -111,7 +106,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       min="1"
                       max="999"
                       required
-                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -126,7 +121,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       min="1"
                       max="999"
                       required
-                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -135,7 +130,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <button 
                     type="submit" 
                     className="submit-button"
-                    style={{width: '90px', height: '35px', fontSize: '14px'}}
+                    style={{width: '90px', fontSize: '14px'}}
                   >
                     {isRangeMode ? 'Submit Range' : 'Submit'}
                   </button>

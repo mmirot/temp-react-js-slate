@@ -36,7 +36,9 @@ const StainQCSubmissionForm = ({
           value={formData.date_prepared || ''}
           onChange={handleChange}
           required
-          max={today} 
+          max={today}
+          style={{textAlign: 'center'}}
+          className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
@@ -49,6 +51,8 @@ const StainQCSubmissionForm = ({
           onChange={handleChange}
           required
           maxLength={3}
+          style={{textAlign: 'center'}}
+          className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
 

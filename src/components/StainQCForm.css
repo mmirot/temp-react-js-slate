@@ -1,3 +1,4 @@
+
 .App {
   text-align: center;
   background-color: #f0f4f8;
@@ -47,6 +48,7 @@
 
 .form-group input[type="text"],
 .form-group input[type="date"],
+.form-group input[type="number"],
 .form-group select,
 .form-group textarea {
   padding: 8px;
@@ -56,10 +58,12 @@
   height: 35px;
   box-sizing: border-box;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .form-group input[type="text"]:focus,
 .form-group input[type="date"]:focus,
+.form-group input[type="number"]:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: #4299e1;
@@ -314,13 +318,18 @@
 }
 
 .submissions-table select,
-.submissions-table input[type="text"] {
-  padding: 4px 8px;
+.submissions-table input[type="text"],
+.submissions-table input[type="date"],
+.submissions-table input[type="number"] {
+  padding: 8px;
   border: 1px solid #cbd5e0;
   border-radius: 4px;
   font-size: 14px;
+  height: 35px;
   width: 100%;
   max-width: 120px;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .submissions-table input[type="checkbox"] {
@@ -328,7 +337,9 @@
 }
 
 .submissions-table select:focus,
-.submissions-table input[type="text"]:focus {
+.submissions-table input[type="text"]:focus,
+.submissions-table input[type="date"]:focus,
+.submissions-table input[type="number"]:focus {
   border-color: #4299e1;
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
   outline: none;
