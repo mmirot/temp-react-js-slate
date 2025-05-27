@@ -27,6 +27,36 @@ const ScreeningPendingTable = ({
     return null;
   }
 
+  // Group submissions by range_group_id
+  const groupedSubmissions = pendingSubmissions.reduce((groups, sub) => {
+    const key = sub.range_group_id || sub.id;
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(sub);
+    return groups;
+  }, {});
+
+  const renderGroupBracket = (submissions, isFirst, isLast) => {
+    if (submissions.length === 1) return null;
+    
+    return (
+      <div className="absolute left-[-15px] top-0 bottom-0 flex items-center">
+        <div className="h-full flex flex-col justify-center">
+          {isFirst && (
+            <div className="border-l-2 border-t-2 border-gray-400 w-3 h-1/2"></div>
+          )}
+          {!isFirst && !isLast && (
+            <div className="border-l-2 border-gray-400 w-3 h-full"></div>
+          )}
+          {isLast && (
+            <div className="border-l-2 border-b-2 border-gray-400 w-3 h-1/2"></div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="submissions-section pending-section">
       <h2>Screening completed</h2>
@@ -44,67 +74,82 @@ const ScreeningPendingTable = ({
             </tr>
           </thead>
           <tbody>
-            {pendingSubmissions.map(sub => (
-              <tr key={sub.id}>
-                <td className="border border-gray-300 p-2">{sub.accession_number}</td>
-                <td className="border border-gray-300 p-2">{sub.std_slide_number}</td>
-                <td className="border border-gray-300 p-2">{sub.lb_slide_number}</td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="date"
-                    value={getSubmissionValue(sub, 'date_screened') || today}
-                    onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
-                    max={today}
-                    required
-                    style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
-                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    value={getSubmissionValue(sub, 'path_initials') || ''}
-                    onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
-                    maxLength={3}
-                    required
-                    style={{width: '80px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
-                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    value={getSubmissionValue(sub, 'time_minutes') || ''}
-                    onChange={(e) => handlePendingChange(sub.id, 'time_minutes', parseInt(e.target.value) || null)}
-                    min="0"
-                    max="999"
-                    style={{width: '70px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
-                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="action-buttons">
-                    <button
-                      type="button"
-                      className="submit-button"
-                      onClick={() => handlePendingSubmit(sub.id)}
-                      style={{width: '90px', marginBottom: '4px'}}
-                    >
-                      Complete
-                    </button>
-                    <button
-                      type="button"
-                      className="delete-button"
-                      onClick={() => handleDeleteSubmission(sub.id)}
-                      disabled={isDeleting}
-                      style={{width: '90px'}}
-                    >
-                      {isDeleting ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {Object.values(groupedSubmissions).map(groupSubmissions => 
+              groupSubmissions.map((sub, index) => (
+                <tr key={sub.id} className="relative">
+                  {renderGroupBracket(groupSubmissions, index === 0, index === groupSubmissions.length - 1)}
+                  <td className="border border-gray-300 p-2">{sub.accession_number}</td>
+                  <td className="border border-gray-300 p-2 text-center">
+                    {sub.std_slide_number === '*' ? (
+                      <span className="text-gray-500 text-lg">*</span>
+                    ) : (
+                      sub.std_slide_number
+                    )}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-center">
+                    {sub.lb_slide_number === '*' ? (
+                      <span className="text-gray-500 text-lg">*</span>
+                    ) : (
+                      sub.lb_slide_number
+                    )}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <input
+                      type="date"
+                      value={getSubmissionValue(sub, 'date_screened') || today}
+                      onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
+                      max={today}
+                      required
+                      style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <input
+                      type="text"
+                      value={getSubmissionValue(sub, 'path_initials') || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
+                      maxLength={3}
+                      required
+                      style={{width: '80px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <input
+                      type="number"
+                      value={getSubmissionValue(sub, 'time_minutes') || ''}
+                      onChange={(e) => handlePendingChange(sub.id, 'time_minutes', parseInt(e.target.value) || null)}
+                      min="0"
+                      max="999"
+                      style={{width: '70px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <div className="action-buttons flex flex-col gap-1">
+                      <button
+                        type="button"
+                        className="submit-button h-9"
+                        onClick={() => handlePendingSubmit(sub.id)}
+                        style={{width: '90px', height: '36px'}}
+                      >
+                        Complete
+                      </button>
+                      <button
+                        type="button"
+                        className="delete-button h-9"
+                        onClick={() => handleDeleteSubmission(sub.id)}
+                        disabled={isDeleting}
+                        style={{width: '90px', height: '36px'}}
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

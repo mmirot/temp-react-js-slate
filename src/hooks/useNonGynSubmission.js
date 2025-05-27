@@ -63,35 +63,6 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     return isNaN(num) ? 0 : num;
   };
 
-  // Helper function to distribute slide numbers across a range
-  const distributeSlideNumbers = (totalStdSlides, totalLbSlides, rangeCount) => {
-    const stdPerAccession = Math.floor(totalStdSlides / rangeCount);
-    const lbPerAccession = Math.floor(totalLbSlides / rangeCount);
-    const stdRemainder = totalStdSlides % rangeCount;
-    const lbRemainder = totalLbSlides % rangeCount;
-    
-    console.log('📊 Distributing slides across range:', {
-      totalStdSlides,
-      totalLbSlides,
-      rangeCount,
-      stdPerAccession,
-      lbPerAccession,
-      stdRemainder,
-      lbRemainder
-    });
-    
-    const distribution = [];
-    for (let i = 0; i < rangeCount; i++) {
-      // Distribute remainder slides to first few accessions
-      const stdSlides = stdPerAccession + (i < stdRemainder ? 1 : 0);
-      const lbSlides = lbPerAccession + (i < lbRemainder ? 1 : 0);
-      distribution.push({ stdSlides, lbSlides });
-    }
-    
-    console.log('📋 Slide distribution result:', distribution);
-    return distribution;
-  };
-
   const handleSubmit = async (e, customFormData = null) => {
     e.preventDefault();
     
@@ -132,25 +103,26 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         
         console.log('📋 Creating multiple cases for range:', accessionNumbers);
         
-        // Convert total slide numbers
-        const totalStdSlides = convertSlideNumber(dataToSubmit.std_slide_number);
-        const totalLbSlides = convertSlideNumber(dataToSubmit.lb_slide_number);
+        // Convert slide numbers for first entry only
+        const stdNum = convertSlideNumber(dataToSubmit.std_slide_number);
+        const lbNum = convertSlideNumber(dataToSubmit.lb_slide_number);
         
-        // Distribute slides across the range
-        const slideDistribution = distributeSlideNumbers(totalStdSlides, totalLbSlides, accessionNumbers.length);
+        // Generate range group ID for grouping
+        const rangeGroupId = crypto.randomUUID();
         
         const submissions = accessionNumbers.map((accessionNumber, index) => {
-          const { stdSlides, lbSlides } = slideDistribution[index];
-          
           const submission = {
             accession_number: accessionNumber,
             date_prepared: dataToSubmit.date_prepared,
             tech_initials: dataToSubmit.tech_initials.trim(),
-            std_slide_number: stdSlides.toString(),
-            lb_slide_number: lbSlides.toString(),
+            // Only first row gets actual slide numbers, rest get asterisks
+            std_slide_number: index === 0 ? stdNum.toString() : '*',
+            lb_slide_number: index === 0 ? lbNum.toString() : '*',
             date_screened: null,
             path_initials: null,
-            time_minutes: null
+            time_minutes: null,
+            range_group_id: rangeGroupId,
+            is_range_first: index === 0
           };
           
           console.log('📤 SUPABASE TRANSMISSION - Range submission:', submission);
@@ -171,7 +143,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         }
 
         console.log('✅ SUPABASE SUCCESS - Range submission:', accessionNumbers.length, 'records inserted');
-        toast.success(`${accessionNumbers.length} non-gyn cases submitted successfully with distributed slide counts!`);
+        toast.success(`${accessionNumbers.length} non-gyn cases submitted successfully as grouped range!`);
         if (!customFormData) {
           resetFormData();
         }
