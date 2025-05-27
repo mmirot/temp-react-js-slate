@@ -31,7 +31,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
         <button
           type="button"
           onClick={handleModeToggle}
-          className="view-toggle-button"
+          className="submit-button"
+          style={{width: '80px', height: '35px', fontSize: '14px'}}
         >
           {isRangeMode ? 'Single' : 'Range'}
         </button>
@@ -39,14 +40,14 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
       
       <form onSubmit={handleSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
-          <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[750px]">
+          <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[800px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left w-[160px]">Accession Number</th>
+                <th className="border border-gray-300 p-2 text-left w-[200px]">Accession Number</th>
                 <th className="border border-gray-300 p-2 text-left w-[140px]">Date Prepared</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">Tech Initials</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">Std Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">LB Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[120px]">Tech Initials</th>
+                <th className="border border-gray-300 p-2 text-left w-[120px]">Std Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[120px]">LB Slide #</th>
                 <th className="border border-gray-300 p-2 text-left w-[110px]">Action</th>
               </tr>
             </thead>
@@ -54,21 +55,17 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
               <tr>
                 <td className="border border-gray-300 p-2">
                   <div className="form-group">
-                    <div className="flex items-center">
-                      <span className="bg-gray-100 px-2 py-1 border rounded-l font-mono whitespace-nowrap flex-shrink-0" style={{fontSize: '14px', height: '35px', display: 'flex', alignItems: 'center'}}>
-                        {prefix}
-                      </span>
-                      <input
-                        type="text"
-                        name="accession_number"
-                        value={formData.accession_number || ''}
-                        onChange={handleAccessionChange}
-                        maxLength={5}
-                        required
-                        style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
-                        className="border border-l-0 rounded-r focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      name="accession_number"
+                      value={formData.accession_number || ''}
+                      onChange={handleAccessionChange}
+                      maxLength={10}
+                      required
+                      style={{width: '180px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Enter accession number"
+                    />
                     {isRangeMode && (
                       <small className="text-gray-600" style={{fontSize: '12px'}}>
                         Range format: 1-5 or 1,3,5-7
@@ -99,7 +96,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={handleChange}
                       maxLength={3}
                       required
-                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -114,7 +111,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       min="1"
                       max="999"
                       required
-                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -129,7 +126,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       min="1"
                       max="999"
                       required
-                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      style={{width: '100px', padding: '8px', height: '35px', fontSize: '14px'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -138,7 +135,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <button 
                     type="submit" 
                     className="submit-button"
-                    style={{width: '90px'}}
+                    style={{width: '90px', height: '35px', fontSize: '14px'}}
                   >
                     {isRangeMode ? 'Submit Range' : 'Submit'}
                   </button>
