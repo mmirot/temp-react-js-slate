@@ -39,15 +39,15 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
       
       <form onSubmit={handleSubmit} className="w-full">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
+          <table className="w-full border-collapse border border-gray-300 table-fixed">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left min-w-[200px]">Accession Number</th>
-                <th className="border border-gray-300 p-2 text-left min-w-[150px]">Date Prepared</th>
-                <th className="border border-gray-300 p-2 text-left min-w-[120px]">Tech Initials</th>
-                <th className="border border-gray-300 p-2 text-left min-w-[120px]">Std Slide #</th>
-                <th className="border border-gray-300 p-2 text-left min-w-[120px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left min-w-[120px]">Action</th>
+                <th className="border border-gray-300 p-2 text-left w-48">Accession Number</th>
+                <th className="border border-gray-300 p-2 text-left w-36">Date Prepared</th>
+                <th className="border border-gray-300 p-2 text-left w-24">Tech Initials</th>
+                <th className="border border-gray-300 p-2 text-left w-28">Std Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-28">LB Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-24">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -63,9 +63,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                         name="accession_number"
                         value={formData.accession_number || ''}
                         onChange={handleAccessionChange}
-                        placeholder={isRangeMode ? "1-5 or 1,3,5-7" : "1"}
+                        placeholder=""
                         required
-                        className="flex-1 px-2 py-1 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+                        className="flex-1 px-2 py-1 border border-l-0 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0 text-sm"
                       />
                     </div>
                     {isRangeMode && (
@@ -83,7 +83,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     onChange={handleChange}
                     max={getTodayDateString()}
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -95,7 +95,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     maxLength={3}
                     placeholder=""
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -107,7 +107,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     min="1"
                     placeholder=""
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -119,13 +119,13 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     min="1"
                     placeholder=""
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
                   <button 
                     type="submit" 
-                    className="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+                    className="w-full px-2 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
                   >
                     {isRangeMode ? 'Submit Range' : 'Submit'}
                   </button>
