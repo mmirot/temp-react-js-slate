@@ -35,12 +35,12 @@ const ScreeningPendingTable = ({
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 p-2 text-left w-[160px]">Accession Number</th>
-              <th className="border border-gray-300 p-2 text-left w-[90px]">Std Slide #</th>
-              <th className="border border-gray-300 p-2 text-left w-[90px]">LB Slide #</th>
+              <th className="border border-gray-300 p-2 text-left w-[100px]">Std Slide #</th>
+              <th className="border border-gray-300 p-2 text-left w-[100px]">LB Slide #</th>
               <th className="border border-gray-300 p-2 text-left w-[140px]">Date Screened</th>
               <th className="border border-gray-300 p-2 text-left w-[100px]">Path Initial</th>
-              <th className="border border-gray-300 p-2 text-left w-[80px]">Time Min</th>
-              <th className="border border-gray-300 p-2 text-left w-[90px]">Action</th>
+              <th className="border border-gray-300 p-2 text-left w-[90px]">Time Min</th>
+              <th className="border border-gray-300 p-2 text-left w-[110px]">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -56,7 +56,8 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
                     max={today}
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+                    style={{width: '120px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -66,7 +67,8 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'path_initials', e.target.value)}
                     maxLength={3}
                     required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+                    style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
@@ -76,23 +78,26 @@ const ScreeningPendingTable = ({
                     onChange={(e) => handlePendingChange(sub.id, 'time_minutes', parseInt(e.target.value) || null)}
                     min="0"
                     max="999"
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+                    style={{width: '70px', padding: '8px', height: '35px', fontSize: '14px'}}
+                    className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <div className="action-buttons flex flex-col space-y-1">
+                  <div className="action-buttons">
                     <button
                       type="button"
-                      className="w-full px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs"
+                      className="submit-button"
                       onClick={() => handlePendingSubmit(sub.id)}
+                      style={{width: '90px', marginBottom: '4px'}}
                     >
                       Complete
                     </button>
                     <button
                       type="button"
-                      className="w-full px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs"
+                      className="delete-button"
                       onClick={() => handleDeleteSubmission(sub.id)}
                       disabled={isDeleting}
+                      style={{width: '90px'}}
                     >
                       {isDeleting ? 'Deleting...' : 'Delete'}
                     </button>

@@ -31,31 +31,31 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
         <button
           type="button"
           onClick={handleModeToggle}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="view-toggle-button"
         >
-          {isRangeMode ? 'Switch to Single Entry' : 'Switch to Range Entry'}
+          {isRangeMode ? 'Single' : 'Range'}
         </button>
       </div>
       
-      <form onSubmit={handleSubmit} className="w-full">
+      <form onSubmit={handleSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 table-fixed min-w-[650px]">
+          <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[750px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left w-[140px]">Accession Number</th>
+                <th className="border border-gray-300 p-2 text-left w-[160px]">Accession Number</th>
                 <th className="border border-gray-300 p-2 text-left w-[140px]">Date Prepared</th>
-                <th className="border border-gray-300 p-2 text-left w-[90px]">Tech Initials</th>
-                <th className="border border-gray-300 p-2 text-left w-[90px]">Std Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[90px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">Action</th>
+                <th className="border border-gray-300 p-2 text-left w-[100px]">Tech Initials</th>
+                <th className="border border-gray-300 p-2 text-left w-[100px]">Std Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[100px]">LB Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[110px]">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="border border-gray-300 p-2">
-                  <div className="flex flex-col space-y-1">
+                  <div className="form-group">
                     <div className="flex items-center">
-                      <span className="bg-gray-100 px-2 py-1 border rounded-l text-xs font-mono whitespace-nowrap flex-shrink-0">
+                      <span className="bg-gray-100 px-2 py-1 border rounded-l font-mono whitespace-nowrap flex-shrink-0" style={{fontSize: '14px', height: '35px', display: 'flex', alignItems: 'center'}}>
                         {prefix}
                       </span>
                       <input
@@ -65,66 +65,80 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                         onChange={handleAccessionChange}
                         maxLength={5}
                         required
-                        className="flex-1 px-2 py-1 border border-l-0 rounded-r focus:outline-none focus:ring-1 focus:ring-blue-500 min-w-0 text-xs"
+                        style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                        className="border border-l-0 rounded-r focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                     {isRangeMode && (
-                      <small className="text-gray-600 text-xs">
+                      <small className="text-gray-600" style={{fontSize: '12px'}}>
                         Range format: 1-5 or 1,3,5-7
                       </small>
                     )}
                   </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <input
-                    type="date"
-                    name="date_prepared"
-                    value={formData.date_prepared || ''}
-                    onChange={handleChange}
-                    max={getTodayDateString()}
-                    required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                  />
+                  <div className="form-group">
+                    <input
+                      type="date"
+                      name="date_prepared"
+                      value={formData.date_prepared || ''}
+                      onChange={handleChange}
+                      max={getTodayDateString()}
+                      required
+                      style={{width: '120px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    name="tech_initials"
-                    value={formData.tech_initials || ''}
-                    onChange={handleChange}
-                    maxLength={3}
-                    required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                  />
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      name="tech_initials"
+                      value={formData.tech_initials || ''}
+                      onChange={handleChange}
+                      maxLength={3}
+                      required
+                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    name="std_slide_number"
-                    value={formData.std_slide_number || ''}
-                    onChange={handleChange}
-                    min="1"
-                    max="999"
-                    required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                  />
+                  <div className="form-group">
+                    <input
+                      type="number"
+                      name="std_slide_number"
+                      value={formData.std_slide_number || ''}
+                      onChange={handleChange}
+                      min="1"
+                      max="999"
+                      required
+                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    name="lb_slide_number"
-                    value={formData.lb_slide_number || ''}
-                    onChange={handleChange}
-                    min="1"
-                    max="999"
-                    required
-                    className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                  />
+                  <div className="form-group">
+                    <input
+                      type="number"
+                      name="lb_slide_number"
+                      value={formData.lb_slide_number || ''}
+                      onChange={handleChange}
+                      min="1"
+                      max="999"
+                      required
+                      style={{width: '80px', padding: '8px', height: '35px', fontSize: '14px'}}
+                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
                 </td>
                 <td className="border border-gray-300 p-2">
                   <button 
                     type="submit" 
-                    className="w-full px-2 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs"
+                    className="submit-button"
+                    style={{width: '90px'}}
                   >
                     {isRangeMode ? 'Submit Range' : 'Submit'}
                   </button>
