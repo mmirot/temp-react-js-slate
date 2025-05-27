@@ -121,8 +121,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
             date_screened: null,
             path_initials: null,
             time_minutes: null,
-            range_group_id: rangeGroupId,
-            is_range_first: index === 0
+            range_group_id: rangeGroupId
           };
           
           console.log('📤 SUPABASE TRANSMISSION - Range submission:', submission);
