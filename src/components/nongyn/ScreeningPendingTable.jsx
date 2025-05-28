@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { formatDate, getTodayDateString } from '../../utils/dateUtils';
@@ -70,7 +69,7 @@ const ScreeningPendingTable = ({
               <th className="border border-gray-300 p-2 text-left w-[140px]">Date Screened</th>
               <th className="border border-gray-300 p-2 text-left w-[100px]">Path Initial</th>
               <th className="border border-gray-300 p-2 text-left w-[90px]">Time Min</th>
-              <th className="border border-gray-300 p-2 text-left w-[110px]">Action</th>
+              <th className="border border-gray-300 p-2 text-left w-[200px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -127,12 +126,11 @@ const ScreeningPendingTable = ({
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <div className="action-buttons flex flex-col gap-1">
+                    <div className="action-buttons flex flex-row gap-2 justify-center">
                       <button
                         type="button"
                         className="submit-button h-9"
                         onClick={() => handlePendingSubmit(sub.id)}
-                        style={{width: '90px', height: '36px'}}
                       >
                         Complete
                       </button>
@@ -141,7 +139,6 @@ const ScreeningPendingTable = ({
                         className="delete-button h-9"
                         onClick={() => handleDeleteSubmission(sub.id)}
                         disabled={isDeleting}
-                        style={{width: '90px', height: '36px'}}
                       >
                         {isDeleting ? 'Deleting...' : 'Delete'}
                       </button>

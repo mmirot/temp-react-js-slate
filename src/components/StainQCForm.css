@@ -237,6 +237,7 @@
 }
 
 .submit-button {
+  min-width: 90px;
   background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%);
   color: white;
   padding: 8px 16px;
@@ -406,8 +407,10 @@
 }
 
 .action-buttons {
-  display: flex;
-  gap: 8px;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px !important;
+  justify-content: center !important;
 }
 
 .delete-button {
@@ -420,7 +423,7 @@
   font-size: 12px;
   font-weight: 600;
   height: auto;
-  min-width: 80px;
+  min-width: 90px;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
               inset 0 1px 0 rgba(255, 255, 255, 0.2);
