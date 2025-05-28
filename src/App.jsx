@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn, ClerkProvider } from '@clerk/clerk-react';
 import StainQCForm from './components/StainQCForm';
 import StainList from './components/StainList';
 import NonGynForm from './components/NonGynForm';
@@ -20,58 +19,60 @@ function App() {
   const showDemoMode = isLovablePreview && !hasClerkKey;
 
   return (
-    <Router>
-      <div className="App">
-        <Toaster position="top-right" />
-        <Navbar />
-        <div className="container mx-auto p-4">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth/*" element={<Auth />} />
-            <Route
-              path="/daily-qc"
-              element={
-                <>
-                  <SignedIn>
-                    <StainQCForm />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
-              }
-            />
-            <Route
-              path="/stains"
-              element={
-                <>
-                  <SignedIn>
-                    <StainList />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
-              }
-            />
-            <Route
-              path="/non-gyn-tracking"
-              element={
-                <>
-                  <SignedIn>
-                    <NonGynForm />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
-              }
-            />
-          </Routes>
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <Router>
+        <div className="App">
+          <Toaster position="top-right" />
+          <Navbar />
+          <div className="container mx-auto p-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth/*" element={<Auth />} />
+              <Route
+                path="/daily-qc"
+                element={
+                  <>
+                    <SignedIn>
+                      <StainQCForm />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                }
+              />
+              <Route
+                path="/stains"
+                element={
+                  <>
+                    <SignedIn>
+                      <StainList />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                }
+              />
+              <Route
+                path="/non-gyn-tracking"
+                element={
+                  <>
+                    <SignedIn>
+                      <NonGynForm />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                }
+              />
+            </Routes>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </Router>
+      </Router>
+    </ClerkProvider>
   );
 }
 
