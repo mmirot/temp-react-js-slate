@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -184,23 +183,24 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           </table>
         </div>
         
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            type="button"
-            onClick={addRow}
-            className="submit-button flex items-center justify-center gap-1"
-            style={{width: '100px', height: '36px', fontSize: '14px'}}
-          >
-            <Plus size={14} />
-            + Row
-          </button>
-          <button
-            type="submit"
-            className="submit-button flex items-center justify-center"
-            style={{width: '100px', height: '36px', fontSize: '14px'}}
-          >
-            Submit
-          </button>
+        <div className="flex justify-center mt-4">
+          <div className="action-buttons flex flex-col gap-1">
+            <button
+              type="button"
+              onClick={addRow}
+              className="submit-button h-9"
+              style={{width: '90px', height: '36px'}}
+            >
+              + Row
+            </button>
+            <button
+              type="submit"
+              className="submit-button h-9"
+              style={{width: '90px', height: '36px'}}
+            >
+              Submit
+            </button>
+          </div>
         </div>
       </form>
     </div>
