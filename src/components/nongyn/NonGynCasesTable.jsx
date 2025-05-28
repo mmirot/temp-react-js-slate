@@ -11,93 +11,48 @@ const isRowComplete = (row) => {
 };
 
 const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
-  const [rows, setRows] = useState([
-    {
-      id: 1,
+  const [formState, setFormState] = useState({
       accession_number: '',
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
       lb_slide_number: ''
-    }
-  ]);
+  });
   
   const prefix = generateAccessionPrefix(getTodayDateString());
 
-  const addRow = () => {
-    const newRow = {
-      id: Date.now(),
-      accession_number: '',
-      date_prepared: getTodayDateString(),
-      tech_initials: '',
-      std_slide_number: '',
-      lb_slide_number: ''
-    };
-    setRows([...rows, newRow]);
-  };
-
-  const removeRow = (rowId) => {
-    if (rows.length > 1) {
-      setRows(rows.filter(row => row.id !== rowId));
-    }
-  };
-
-  const updateRow = (rowId, field, value) => {
-    setRows(rows.map(row => 
-      row.id === rowId ? { ...row, [field]: value } : row
-    ));
+  const updateField = (field, value) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleIncompleteRows = () => {
-    const incompleteRows = rows.filter(row => !isRowComplete(row));
-    if (incompleteRows.length > 0) {
-      if (confirm('There are incomplete entries. Delete incomplete entries and submit?')) {
-        setRows(rows.filter(row => isRowComplete(row)));
-        return true;
-      }
-      return false;
-    }
-    return true;
+    return isRowComplete(formState);
   };
 
   const handleMultiSubmit = (e) => {
     e.preventDefault();
     
-    // Check for incomplete rows first
-    if (!handleIncompleteRows()) {
+    if (!isRowComplete(formState)) {
+      toast.error('Please complete all fields before submitting');
       return;
     }
     
-    // Get only complete rows
-    const completeRows = rows.filter(row => isRowComplete(row));
-    
-    if (completeRows.length === 0) {
-      toast.error('No complete entries to submit');
-      return;
-    }
-    
-    // Validate all rows
-    for (let i = 0; i < completeRows.length; i++) {
-      const row = completeRows[i];
-      
-      if (!row.accession_number.trim()) {
-        toast.error(`Row ${i + 1}: Accession number is required`);
-        return;
-      }
-      
-      if (!row.tech_initials.trim()) {
-        toast.error(`Row ${i + 1}: Tech initials are required`);
-        return;
-      }
-      
-      // Validate slide numbers - at least one must be positive
-      const stdNum = row.std_slide_number === '' ? 0 : parseInt(row.std_slide_number) || 0;
-      const lbNum = row.lb_slide_number === '' ? 0 : parseInt(row.lb_slide_number) || 0;
-      
-      if (stdNum <= 0 && lbNum <= 0) {
-        toast.error(`Row ${i + 1}: At least one slide number (Std or LB) must be a positive integer`);
-        return;
-      }
+    // Create synthetic event for submission
+    const syntheticEvent = { preventDefault: () => {} };
+    handleSubmit(syntheticEvent, formState);
+
+    // Reset form after successful submission
+    setFormState({
+      accession_number: '',
+      date_prepared: getTodayDateString(),
+      tech_initials: '',
+      std_slide_number: '',
+      lb_slide_number: ''
+    });
+  };
     }
     
     // Submit each row
@@ -127,7 +82,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[900px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left w-[40px]">#</th>
                 <th className="border border-gray-300 p-2 text-left w-[160px]">Accession Number</th>
                 <th className="border border-gray-300 p-2 text-left w-[130px]">Date Prepared</th>
                 <th className="border border-gray-300 p-2 text-left w-[90px]">Tech Initials</th>
@@ -137,16 +91,12 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
-                <tr key={row.id}>
-                  <td className="border border-gray-300 p-2 text-center font-medium">
-                    {index + 1}
-                  </td>
+                <tr>
                   <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      value={row.accession_number}
-                      onChange={(e) => updateRow(row.id, 'accession_number', e.target.value)}
+                      value={formState.accession_number}
+                      onChange={(e) => updateField('accession_number', e.target.value)}
                       maxLength={10}
                       noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -156,8 +106,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="date"
-                      value={row.date_prepared}
-                      onChange={(e) => updateRow(row.id, 'date_prepared', e.target.value)}
+                      value={formState.date_prepared}
+                      onChange={(e) => updateField('date_prepared', e.target.value)}
                       max={getTodayDateString()}
                       noValidate
                       className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -166,8 +116,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      value={row.tech_initials}
-                      onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
+                      value={formState.tech_initials}
+                      onChange={(e) => updateField('tech_initials', e.target.value)}
                       maxLength={3}
                       noValidate
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -176,8 +126,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      value={row.std_slide_number}
-                      onChange={(e) => updateRow(row.id, 'std_slide_number', e.target.value)}
+                      value={formState.std_slide_number}
+                      onChange={(e) => updateField('std_slide_number', e.target.value)}
                       min="0"
                       max="999"
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -186,8 +136,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      value={row.lb_slide_number}
-                      onChange={(e) => updateRow(row.id, 'lb_slide_number', e.target.value)}
+                      value={formState.lb_slide_number}
+                      onChange={(e) => updateField('lb_slide_number', e.target.value)}
                       min="0"
                       max="999"
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -195,16 +145,10 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   </td>
                   <td className="border border-gray-300 p-2">
                     <div className="action-buttons flex flex-row gap-2 justify-center">
-                      {index === 0 && (
-                        <>
-                          <button type="button\" onClick={addRow} className="submit-button">+ Row</button>
-                          <button type="submit" className="submit-button">Submit</button>
-                        </>
-                      )}
+                      <button type="submit" className="submit-button">Submit</button>
                     </div>
                   </td>
                 </tr>
-              ))}
             </tbody>
           </table>
         </div>
