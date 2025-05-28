@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -104,7 +103,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Tech Initials</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Std Slide #</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-center w-[100px]">Actions</th>
+                <th className="border border-gray-300 p-2 text-left w-[110px]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -165,12 +164,31 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <div className="flex justify-center items-center gap-1">
+                    <div className="action-buttons flex flex-col gap-1">
+                      {index === 0 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={addRow}
+                            className="submit-button h-9"
+                            style={{width: '90px', height: '36px'}}
+                          >
+                            + Row
+                          </button>
+                          <button
+                            type="submit"
+                            className="submit-button h-9"
+                            style={{width: '90px', height: '36px'}}
+                          >
+                            Submit
+                          </button>
+                        </>
+                      )}
                       {rows.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeRow(row.id)}
-                          className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-100 rounded"
+                          className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-100 rounded mx-auto"
                           title="Remove row"
                         >
                           <Trash2 size={16} />
@@ -182,28 +200,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
               ))}
             </tbody>
           </table>
-        </div>
-        
-        <div className="mt-4 relative">
-          <div className="absolute" style={{left: 'calc(50px + 200px + 140px + 120px + 120px + 120px + 8px)', top: '0'}}>
-            <div className="action-buttons flex flex-col gap-1">
-              <button
-                type="button"
-                onClick={addRow}
-                className="submit-button h-9"
-                style={{width: '90px', height: '36px'}}
-              >
-                + Row
-              </button>
-              <button
-                type="submit"
-                className="submit-button h-9"
-                style={{width: '90px', height: '36px'}}
-              >
-                Submit
-              </button>
-            </div>
-          </div>
         </div>
       </form>
     </div>
