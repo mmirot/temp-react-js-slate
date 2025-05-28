@@ -21,7 +21,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
       lb_slide_number: ''
     }
   ]);
-  const [showDialog, setShowDialog] = useState(false);
   
   const prefix = generateAccessionPrefix(getTodayDateString());
 
@@ -52,22 +51,13 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
   const handleIncompleteRows = () => {
     const incompleteRows = rows.filter(row => !isRowComplete(row));
     if (incompleteRows.length > 0) {
-      setShowDialog(true);
+      if (confirm('There are incomplete entries. Delete incomplete entries and submit?')) {
+        setRows(rows.filter(row => isRowComplete(row)));
+        return true;
+      }
       return false;
     }
     return true;
-  };
-
-  const handleDialogConfirm = () => {
-    setShowDialog(false);
-    if (rows.filter(row => isRowComplete(row)).length > 0) {
-        setRows(rows.filter(row => isRowComplete(row)));
-        handleMultiSubmit(new Event('submit'));
-    }
-  };
-
-  const handleDialogCancel = () => {
-    setShowDialog(false);
   };
 
   const handleMultiSubmit = (e) => {
@@ -131,29 +121,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
   return (
     <div className="form-section mb-8">
       <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
-      
-      {showDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Incomplete Entries</h3>
-            <p className="mb-6">There are incomplete entries. Would you like to delete them and submit the completed entries?</p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={handleDialogCancel}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDialogConfirm}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Delete & Submit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       
       <form onSubmit={handleMultiSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
@@ -230,8 +197,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     <div className="action-buttons flex flex-row gap-2 justify-center">
                       {index === 0 && (
                         <>
-                          <button type="button" onClick={addRow} className="submit-button">+ Row</button>
-                          <button type="submit" className="submit-button">Submit</button>
+                          <button type="button\" onClick={addRow} className=\"submit-button">+ Row</button>
+                          <button type="submit\" className="submit-button">Submit</button>
                         </>
                       )}
                     </div>
