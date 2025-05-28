@@ -25,7 +25,6 @@ export default defineConfig(async ({ mode }) => {
     server: {
       host: "::",
       port: 8080,
-      // Add a startup message to guide users
       onListening(server) {
         const { port } = server.config.server;
         console.log(`\n🚀 Server running at http://localhost:${port}/`);
@@ -39,10 +38,5 @@ export default defineConfig(async ({ mode }) => {
       react(),
       taggerPlugin
     ].filter(Boolean),
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
-    }
   };
 });
