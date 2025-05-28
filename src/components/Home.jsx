@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import './Home.css';
 
 const Home = () => {
@@ -51,25 +52,18 @@ const Home = () => {
             // Check for auth key and conditionally render
             hasClerkKey ? (
               <>
-                {/* Import Clerk components dynamically when key exists */}
-                {React.lazy(() => import('@clerk/clerk-react').then(module => ({
-                  default: () => (
-                    <>
-                      <module.SignedOut>
-                        <div className="auth-buttons">
-                          <Link to="/auth" className="cta-button">
-                            Sign In
-                          </Link>
-                        </div>
-                      </module.SignedOut>
-                      <module.SignedIn>
-                        <Link to="/daily-qc" className="cta-button">
-                          Access Daily QC Tool
-                        </Link>
-                      </module.SignedIn>
-                    </>
-                  )
-                })))}
+                <SignedOut>
+                  <div className="auth-buttons">
+                    <Link to="/auth" className="cta-button">
+                      Sign In
+                    </Link>
+                  </div>
+                </SignedOut>
+                <SignedIn>
+                  <Link to="/daily-qc" className="cta-button">
+                    Access Daily QC Tool
+                  </Link>
+                </SignedIn>
               </>
             ) : (
               // No key available, show generic buttons
@@ -149,30 +143,21 @@ const Home = () => {
       ) : (
         hasClerkKey ? (
           // Authenticated tools section
-          <>
-            {/* Import Clerk components dynamically when key exists */}
-            {React.lazy(() => import('@clerk/clerk-react').then(module => ({
-              default: () => (
-                <>
-                  <module.SignedIn>
-                    <section className="tools">
-                      <h2>Laboratory Tools</h2>
-                      <div className="tools-grid">
-                        <Link to="/daily-qc" className="tool-card">
-                          <h3>Daily Stain QC</h3>
-                          <p>Submit and track daily quality control for laboratory stains.</p>
-                        </Link>
-                        <Link to="/stains" className="tool-card">
-                          <h3>Stain Library</h3>
-                          <p>View the complete catalog of available stains.</p>
-                        </Link>
-                      </div>
-                    </section>
-                  </module.SignedIn>
-                </>
-              )
-            })))}
-          </>
+          <SignedIn>
+            <section className="tools">
+              <h2>Laboratory Tools</h2>
+              <div className="tools-grid">
+                <Link to="/daily-qc" className="tool-card">
+                  <h3>Daily Stain QC</h3>
+                  <p>Submit and track daily quality control for laboratory stains.</p>
+                </Link>
+                <Link to="/stains" className="tool-card">
+                  <h3>Stain Library</h3>
+                  <p>View the complete catalog of available stains.</p>
+                </Link>
+              </div>
+            </section>
+          </SignedIn>
         ) : (
           // No auth available, show regular tools
           <section className="tools">

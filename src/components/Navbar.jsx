@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -57,21 +58,14 @@ const Navbar = () => {
         <div className="auth-nav-buttons">
           {hasClerkKey ? (
             <>
-              {/* Import Clerk components dynamically when key exists */}
-              {React.lazy(() => import('@clerk/clerk-react').then(module => ({
-                default: () => (
-                  <>
-                    <module.SignedIn>
-                      <module.UserButton afterSignOutUrl="/" />
-                    </module.SignedIn>
-                    <module.SignedOut>
-                      <Link to="/auth" className="sign-in-button">
-                        Sign In
-                      </Link>
-                    </module.SignedOut>
-                  </>
-                )
-              })))}
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <SignedOut>
+                <Link to="/auth" className="sign-in-button">
+                  Sign In
+                </Link>
+              </SignedOut>
             </>
           ) : (
             <Link to="/auth" className="sign-in-button">

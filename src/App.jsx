@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import StainQCForm from './components/StainQCForm';
 import StainList from './components/StainList';
 import NonGynForm from './components/NonGynForm';
@@ -25,10 +26,58 @@ function App() {
         <div className="container mx-auto p-4">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/auth/*" element={<Auth />} />
-            <Route path="/daily-qc" element={<StainQCForm />} />
-            <Route path="/stains" element={<StainList />} />
-            <Route path="/non-gyn-tracking" element={<NonGynForm />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/daily-qc"
+              element={
+                hasClerkKey ? (
+                  <>
+                    <SignedIn>
+                      <StainQCForm />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                ) : (
+                  <StainQCForm />
+                )
+              }
+            />
+            <Route
+              path="/stains"
+              element={
+                hasClerkKey ? (
+                  <>
+                    <SignedIn>
+                      <StainList />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                ) : (
+                  <StainList />
+                )
+              }
+            />
+            <Route
+              path="/non-gyn-tracking"
+              element={
+                hasClerkKey ? (
+                  <>
+                    <SignedIn>
+                      <NonGynForm />
+                    </SignedIn>
+                    <SignedOut>
+                      <RedirectToSignIn />
+                    </SignedOut>
+                  </>
+                ) : (
+                  <NonGynForm />
+                )
+              }
+            />
           </Routes>
         </div>
         <Footer />
