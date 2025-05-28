@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -188,14 +187,16 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           <button
             type="button"
             onClick={addRow}
-            className="h-8 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="submit-button"
+            style={{width: '90px', height: '36px'}}
           >
             <Plus size={16} />
             Add Row
           </button>
           <button
             type="submit"
-            className="h-8 flex items-center justify-center px-6 bg-green-600 text-white rounded hover:bg-green-700"
+            className="submit-button"
+            style={{width: '120px', height: '36px'}}
           >
             Submit All ({rows.length} row{rows.length !== 1 ? 's' : ''})
           </button>
