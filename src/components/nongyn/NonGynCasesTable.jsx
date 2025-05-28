@@ -197,8 +197,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     <div className="action-buttons flex flex-row gap-2 justify-center">
                       {index === 0 && (
                         <>
-                          <button type="button\" onClick={addRow} className="submit-button">+ Row</button>
-                          <button type="submit" className="submit-button">Submit</button>
+                          <button type="button\" onClick={addRow} className=\"submit-button">+ Row</button>
+                          <button type="submit\" className="submit-button">Submit</button>
                         </>
                       )}
                     </div>
