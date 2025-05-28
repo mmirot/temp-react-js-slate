@@ -119,6 +119,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'accession_number', e.target.value)}
                       maxLength={10}
                       required
+                      noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                       placeholder="Enter accession number"
                     />
@@ -130,6 +131,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'date_prepared', e.target.value)}
                       max={getTodayDateString()}
                       required
+                      noValidate
                       className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
@@ -140,6 +142,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
                       maxLength={3}
                       required
+                      noValidate
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
@@ -166,20 +169,10 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <div className="action-buttons flex flex-row gap-2 justify-center">
                       {index === 0 && (
-                        <div className="flex flex-row gap-2">
+                        <>
                           <button type="button\" onClick={addRow} className="submit-button">+ Row</button>
                           <button type="submit" className="submit-button">Submit</button>
-                        </div>
-                      )}
-                      {rows.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeRow(row.id)}
-                          className="delete-button flex items-center justify-center"
-                          title="Remove row"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        </>
                       )}
                     </div>
                   </td>
