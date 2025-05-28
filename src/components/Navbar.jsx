@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
   const [connectionStatus, setConnectionStatus] = useState('unknown');
+  const hasClerkKey = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   
   // Simple connection check
   useEffect(() => {
@@ -55,14 +55,29 @@ const Navbar = () => {
         </div>
 
         <div className="auth-nav-buttons">
-          <SignedIn>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
-          <SignedOut>
+          {hasClerkKey ? (
+            <>
+              {/* Import Clerk components dynamically when key exists */}
+              {React.lazy(() => import('@clerk/clerk-react').then(module => ({
+                default: () => (
+                  <>
+                    <module.SignedIn>
+                      <module.UserButton afterSignOutUrl="/" />
+                    </module.SignedIn>
+                    <module.SignedOut>
+                      <Link to="/auth" className="sign-in-button">
+                        Sign In
+                      </Link>
+                    </module.SignedOut>
+                  </>
+                )
+              })))}
+            </>
+          ) : (
             <Link to="/auth" className="sign-in-button">
               Sign In
             </Link>
-          </SignedOut>
+          )}
         </div>
 
         {connectionStatus !== 'connected' && (
