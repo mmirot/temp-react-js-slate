@@ -1,9 +1,7 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import './index.css';
-import { dark } from '@clerk/themes';
 import App from './App';
 
 // Get the publishable key
