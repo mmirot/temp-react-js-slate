@@ -3,7 +3,12 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { generateAccessionPrefix } from '../../utils/accessionUtils';
 import { getTodayDateString } from '../../utils/dateUtils';
-import { Trash2, Plus } from 'lucide-react';
+
+const isRowComplete = (row) => {
+  return row.accession_number.trim() !== '' &&
+         row.tech_initials.trim() !== '' &&
+         (parseInt(row.std_slide_number) > 0 || parseInt(row.lb_slide_number) > 0);
+};
 
 const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
   const [rows, setRows] = useState([
@@ -43,12 +48,37 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
     ));
   };
 
+  const handleIncompleteRows = () => {
+    const incompleteRows = rows.filter(row => !isRowComplete(row));
+    if (incompleteRows.length > 0) {
+      if (confirm('There are incomplete entries. Delete incomplete entries and submit?')) {
+        setRows(rows.filter(row => isRowComplete(row)));
+        return true;
+      }
+      return false;
+    }
+    return true;
+  };
+
   const handleMultiSubmit = (e) => {
     e.preventDefault();
     
+    // Check for incomplete rows first
+    if (!handleIncompleteRows()) {
+      return;
+    }
+    
+    // Get only complete rows
+    const completeRows = rows.filter(row => isRowComplete(row));
+    
+    if (completeRows.length === 0) {
+      toast.error('No complete entries to submit');
+      return;
+    }
+    
     // Validate all rows
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
+    for (let i = 0; i < completeRows.length; i++) {
+      const row = completeRows[i];
       
       if (!row.accession_number.trim()) {
         toast.error(`Row ${i + 1}: Accession number is required`);
@@ -71,7 +101,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
     }
     
     // Submit each row
-    rows.forEach((row, index) => {
+    completeRows.forEach((row, index) => {
       // Create a synthetic event for each row submission
       const syntheticEvent = { preventDefault: () => {} };
       handleSubmit(syntheticEvent, row);
