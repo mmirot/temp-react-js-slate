@@ -140,7 +140,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
                       maxLength={3}
                       required
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[70px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
