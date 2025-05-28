@@ -164,31 +164,18 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <div className="action-buttons flex flex-col gap-1">
+                    <div className="action-buttons flex flex-row gap-2 justify-center">
                       {index === 0 && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={addRow}
-                            className="submit-button h-9"
-                            style={{width: '90px', height: '36px'}}
-                          >
-                            + Row
-                          </button>
-                          <button
-                            type="submit"
-                            className="submit-button h-9"
-                            style={{width: '90px', height: '36px'}}
-                          >
-                            Submit
-                          </button>
-                        </>
+                        <div className="flex flex-row gap-2">
+                          <button type="button" onClick={addRow} className="submit-button">+ Row</button>
+                          <button type="submit" className="submit-button">Submit</button>
+                        </div>
                       )}
                       {rows.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeRow(row.id)}
-                          className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-100 rounded mx-auto"
+                          className="delete-button flex items-center justify-center"
                           title="Remove row"
                         >
                           <Trash2 size={16} />
