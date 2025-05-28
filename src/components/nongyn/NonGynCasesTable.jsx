@@ -118,7 +118,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       value={row.accession_number}
                       onChange={(e) => updateRow(row.id, 'accession_number', e.target.value)}
                       maxLength={10}
-                      required
                       noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                       placeholder="Enter accession number"
@@ -130,7 +129,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       value={row.date_prepared}
                       onChange={(e) => updateRow(row.id, 'date_prepared', e.target.value)}
                       max={getTodayDateString()}
-                      required
                       noValidate
                       className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
@@ -141,7 +139,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       value={row.tech_initials}
                       onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
                       maxLength={3}
-                      required
                       noValidate
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
@@ -170,7 +167,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     <div className="action-buttons flex flex-row gap-2 justify-center">
                       {index === 0 && (
                         <>
-                          <button type="button\" onClick={addRow} className="submit-button">+ Row</button>
+                          <button type="button" onClick={addRow} className="submit-button">+ Row</button>
                           <button type="submit" className="submit-button">Submit</button>
                         </>
                       )}
