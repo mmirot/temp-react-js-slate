@@ -53,25 +53,25 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
       lb_slide_number: ''
     });
   };
-    }
+
+  const completeRows = [];
     
-    // Submit each row
-    completeRows.forEach((row, index) => {
-      // Create a synthetic event for each row submission
-      const syntheticEvent = { preventDefault: () => {} };
-      handleSubmit(syntheticEvent, row);
-    });
+  // Submit each row
+  completeRows.forEach((row, index) => {
+    // Create a synthetic event for each row submission
+    const syntheticEvent = { preventDefault: () => {} };
+    handleSubmit(syntheticEvent, row);
+  });
     
-    // Clear all rows after successful submission
-    setRows([{
-      id: Date.now(),
-      accession_number: '',
-      date_prepared: getTodayDateString(),
-      tech_initials: '',
-      std_slide_number: '',
-      lb_slide_number: ''
-    }]);
-  };
+  // Clear all rows after successful submission
+  setRows([{
+    id: Date.now(),
+    accession_number: '',
+    date_prepared: getTodayDateString(),
+    tech_initials: '',
+    std_slide_number: '',
+    lb_slide_number: ''
+  }]);
 
   return (
     <div className="form-section mb-8">
