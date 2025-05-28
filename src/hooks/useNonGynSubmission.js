@@ -166,11 +166,14 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   const handlePendingSubmit = async (submissionId) => {
     const updates = pendingUpdates[submissionId] || {};
     
-    // Get the current submission data to check for existing values
-    const submissions = await getCurrentSubmissions();
-    const currentSubmission = submissions.find(s => s.id === submissionId);
+    // Get the specific submission data
+    const { data: currentSubmission, error: fetchError } = await supabase
+      .from('non_gyn_submissions')
+      .select('*')
+      .eq('id', submissionId)
+      .single();
     
-    if (!currentSubmission) {
+    if (fetchError || !currentSubmission) {
       toast.error('Submission not found');
       return;
     }
@@ -220,25 +223,15 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         time_minutes: timeMinutes
       };
       
-      console.log('📤 SUPABASE TRANSMISSION - Pending completion:', submissionId, updateData);
-      console.log('📊 Original submission data:', {
-        accession_number: currentSubmission.accession_number,
-        std_slide_number: currentSubmission.std_slide_number,
-        lb_slide_number: currentSubmission.lb_slide_number,
-        date_prepared: currentSubmission.date_prepared
-      });
-
       const { error } = await supabase
         .from('non_gyn_submissions')
         .update(updateData)
         .eq('id', submissionId);
 
       if (error) {
-        console.error('❌ SUPABASE ERROR - Pending completion:', error);
         throw error;
       }
 
-      console.log('✅ SUPABASE SUCCESS - Pending completion:', submissionId);
       toast.success('Screening completed successfully!');
       setPendingUpdates(prev => {
         const newUpdates = { ...prev };
@@ -247,7 +240,6 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       });
       fetchSubmissions();
     } catch (error) {
-      console.error('❌ Pending completion error:', error);
       toast.error('Error completing screening: ' + error.message);
     }
   };

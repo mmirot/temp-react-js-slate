@@ -49,20 +49,18 @@ export const useNonGynData = () => {
     }
 
     try {
-      const { error } = await supabase 
+      const { error } = await supabase
         .from('non_gyn_submissions')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+        .gte('created_at', '1900-01-01'); // Delete all records
 
       if (error) {
-        console.error('❌ SUPABASE ERROR - Delete All:', error);
         throw error;
       }
 
       toast.success('All workload data deleted successfully');
       fetchSubmissions();
     } catch (error) {
-      console.error('❌ SUPABASE ERROR - Delete All operation failed:', error);
       toast.error('Error deleting workload data: ' + error.message);
     }
   };
@@ -71,19 +69,10 @@ export const useNonGynData = () => {
   
   // Transform completed submissions into daily aggregated workload data
   const completedSubmissions = submissions.filter(sub => sub.date_screened);
-  console.log('📊 Processing completed submissions for aggregation:', completedSubmissions.length, 'records');
-  
-  if (completedSubmissions.length > 0) {
-    console.log('📋 Sample completed submission data:', completedSubmissions.slice(0, 2));
-  }
   
   const aggregatedWorkload = aggregateDailyWorkload(completedSubmissions);
   const sortedAggregatedWorkload = sortAggregatedData(aggregatedWorkload, sortConfig);
 
-  console.log('📈 Final aggregated workload data:', sortedAggregatedWorkload.length, 'entries');
-  if (sortedAggregatedWorkload.length > 0) {
-    console.log('📝 Sample aggregated entry:', sortedAggregatedWorkload[0]);
-  }
 
   return {
     submissions,
