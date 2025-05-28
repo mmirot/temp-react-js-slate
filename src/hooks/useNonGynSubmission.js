@@ -259,23 +259,18 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
     setIsDeleting(true);
     try {
-      console.log('📤 SUPABASE TRANSMISSION - Delete submission:', submissionId);
-      
       const { error } = await supabase
         .from('non_gyn_submissions')
         .delete()
         .eq('id', submissionId);
 
       if (error) {
-        console.error('❌ SUPABASE ERROR - Delete submission:', error);
         throw error;
       }
 
-      console.log('✅ SUPABASE SUCCESS - Delete submission:', submissionId);
       toast.success('Submission deleted successfully');
       fetchSubmissions();
     } catch (error) {
-      console.error('❌ Delete submission error:', error);
       toast.error('Error deleting submission: ' + error.message);
     } finally {
       setIsDeleting(false);
