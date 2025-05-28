@@ -2,13 +2,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import fs from 'fs';
-import dotenv from 'dotenv';
-
-// Load env.local file
-const localEnv = fs.existsSync('./env.local') 
-  ? dotenv.parse(fs.readFileSync('./env.local'))
-  : {};
 
 // Create a dynamic import function for the ESM-only lovable-tagger
 const loadComponentTagger = async (mode) => {
@@ -47,8 +40,10 @@ export default defineConfig(async ({ mode }) => {
       taggerPlugin
     ].filter(Boolean),
     define: {
-      'process.env': { ...process.env, ...localEnv }
+      'process.env': process.env
     },
+    envDir: '.',
+    envPrefix: 'VITE_',
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
