@@ -97,13 +97,13 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[900px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left w-[50px]">#</th>
-                <th className="border border-gray-300 p-2 text-left w-[200px]">Accession Number</th>
-                <th className="border border-gray-300 p-2 text-left w-[140px]">Date Prepared</th>
-                <th className="border border-gray-300 p-2 text-left w-[120px]">Tech Initials</th>
-                <th className="border border-gray-300 p-2 text-left w-[120px]">Std Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[120px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[110px]">Actions</th>
+                <th className="border border-gray-300 p-2 text-left w-[40px]">#</th>
+                <th className="border border-gray-300 p-2 text-left w-[160px]">Accession Number</th>
+                <th className="border border-gray-300 p-2 text-left w-[130px]">Date Prepared</th>
+                <th className="border border-gray-300 p-2 text-left w-[90px]">Tech Initials</th>
+                <th className="border border-gray-300 p-2 text-left w-[90px]">Std Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[90px]">LB Slide #</th>
+                <th className="border border-gray-300 p-2 text-left w-[180px]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -119,7 +119,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'accession_number', e.target.value)}
                       maxLength={10}
                       required
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                       placeholder="Enter accession number"
                     />
                   </td>
@@ -130,7 +130,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'date_prepared', e.target.value)}
                       max={getTodayDateString()}
                       required
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
@@ -140,7 +140,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
                       maxLength={3}
                       required
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
@@ -150,7 +150,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'std_slide_number', e.target.value)}
                       min="0"
                       max="999"
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
@@ -160,7 +160,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                       onChange={(e) => updateRow(row.id, 'lb_slide_number', e.target.value)}
                       min="0"
                       max="999"
-                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
+                      className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
