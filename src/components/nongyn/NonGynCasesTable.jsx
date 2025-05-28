@@ -187,16 +187,16 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           <button
             type="button"
             onClick={addRow}
-            className="submit-button"
-            style={{width: '90px', height: '36px'}}
+            className="submit-button flex items-center justify-center gap-1"
+            style={{width: '120px', height: '36px', fontSize: '14px'}}
           >
-            <Plus size={16} />
+            <Plus size={14} />
             Add Row
           </button>
           <button
             type="submit"
-            className="submit-button"
-            style={{width: '120px', height: '36px'}}
+            className="submit-button flex items-center justify-center"
+            style={{width: '160px', height: '36px', fontSize: '14px'}}
           >
             Submit All ({rows.length} row{rows.length !== 1 ? 's' : ''})
           </button>
