@@ -39,11 +39,6 @@ export default defineConfig(async ({ mode }) => {
       react(),
       taggerPlugin
     ].filter(Boolean),
-    define: {
-      'process.env': process.env
-    },
-    envDir: '.',
-    envPrefix: 'VITE_',
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
