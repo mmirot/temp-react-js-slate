@@ -54,25 +54,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
     });
   };
 
-  const completeRows = [];
-    
-  // Submit each row
-  completeRows.forEach((row, index) => {
-    // Create a synthetic event for each row submission
-    const syntheticEvent = { preventDefault: () => {} };
-    handleSubmit(syntheticEvent, row);
-  });
-    
-  // Clear all rows after successful submission
-  setRows([{
-    id: Date.now(),
-    accession_number: '',
-    date_prepared: getTodayDateString(),
-    tech_initials: '',
-    std_slide_number: '',
-    lb_slide_number: ''
-  }]);
-
   return (
     <div className="form-section mb-8">
       <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
