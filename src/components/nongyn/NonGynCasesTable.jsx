@@ -104,7 +104,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Tech Initials</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Std Slide #</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[100px]">Actions</th>
+                <th className="border border-gray-300 p-2 text-center w-[100px]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -165,12 +165,12 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <div className="flex gap-1">
+                    <div className="flex justify-center items-center gap-1">
                       {rows.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeRow(row.id)}
-                          className="p-1 text-red-600 hover:bg-red-100 rounded"
+                          className="h-8 w-8 flex items-center justify-center text-red-600 hover:bg-red-100 rounded"
                           title="Remove row"
                         >
                           <Trash2 size={16} />
@@ -184,18 +184,18 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           </table>
         </div>
         
-        <div className="flex gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-4">
           <button
             type="button"
             onClick={addRow}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="h-8 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             <Plus size={16} />
             Add Row
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="h-8 flex items-center justify-center px-6 bg-green-600 text-white rounded hover:bg-green-700"
           >
             Submit All ({rows.length} row{rows.length !== 1 ? 's' : ''})
           </button>
