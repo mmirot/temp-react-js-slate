@@ -1,136 +1,204 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import toast from 'react-hot-toast';
 import { generateAccessionPrefix } from '../../utils/accessionUtils';
 import { getTodayDateString } from '../../utils/dateUtils';
+import { Trash2, Plus } from 'lucide-react';
 
 const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
-  const [isRangeMode, setIsRangeMode] = useState(false);
+  const [rows, setRows] = useState([
+    {
+      id: 1,
+      accession_number: '',
+      date_prepared: getTodayDateString(),
+      tech_initials: '',
+      std_slide_number: '',
+      lb_slide_number: ''
+    }
+  ]);
   
-  const prefix = generateAccessionPrefix(formData.date_prepared);
+  const prefix = generateAccessionPrefix(getTodayDateString());
 
-  const handleAccessionChange = (e) => {
-    const { value } = e.target;
-    // Only set range mode if user explicitly uses range indicators and has actual content
-    const hasRangeIndicators = value.trim().length > 0 && (value.includes('-') || value.includes(','));
-    setIsRangeMode(hasRangeIndicators);
-    
-    handleChange(e);
+  const addRow = () => {
+    const newRow = {
+      id: Date.now(),
+      accession_number: '',
+      date_prepared: getTodayDateString(),
+      tech_initials: '',
+      std_slide_number: '',
+      lb_slide_number: ''
+    };
+    setRows([...rows, newRow]);
   };
 
-  const handleModeToggle = () => {
-    setIsRangeMode(!isRangeMode);
-    // Clear the accession number when switching modes
-    handleChange({ target: { name: 'accession_number', value: '' } });
+  const removeRow = (rowId) => {
+    if (rows.length > 1) {
+      setRows(rows.filter(row => row.id !== rowId));
+    }
+  };
+
+  const updateRow = (rowId, field, value) => {
+    setRows(rows.map(row => 
+      row.id === rowId ? { ...row, [field]: value } : row
+    ));
+  };
+
+  const handleMultiSubmit = (e) => {
+    e.preventDefault();
+    
+    // Validate all rows
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      
+      if (!row.accession_number.trim()) {
+        toast.error(`Row ${i + 1}: Accession number is required`);
+        return;
+      }
+      
+      if (!row.tech_initials.trim()) {
+        toast.error(`Row ${i + 1}: Tech initials are required`);
+        return;
+      }
+      
+      // Validate slide numbers - at least one must be positive
+      const stdNum = row.std_slide_number === '' ? 0 : parseInt(row.std_slide_number) || 0;
+      const lbNum = row.lb_slide_number === '' ? 0 : parseInt(row.lb_slide_number) || 0;
+      
+      if (stdNum <= 0 && lbNum <= 0) {
+        toast.error(`Row ${i + 1}: At least one slide number (Std or LB) must be a positive integer`);
+        return;
+      }
+    }
+    
+    // Submit each row
+    rows.forEach((row, index) => {
+      // Create a synthetic event for each row submission
+      const syntheticEvent = { preventDefault: () => {} };
+      handleSubmit(syntheticEvent, row);
+    });
+    
+    // Clear all rows after successful submission
+    setRows([{
+      id: Date.now(),
+      accession_number: '',
+      date_prepared: getTodayDateString(),
+      tech_initials: '',
+      std_slide_number: '',
+      lb_slide_number: ''
+    }]);
   };
 
   return (
     <div className="form-section mb-8">
       <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
       
-      <form onSubmit={handleSubmit} className="stain-qc-form">
+      <form onSubmit={handleMultiSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
-          <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[800px]">
+          <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[900px]">
             <thead>
               <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-left w-[50px]">#</th>
                 <th className="border border-gray-300 p-2 text-left w-[200px]">Accession Number</th>
                 <th className="border border-gray-300 p-2 text-left w-[140px]">Date Prepared</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Tech Initials</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">Std Slide #</th>
                 <th className="border border-gray-300 p-2 text-left w-[120px]">LB Slide #</th>
-                <th className="border border-gray-300 p-2 text-left w-[110px]">Action</th>
+                <th className="border border-gray-300 p-2 text-left w-[100px]">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border border-gray-300 p-2">
-                  <div className="form-group">
+              {rows.map((row, index) => (
+                <tr key={row.id}>
+                  <td className="border border-gray-300 p-2 text-center font-medium">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      name="accession_number"
-                      value={formData.accession_number || ''}
-                      onChange={handleAccessionChange}
+                      value={row.accession_number}
+                      onChange={(e) => updateRow(row.id, 'accession_number', e.target.value)}
                       maxLength={10}
                       required
-                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                       placeholder="Enter accession number"
                     />
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="form-group">
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="date"
-                      name="date_prepared"
-                      value={formData.date_prepared || ''}
-                      onChange={handleChange}
+                      value={row.date_prepared}
+                      onChange={(e) => updateRow(row.id, 'date_prepared', e.target.value)}
                       max={getTodayDateString()}
                       required
-                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="form-group">
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      name="tech_initials"
-                      value={formData.tech_initials || ''}
-                      onChange={handleChange}
+                      value={row.tech_initials}
+                      onChange={(e) => updateRow(row.id, 'tech_initials', e.target.value)}
                       maxLength={3}
                       required
-                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="form-group">
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      name="std_slide_number"
-                      value={formData.std_slide_number || ''}
-                      onChange={handleChange}
+                      value={row.std_slide_number}
+                      onChange={(e) => updateRow(row.id, 'std_slide_number', e.target.value)}
                       min="0"
                       max="999"
-                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="form-group">
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      name="lb_slide_number"
-                      value={formData.lb_slide_number || ''}
-                      onChange={handleChange}
+                      value={row.lb_slide_number}
+                      onChange={(e) => updateRow(row.id, 'lb_slide_number', e.target.value)}
                       min="0"
                       max="999"
-                      className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
-                  </div>
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <div className="action-buttons flex flex-col gap-1">
-                    <button
-                      type="button"
-                      onClick={handleModeToggle}
-                      className="submit-button h-9"
-                      style={{width: '90px', height: '36px'}}
-                    >
-                      {isRangeMode ? 'Single' : 'Range'}
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="submit-button h-9"
-                      style={{width: '90px', height: '36px'}}
-                    >
-                      {isRangeMode ? 'Submit Range' : 'Submit'}
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <div className="flex gap-1">
+                      {rows.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeRow(row.id)}
+                          className="p-1 text-red-600 hover:bg-red-100 rounded"
+                          title="Remove row"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+        </div>
+        
+        <div className="flex gap-2 mt-4">
+          <button
+            type="button"
+            onClick={addRow}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            <Plus size={16} />
+            Add Row
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Submit All ({rows.length} row{rows.length !== 1 ? 's' : ''})
+          </button>
         </div>
       </form>
     </div>

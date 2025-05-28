@@ -1,10 +1,9 @@
 
-
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
-import { generateAccessionPrefix, parseAccessionRange, validateAccessionRange } from '../utils/accessionUtils';
+import { generateAccessionPrefix } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
   const [formData, setFormData] = useState({
@@ -89,70 +88,6 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     // Validate date is not in the future
     if (isDateInFuture(dataToSubmit.date_prepared)) {
       toast.error('Date prepared cannot be in the future');
-      return;
-    }
-
-    // Handle range input for accession numbers
-    if (dataToSubmit.accession_number.includes('-') || dataToSubmit.accession_number.includes(',')) {
-      if (!validateAccessionRange(dataToSubmit.accession_number)) {
-        toast.error('Invalid accession number range format');
-        return;
-      }
-
-      try {
-        const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
-        const accessionNumbers = parseAccessionRange(dataToSubmit.accession_number, prefix);
-        
-        console.log('📋 Creating multiple cases for range:', accessionNumbers);
-        
-        // Convert slide numbers for first entry only
-        const stdNum = convertSlideNumber(dataToSubmit.std_slide_number);
-        const lbNum = convertSlideNumber(dataToSubmit.lb_slide_number);
-        
-        // Generate range group ID for grouping
-        const rangeGroupId = crypto.randomUUID();
-        
-        const submissions = accessionNumbers.map((accessionNumber, index) => {
-          const submission = {
-            accession_number: accessionNumber,
-            date_prepared: dataToSubmit.date_prepared,
-            tech_initials: dataToSubmit.tech_initials.trim(),
-            // Only first row gets actual slide numbers, rest get asterisks
-            std_slide_number: index === 0 ? stdNum.toString() : '*',
-            lb_slide_number: index === 0 ? lbNum.toString() : '*',
-            date_screened: null,
-            path_initials: null,
-            time_minutes: null,
-            range_group_id: rangeGroupId
-          };
-          
-          console.log('📤 SUPABASE TRANSMISSION - Range submission:', submission);
-          return submission;
-        });
-
-        const { error } = await supabase
-          .from('non_gyn_submissions')
-          .insert(submissions);
-
-        if (error) {
-          console.error('❌ SUPABASE ERROR - Range submission:', error);
-          if (error.code === '23505') {
-            toast.error('One or more accession numbers already exist');
-            return;
-          }
-          throw error;
-        }
-
-        console.log('✅ SUPABASE SUCCESS - Range submission:', accessionNumbers.length, 'records inserted');
-        toast.success(`${accessionNumbers.length} non-gyn cases submitted successfully as grouped range!`);
-        if (!customFormData) {
-          resetFormData();
-        }
-        fetchSubmissions();
-      } catch (error) {
-        console.error('❌ Range submission error:', error);
-        toast.error('Error submitting range: ' + error.message);
-      }
       return;
     }
 
@@ -378,4 +313,3 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     handleSubmit
   };
 };
-
