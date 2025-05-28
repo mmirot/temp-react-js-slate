@@ -183,8 +183,8 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
           </table>
         </div>
         
-        <div className="mt-4" style={{paddingLeft: '630px'}}>
-          <div className="action-buttons flex flex-col gap-1">
+        <div className="mt-4 flex justify-end">
+          <div className="action-buttons flex flex-col gap-1" style={{marginRight: '20px'}}>
             <button
               type="button"
               onClick={addRow}
