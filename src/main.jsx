@@ -13,12 +13,15 @@ const showDemoMode = isLovablePreview;
 
 console.log('Running in:', showDemoMode ? 'Demo Mode' : 'Production Mode');
 
+// Get the Clerk publishable key from environment variables
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     {showDemoMode ? (
       <App />
     ) : (
-      <ClerkProvider>
+      <ClerkProvider publishableKey={clerkPubKey}>
         <App />
       </ClerkProvider>
     )}
