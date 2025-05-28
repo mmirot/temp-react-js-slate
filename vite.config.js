@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+
 // Create a dynamic import function for the ESM-only lovable-tagger
 const loadComponentTagger = async (mode) => {
   if (mode === 'development') {
@@ -21,7 +22,6 @@ export default defineConfig(async ({ mode }) => {
   const taggerPlugin = await loadComponentTagger(mode);
   
   return {
-    base: '/',
     server: {
       host: "::",
       port: 8080,
@@ -40,25 +40,12 @@ export default defineConfig(async ({ mode }) => {
       taggerPlugin
     ].filter(Boolean),
     define: {
-      'process.env': {},
-      'process.env.NODE_ENV': JSON.stringify(mode)
+      'process.env': process.env
     },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
-    },
-    build: {
-      outDir: 'dist',
-      assetsDir: 'assets',
-      sourcemap: true,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom']
-          }
-        }
-      }
     }
   };
 });
