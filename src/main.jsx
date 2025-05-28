@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import './index.css';
+import { dark } from '@clerk/themes';
 import App from './App';
 
 // Get the publishable key
@@ -34,8 +35,12 @@ const renderApp = () => {
       <React.StrictMode>
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
+          navigate={(to) => window.location.href = to}
           appearance={{
-            baseTheme: "light"
+            baseTheme: "light",
+            variables: {
+              colorPrimary: '#2c5282'
+            }
           }}
         >
           <App />
@@ -47,7 +52,22 @@ const renderApp = () => {
     console.log('No Clerk key available, running in demo mode');
     return (
       <React.StrictMode>
-        <App />
+        {isProduction ? (
+          <div style={{ 
+            padding: '20px', 
+            textAlign: 'center',
+            maxWidth: '600px',
+            margin: '40px auto',
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffeeba',
+            borderRadius: '4px'
+          }}>
+            <h2>Authentication Not Configured</h2>
+            <p>Please set up the VITE_CLERK_PUBLISHABLE_KEY environment variable.</p>
+          </div>
+        ) : (
+          <App />
+        )}
       </React.StrictMode>
     );
   }

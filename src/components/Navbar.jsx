@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -54,9 +55,14 @@ const Navbar = () => {
         </div>
 
         <div className="auth-nav-buttons">
-          <Link to="/auth" className="sign-in-button">
-            Sign In
-          </Link>
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+          <SignedOut>
+            <Link to="/auth" className="sign-in-button">
+              Sign In
+            </Link>
+          </SignedOut>
         </div>
 
         {connectionStatus !== 'connected' && (
