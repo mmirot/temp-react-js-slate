@@ -111,6 +111,13 @@ export default function StainQCForm() {
       )}
 
       <PendingQCTable
+        pendingSubmissions={pendingSubmissions}
+        pendingUpdates={pendingUpdates}
+        handlePendingChange={handlePendingChange}
+        handlePendingSubmit={handlePendingSubmit}
+        handleDeleteSubmission={handleDeleteSubmission}
+        isDeleting={isDeleting}
+        getSubmissionValue={getSubmissionValue}
       />
       
       <div className="download-section mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
@@ -144,16 +151,6 @@ export default function StainQCForm() {
           </button>
         </div>
       </div>
-
-      <CompletedQCTable
-        pendingSubmissions={pendingSubmissions}
-        pendingUpdates={pendingUpdates}
-        handlePendingChange={handlePendingChange}
-        handlePendingSubmit={handlePendingSubmit}
-        handleDeleteSubmission={handleDeleteSubmission}
-        isDeleting={isDeleting}
-        getSubmissionValue={getSubmissionValue}
-      />
 
       <CompletedQCTable
         completedSubmissions={completedSubmissions}
