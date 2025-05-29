@@ -33,17 +33,24 @@ export const useStainData = () => {
     }
   };
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (startDate = null, endDate = null) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('stain_submissions')
         .select(`
           *,
           new_stain_list (
             name
           )
-        `)
-        .order('date_prepared', { ascending: false });
+        `);
+      
+      if (startDate && endDate) {
+        query = query
+          .gte('date_qc', startDate)
+          .lte('date_qc', endDate);
+      }
+      
+      const { data, error } = await query.order('date_prepared', { ascending: false });
       
       if (error) {
         console.error('Error fetching submissions:', error);
