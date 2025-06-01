@@ -4,61 +4,17 @@ import toast from 'react-hot-toast';
 import { generateAccessionPrefix } from '../../utils/accessionUtils';
 import { getTodayDateString } from '../../utils/dateUtils';
 
-const isRowComplete = (row) => {
-  return row.accession_number.trim() !== '' &&
-         row.tech_initials.trim() !== '' &&
-         (parseInt(row.std_slide_number) > 0 || parseInt(row.lb_slide_number) > 0);
-};
-
-const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
-  const [formState, setFormState] = useState({
-      accession_number: '',
-      date_prepared: getTodayDateString(),
-      tech_initials: '',
-      std_slide_number: '',
-      lb_slide_number: ''
-  });
-  
-  const prefix = generateAccessionPrefix(getTodayDateString());
-
-  const updateField = (field, value) => {
-    setFormState(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleIncompleteRows = () => {
-    return isRowComplete(formState);
-  };
-
-  const handleMultiSubmit = (e) => {
+const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, removeRow }) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    
-    if (!isRowComplete(formState)) {
-      toast.error('Please complete all fields before submitting');
-      return;
-    }
-    
-    // Create synthetic event for submission
-    const syntheticEvent = { preventDefault: () => {} };
-    handleSubmit(syntheticEvent, formState);
-
-    // Reset form after successful submission
-    setFormState({
-      accession_number: '',
-      date_prepared: getTodayDateString(),
-      tech_initials: '',
-      std_slide_number: '',
-      lb_slide_number: ''
-    });
+    handleSubmit(e);
   };
 
   return (
     <div className="form-section mb-8">
       <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
       
-      <form onSubmit={handleMultiSubmit} className="stain-qc-form">
+      <form onSubmit={handleFormSubmit} className="stain-qc-form">
         <div className="overflow-x-auto">
           <table className="submissions-table w-full border-collapse border border-gray-300 table-fixed min-w-[900px]">
             <thead>
@@ -72,12 +28,14 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
               </tr>
             </thead>
             <tbody>
-                <tr>
+              {formData.map((row, index) => (
+                <tr key={index}>
                   <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      value={formState.accession_number}
-                      onChange={(e) => updateField('accession_number', e.target.value)}
+                      name="accession_number"
+                      value={row.accession_number}
+                      onChange={(e) => handleChange(e, index)}
                       maxLength={10}
                       noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -87,8 +45,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="date"
-                      value={formState.date_prepared}
-                      onChange={(e) => updateField('date_prepared', e.target.value)}
+                      name="date_prepared"
+                      value={row.date_prepared}
+                      onChange={(e) => handleChange(e, index)}
                       max={getTodayDateString()}
                       noValidate
                       className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -97,8 +56,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="text"
-                      value={formState.tech_initials}
-                      onChange={(e) => updateField('tech_initials', e.target.value)}
+                      name="tech_initials"
+                      value={row.tech_initials}
+                      onChange={(e) => handleChange(e, index)}
                       maxLength={3}
                       noValidate
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -107,8 +67,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      value={formState.std_slide_number}
-                      onChange={(e) => updateField('std_slide_number', e.target.value)}
+                      name="std_slide_number"
+                      value={row.std_slide_number}
+                      onChange={(e) => handleChange(e, index)}
                       min="0"
                       max="999"
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -117,8 +78,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   <td className="border border-gray-300 p-2">
                     <input
                       type="number"
-                      value={formState.lb_slide_number}
-                      onChange={(e) => updateField('lb_slide_number', e.target.value)}
+                      name="lb_slide_number"
+                      value={row.lb_slide_number}
+                      onChange={(e) => handleChange(e, index)}
                       min="0"
                       max="999"
                       className="w-[80px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
@@ -126,12 +88,25 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
                   </td>
                   <td className="border border-gray-300 p-2">
                     <div className="action-buttons flex flex-row gap-2 justify-center">
-                      <button type="submit" className="submit-button">Submit</button>
+                      {formData.length > 1 && (
+                        <button type="button" onClick={() => removeRow(index)} className="delete-button">
+                          Remove
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
+              ))}
             </tbody>
           </table>
+          <div className="mt-4 flex justify-between items-center">
+            <button type="button" onClick={addRow} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+              Add Row
+            </button>
+            <button type="submit" className="submit-button">
+              Submit All
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -141,7 +116,9 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit }) => {
 NonGynCasesTable.propTypes = {
   formData: PropTypes.object.isRequired,
   handleChange: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired
+  handleSubmit: PropTypes.func.isRequired,
+  addRow: PropTypes.func.isRequired,
+  removeRow: PropTypes.func.isRequired
 };
 
 export default NonGynCasesTable;

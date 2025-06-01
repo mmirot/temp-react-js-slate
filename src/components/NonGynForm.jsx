@@ -39,7 +39,9 @@ export default function NonGynForm() {
     handlePendingSubmit,
     getSubmissionValue,
     resetFormData,
-    handleSubmit
+    handleSubmit,
+    addRow,
+    removeRow
   } = useNonGynSubmission(fetchSubmissions);
 
   const handleDownloadCSV = async () => {
@@ -76,6 +78,8 @@ export default function NonGynForm() {
           formData={formData}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
+          addRow={addRow}
+          removeRow={removeRow}
         />
       </div>
 

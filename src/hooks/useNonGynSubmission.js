@@ -6,29 +6,47 @@ import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
 import { generateAccessionPrefix } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState([{
     accession_number: '',
     date_prepared: getTodayDateString(),
     tech_initials: '',
     std_slide_number: '',
     lb_slide_number: ''
-  });
+  }]);
   const [pendingUpdates, setPendingUpdates] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e, index) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => prev.map((item, i) => 
+      i === index ? { ...item, [name]: value } : item
+    ));
   };
 
-  const resetFormData = () => {
-    setFormData({
+  const addRow = () => {
+    setFormData(prev => [...prev, {
       accession_number: '',
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
       lb_slide_number: ''
-    });
+    }]);
+  };
+
+  const removeRow = (index) => {
+    if (formData.length > 1) {
+      setFormData(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const resetFormData = () => {
+    setFormData([{
+      accession_number: '',
+      date_prepared: getTodayDateString(),
+      tech_initials: '',
+      std_slide_number: '',
+      lb_slide_number: ''
+    }]);
   };
 
   const validateSlideNumbers = (stdSlides, lbSlides) => {
@@ -67,83 +85,93 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   const handleSubmit = async (e, customFormData = null) => {
     e.preventDefault();
     
-    const dataToSubmit = customFormData || formData;
+    const dataArray = customFormData || formData;
+    const errors = [];
     
-    if (!dataToSubmit.accession_number.trim()) {
-      toast.error('Accession number is required');
-      return;
-    }
+    // Validate all entries first
+    for (let i = 0; i < dataArray.length; i++) {
+      const data = dataArray[i];
+      
+      if (!data.accession_number.trim()) {
+        errors.push(`Row ${i + 1}: Accession number is required`);
+        continue;
+      }
 
-    if (!dataToSubmit.tech_initials.trim()) {
-      toast.error('Tech initials are required');
-      return;
-    }
+      if (!data.tech_initials.trim()) {
+        errors.push(`Row ${i + 1}: Tech initials are required`);
+        continue;
+      }
 
-    // Validate slide numbers - at least one must be positive
-    if (!validateSlideNumbers(dataToSubmit.std_slide_number, dataToSubmit.lb_slide_number)) {
-      toast.error('At least one slide number (Std or LB) must be a positive integer');
-      return;
-    }
+      if (!validateSlideNumbers(data.std_slide_number, data.lb_slide_number)) {
+        errors.push(`Row ${i + 1}: At least one slide number (Std or LB) must be a positive integer`);
+        continue;
+      }
 
-    // Validate date is not in the future
-    if (isDateInFuture(dataToSubmit.date_prepared)) {
-      toast.error('Date prepared cannot be in the future');
-      return;
-    }
-
-    // Single accession number submission
-    const prefix = generateAccessionPrefix(dataToSubmit.date_prepared);
-    let accessionNumber = dataToSubmit.accession_number.trim();
-    
-    // For single numbers, format with leading zeros and add prefix if not already present
-    if (!accessionNumber.startsWith(prefix)) {
-      // If it's just a number, pad it and add prefix
-      const num = parseInt(accessionNumber);
-      if (!isNaN(num)) {
-        accessionNumber = `${prefix}${num.toString().padStart(3, '0')}`;
-      } else {
-        accessionNumber = `${prefix}${accessionNumber}`;
+      if (isDateInFuture(data.date_prepared)) {
+        errors.push(`Row ${i + 1}: Date prepared cannot be in the future`);
+        continue;
       }
     }
-    
-    const stdNum = convertSlideNumber(dataToSubmit.std_slide_number);
-    const lbNum = convertSlideNumber(dataToSubmit.lb_slide_number);
-    
-    const submission = {
-      accession_number: accessionNumber,
-      date_prepared: dataToSubmit.date_prepared,
-      tech_initials: dataToSubmit.tech_initials.trim(),
-      std_slide_number: stdNum.toString(),
-      lb_slide_number: lbNum.toString(),
-      date_screened: null,
-      path_initials: null,
-      time_minutes: null
-    };
+
+    if (errors.length > 0) {
+      errors.forEach(error => toast.error(error));
+      return;
+    }
+
+    // Process all valid entries
+    const submissions = [];
+    for (const data of dataArray) {
+      const prefix = generateAccessionPrefix(data.date_prepared);
+      let accessionNumber = data.accession_number.trim();
+      
+      if (!accessionNumber.startsWith(prefix)) {
+        const num = parseInt(accessionNumber);
+        if (!isNaN(num)) {
+          accessionNumber = `${prefix}${num.toString().padStart(3, '0')}`;
+        } else {
+          accessionNumber = `${prefix}${accessionNumber}`;
+        }
+      }
+      
+      const stdNum = convertSlideNumber(data.std_slide_number);
+      const lbNum = convertSlideNumber(data.lb_slide_number);
+      
+      submissions.push({
+        accession_number: accessionNumber,
+        date_prepared: data.date_prepared,
+        tech_initials: data.tech_initials.trim(),
+        std_slide_number: stdNum.toString(),
+        lb_slide_number: lbNum.toString(),
+        date_screened: null,
+        path_initials: null,
+        time_minutes: null
+      });
+    }
 
     try {
-      console.log('📤 SUPABASE TRANSMISSION - Single submission:', submission);
+      console.log('📤 SUPABASE TRANSMISSION - Multiple submissions:', submissions);
       
       const { error } = await supabase
         .from('non_gyn_submissions')
-        .insert([submission]);
+        .insert(submissions);
 
       if (error) {
-        console.error('❌ SUPABASE ERROR - Single submission:', error);
+        console.error('❌ SUPABASE ERROR - Multiple submissions:', error);
         if (error.code === '23505') {
-          toast.error(`Accession number ${accessionNumber} already exists`);
+          toast.error('One or more accession numbers already exist');
           return;
         }
         throw error;
       }
 
-      console.log('✅ SUPABASE SUCCESS - Single submission:', accessionNumber);
-      toast.success('Non-gyn case submitted successfully!');
+      console.log('✅ SUPABASE SUCCESS - Multiple submissions:', submissions.length);
+      toast.success(`${submissions.length} non-gyn case(s) submitted successfully!`);
       if (!customFormData) {
         resetFormData();
       }
       fetchSubmissions();
     } catch (error) {
-      console.error('❌ Single submission error:', error);
+      console.error('❌ Multiple submission error:', error);
       toast.error('Error submitting: ' + error.message);
     }
   };
@@ -297,6 +325,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     handlePendingSubmit,
     getSubmissionValue,
     resetFormData,
-    handleSubmit
+    handleSubmit,
+    addRow,
+    removeRow
   };
 };
