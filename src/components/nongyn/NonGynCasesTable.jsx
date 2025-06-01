@@ -89,7 +89,7 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
                   <td className="border border-gray-300 p-2">
                     <div className="action-buttons flex flex-row gap-2 justify-center">
                       {formData.length > 1 && (
-                        <button type="button" onClick={() => removeRow(index)} className="delete-button">
+                        <button type="button\" onClick={() => removeRow(index)} className="delete-button">
                           Remove
                         </button>
                       )}
