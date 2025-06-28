@@ -31,6 +31,8 @@ export default function NonGynForm() {
   // Form submission and validation logic
   const { 
     formData, 
+    nextAccessionSuffix,
+    isLoadingNextNumber,
     isDeleting,
     pendingUpdates,
     handleChange, 
@@ -76,6 +78,8 @@ export default function NonGynForm() {
       <div className="form-section">
         <NonGynCasesTable
           formData={formData}
+          nextAccessionSuffix={nextAccessionSuffix}
+          isLoadingNextNumber={isLoadingNextNumber}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           addRow={addRow}

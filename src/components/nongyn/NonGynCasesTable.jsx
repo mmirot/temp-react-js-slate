@@ -4,9 +4,13 @@ import toast from 'react-hot-toast';
 import { generateAccessionPrefix } from '../../utils/accessionUtils';
 import { getTodayDateString } from '../../utils/dateUtils';
 
-const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, removeRow }) => {
-  // Generate the current prefix for display
+const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, removeRow, nextAccessionSuffix, isLoadingNextNumber }) => {
+  // Generate the current prefix for display and helper functions
   const currentPrefix = generateAccessionPrefix();
+  
+  const getFormattedAccessionNumber = (suffix) => {
+    return `${currentPrefix}${suffix.toString().padStart(3, '0')}`;
+  };
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -15,9 +19,10 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
 
   const handleAccessionChange = (e, index) => {
     const { value } = e.target;
-    // If user clears the field completely, restore the prefix
+    // If user clears the field completely, restore the next expected number
     if (value === '') {
-      handleChange({ target: { name: 'accession_number', value: currentPrefix } }, index);
+      const expectedNumber = getFormattedAccessionNumber(nextAccessionSuffix + index);
+      handleChange({ target: { name: 'accession_number', value: expectedNumber } }, index);
     } else {
       handleChange(e, index);
     }
@@ -51,7 +56,12 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
                       maxLength={10}
                       noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
-                      placeholder={`${currentPrefix}###`}
+                      placeholder={
+                        isLoadingNextNumber 
+                          ? `${currentPrefix}###` 
+                          : getFormattedAccessionNumber(nextAccessionSuffix + index)
+                      }
+                      disabled={isLoadingNextNumber}
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
@@ -126,11 +136,13 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
 };
 
 NonGynCasesTable.propTypes = {
-  formData: PropTypes.object.isRequired,
+  formData: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   addRow: PropTypes.func.isRequired,
-  removeRow: PropTypes.func.isRequired
+  removeRow: PropTypes.func.isRequired,
+  nextAccessionSuffix: PropTypes.number.isRequired,
+  isLoadingNextNumber: PropTypes.bool.isRequired
 };
 
 export default NonGynCasesTable;

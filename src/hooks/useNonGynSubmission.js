@@ -1,21 +1,83 @@
 
 import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabaseClient';
 import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
 import { generateAccessionPrefix } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
-  // Generate the current prefix for new rows
-  const currentPrefix = generateAccessionPrefix();
+  const [nextAccessionSuffix, setNextAccessionSuffix] = useState(1);
+  const [isLoadingNextNumber, setIsLoadingNextNumber] = useState(true);
+
+  // Helper function to format accession number
+  const getFormattedAccessionNumber = (suffix) => {
+    const prefix = generateAccessionPrefix();
+    return `${prefix}${suffix.toString().padStart(3, '0')}`;
+  };
+
+  // Fetch the last used accession number on component mount
+  useEffect(() => {
+    const fetchLastAccessionNumber = async () => {
+      try {
+        setIsLoadingNextNumber(true);
+        const { data, error } = await supabase
+          .from('non_gyn_submissions')
+          .select('accession_number')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) {
+          console.error('Error fetching last accession number:', error);
+          setNextAccessionSuffix(1);
+        } else if (data && data.length > 0) {
+          const lastAccession = data[0].accession_number;
+          console.log('Last accession number found:', lastAccession);
+          
+          // Extract the numeric suffix from the accession number
+          // Format is like "CN25-001" or "CN25-123"
+          const match = lastAccession.match(/-(\d+)$/);
+          if (match) {
+            const lastNumber = parseInt(match[1], 10);
+            setNextAccessionSuffix(lastNumber + 1);
+            console.log('Next accession suffix will be:', lastNumber + 1);
+          } else {
+            console.log('Could not parse accession number, starting from 1');
+            setNextAccessionSuffix(1);
+          }
+        } else {
+          console.log('No previous accession numbers found, starting from 1');
+          setNextAccessionSuffix(1);
+        }
+      } catch (error) {
+        console.error('Error in fetchLastAccessionNumber:', error);
+        setNextAccessionSuffix(1);
+      } finally {
+        setIsLoadingNextNumber(false);
+      }
+    };
+
+    fetchLastAccessionNumber();
+  }, []);
 
   const [formData, setFormData] = useState([{
-    accession_number: currentPrefix,
+    accession_number: '',
     date_prepared: getTodayDateString(),
     tech_initials: '',
     std_slide_number: '',
     lb_slide_number: ''
   }]);
+
+  // Update formData when nextAccessionSuffix is loaded
+  useEffect(() => {
+    if (!isLoadingNextNumber && formData.length > 0) {
+      setFormData(prev => prev.map((item, index) => ({
+        ...item,
+        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index)
+      })));
+    }
+  }, [nextAccessionSuffix, isLoadingNextNumber]);
+
   const [pendingUpdates, setPendingUpdates] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -28,7 +90,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const addRow = () => {
     setFormData(prev => [...prev, {
-      accession_number: currentPrefix,
+      accession_number: getFormattedAccessionNumber(nextAccessionSuffix + prev.length),
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
@@ -44,7 +106,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const resetFormData = () => {
     setFormData([{
-      accession_number: currentPrefix,
+      accession_number: getFormattedAccessionNumber(nextAccessionSuffix),
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
@@ -169,6 +231,10 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
       console.log('✅ SUPABASE SUCCESS - Multiple submissions:', submissions.length);
       toast.success(`${submissions.length} non-gyn case(s) submitted successfully!`);
+      
+      // Update the next accession suffix for future entries
+      setNextAccessionSuffix(prev => prev + submissions.length);
+      
       if (!customFormData) {
         resetFormData();
       }
@@ -320,6 +386,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   return {
     formData,
+    nextAccessionSuffix,
+    isLoadingNextNumber,
     isDeleting,
     pendingUpdates,
     handleChange,
