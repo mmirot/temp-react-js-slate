@@ -107,7 +107,6 @@ export default function NonGynForm() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              max={getTodayDateString()}
               className="border rounded p-1"
             />
           </div>
@@ -117,7 +116,6 @@ export default function NonGynForm() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              max={getTodayDateString()}
               className="border rounded p-1"
             />
           </div>

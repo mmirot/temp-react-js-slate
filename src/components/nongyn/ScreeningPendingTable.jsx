@@ -97,7 +97,6 @@ const ScreeningPendingTable = ({
                       type="date"
                       value={getSubmissionValue(sub, 'date_screened') || today}
                       onChange={(e) => handlePendingChange(sub.id, 'date_screened', e.target.value)}
-                      max={today}
                       required
                       style={{width: '120px', padding: '8px', fontSize: '14px', textAlign: 'center'}}
                       className="border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"

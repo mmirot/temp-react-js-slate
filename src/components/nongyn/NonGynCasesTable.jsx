@@ -70,7 +70,6 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
                       name="date_prepared"
                       value={row.date_prepared}
                       onChange={(e) => handleChange(e, index)}
-                      max={getTodayDateString()}
                       noValidate
                       className="w-[120px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
                     />
