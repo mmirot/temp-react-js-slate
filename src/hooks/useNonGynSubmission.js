@@ -72,8 +72,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     if (!isLoadingNextNumber && formData.length > 0) {
       setFormData(prev => prev.map((item, index) => ({
         ...item,
-        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index),
-        date_prepared: item.date_prepared || getTodayDateString()
+        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index)
+        // Don't override date_prepared - let user control it
       })));
     }
   }, [nextAccessionSuffix, isLoadingNextNumber]);
