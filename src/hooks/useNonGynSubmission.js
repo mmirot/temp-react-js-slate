@@ -72,7 +72,8 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     if (!isLoadingNextNumber && formData.length > 0) {
       setFormData(prev => prev.map((item, index) => ({
         ...item,
-        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index)
+        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index),
+        date_prepared: item.date_prepared || getTodayDateString()
       })));
     }
   }, [nextAccessionSuffix, isLoadingNextNumber]);
@@ -88,9 +89,10 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   };
 
   const addRow = () => {
+    const lastRowDate = formData.length > 0 ? formData[formData.length - 1].date_prepared : '';
     setFormData(prev => [...prev, {
       accession_number: getFormattedAccessionNumber(nextAccessionSuffix + prev.length),
-      date_prepared: getTodayDateString(),
+      date_prepared: lastRowDate || getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
       lb_slide_number: ''
@@ -106,7 +108,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   const resetFormData = () => {
     setFormData([{
       accession_number: getFormattedAccessionNumber(nextAccessionSuffix),
-      date_prepared: getTodayDateString(),
+      date_prepared: '',
       tech_initials: '',
       std_slide_number: '',
       lb_slide_number: ''
