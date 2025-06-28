@@ -61,7 +61,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const [formData, setFormData] = useState([{
     accession_number: '',
-    date_prepared: getTodayDateString(),
+    date_prepared: '',
     tech_initials: '',
     std_slide_number: '',
     lb_slide_number: ''
@@ -72,8 +72,9 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     if (!isLoadingNextNumber && formData.length > 0) {
       setFormData(prev => prev.map((item, index) => ({
         ...item,
-        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index)
-        // Don't override date_prepared - let user control it
+        accession_number: item.accession_number || getFormattedAccessionNumber(nextAccessionSuffix + index),
+        // Only set date_prepared if it's completely empty (not just empty string)
+        date_prepared: item.date_prepared !== undefined ? item.date_prepared : ''
       })));
     }
   }, [nextAccessionSuffix, isLoadingNextNumber]);
@@ -89,10 +90,11 @@ export const useNonGynSubmission = (fetchSubmissions) => {
   };
 
   const addRow = () => {
+    // Copy the date from the last row, or leave empty if no previous row
     const lastRowDate = formData.length > 0 ? formData[formData.length - 1].date_prepared : '';
     setFormData(prev => [...prev, {
       accession_number: getFormattedAccessionNumber(nextAccessionSuffix + prev.length),
-      date_prepared: lastRowDate || getTodayDateString(),
+      date_prepared: lastRowDate || '',
       tech_initials: '',
       std_slide_number: '',
       lb_slide_number: ''
@@ -173,8 +175,15 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         continue;
       }
 
-      if (isDateInFuture(data.date_prepared)) {
+      // Only validate date if it's not empty
+      if (data.date_prepared && isDateInFuture(data.date_prepared)) {
         errors.push(`Row ${i + 1}: Date prepared cannot be in the future`);
+        continue;
+      }
+      
+      // Require date_prepared to be filled
+      if (!data.date_prepared || data.date_prepared.trim() === '') {
+        errors.push(`Row ${i + 1}: Date prepared is required`);
         continue;
       }
     }
