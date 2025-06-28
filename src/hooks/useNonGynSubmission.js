@@ -313,6 +313,19 @@ export const useNonGynSubmission = (fetchSubmissions) => {
     }
 
     try {
+      // Log all the screening completion data being saved
+      console.log('💾 SCREENING COMPLETION - Saving to Supabase:', {
+        submissionId,
+        accession_number: currentSubmission.accession_number,
+        date_screened: dateScreened,
+        std_slide_number: currentSubmission.std_slide_number,
+        lb_slide_number: currentSubmission.lb_slide_number,
+        path_initials: pathInitials,
+        time_minutes: timeMinutes,
+        date_prepared: currentSubmission.date_prepared,
+        tech_initials: currentSubmission.tech_initials
+      });
+      
       const updateData = {
         date_screened: dateScreened,
         path_initials: pathInitials,
@@ -328,6 +341,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
         throw error;
       }
 
+      console.log('✅ SCREENING COMPLETION - Successfully saved to database');
       toast.success('Screening completed successfully!');
       setPendingUpdates(prev => {
         const newUpdates = { ...prev };
@@ -336,6 +350,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
       });
       fetchSubmissions();
     } catch (error) {
+      console.error('❌ SCREENING COMPLETION - Database error:', error);
       toast.error('Error completing screening: ' + error.message);
     }
   };

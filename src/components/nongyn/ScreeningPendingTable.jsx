@@ -131,6 +131,7 @@ const ScreeningPendingTable = ({
                         type="button"
                         className="submit-button h-9"
                         onClick={() => handlePendingSubmit(sub.id)}
+                        title={`Complete screening for ${sub.accession_number}`}
                       >
                         Complete
                       </button>
@@ -139,6 +140,7 @@ const ScreeningPendingTable = ({
                         className="delete-button h-9"
                         onClick={() => handleDeleteSubmission(sub.id)}
                         disabled={isDeleting}
+                        title={`Delete ${sub.accession_number}`}
                       >
                         {isDeleting ? 'Deleting...' : 'Delete'}
                       </button>

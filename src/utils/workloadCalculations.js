@@ -18,6 +18,7 @@ export const calculateSlideTotal = (stdSlides = 0, lbSlides = 0) => {
 // Aggregate daily workload data by pathologist and date
 export const aggregateDailyWorkload = (submissions) => {
   console.log('📊 Starting aggregation for', submissions.length, 'submissions');
+  console.log('📋 Sample submission data:', submissions.slice(0, 2));
   const aggregated = {};
   
   submissions.forEach((submission, index) => {
@@ -25,6 +26,15 @@ export const aggregateDailyWorkload = (submissions) => {
       console.log(`⚠️ Skipping submission ${index} - missing date_screened or path_initials:`, submission);
       return;
     }
+    
+    console.log(`📝 Processing submission ${index}:`, {
+      accession_number: submission.accession_number,
+      date_screened: submission.date_screened,
+      path_initials: submission.path_initials,
+      std_slide_number: submission.std_slide_number,
+      lb_slide_number: submission.lb_slide_number,
+      time_minutes: submission.time_minutes
+    });
     
     const key = `${submission.path_initials}-${submission.date_screened}`;
     
