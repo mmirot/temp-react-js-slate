@@ -21,7 +21,8 @@ export default function NonGynForm() {
   const { 
     submissions, 
     pendingSubmissions, 
-    completedSubmissions, 
+    rawCompletedSubmissions,
+    aggregatedWorkload,
     sortConfig,
     fetchSubmissions, 
     handleSort,
@@ -130,7 +131,8 @@ export default function NonGynForm() {
       </div>
 
       <NonGynWorkloadTable
-        completedSubmissions={completedSubmissions}
+        rawCompletedSubmissions={rawCompletedSubmissions}
+        aggregatedWorkload={aggregatedWorkload}
         sortConfig={sortConfig}
         handleSort={handleSort}
         handleDeleteAll={handleDeleteAll}

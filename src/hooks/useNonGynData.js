@@ -75,9 +75,9 @@ export const useNonGynData = () => {
   const pendingSubmissions = submissions.filter(sub => !sub.date_screened);
   
   // Transform completed submissions into daily aggregated workload data
-  const completedSubmissions = submissions.filter(sub => sub.date_screened);
+  const rawCompletedSubmissions = submissions.filter(sub => sub.date_screened);
   
-  const aggregatedWorkload = aggregateDailyWorkload(completedSubmissions);
+  const aggregatedWorkload = aggregateDailyWorkload(rawCompletedSubmissions);
   const sortedAggregatedWorkload = sortAggregatedData(aggregatedWorkload, sortConfig);
 
 
@@ -85,7 +85,8 @@ export const useNonGynData = () => {
     submissions,
     sortConfig,
     pendingSubmissions,
-    completedSubmissions: sortedAggregatedWorkload,
+    rawCompletedSubmissions,
+    aggregatedWorkload: sortedAggregatedWorkload,
     fetchSubmissions,
     handleSort,
     handleDeleteAll
