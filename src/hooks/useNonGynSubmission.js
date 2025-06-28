@@ -6,8 +6,11 @@ import { getTodayDateString, isDateInFuture } from '../utils/dateUtils';
 import { generateAccessionPrefix } from '../utils/accessionUtils';
 
 export const useNonGynSubmission = (fetchSubmissions) => {
+  // Generate the current prefix for new rows
+  const currentPrefix = generateAccessionPrefix();
+
   const [formData, setFormData] = useState([{
-    accession_number: '',
+    accession_number: currentPrefix,
     date_prepared: getTodayDateString(),
     tech_initials: '',
     std_slide_number: '',
@@ -25,7 +28,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const addRow = () => {
     setFormData(prev => [...prev, {
-      accession_number: '',
+      accession_number: currentPrefix,
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',
@@ -41,7 +44,7 @@ export const useNonGynSubmission = (fetchSubmissions) => {
 
   const resetFormData = () => {
     setFormData([{
-      accession_number: '',
+      accession_number: currentPrefix,
       date_prepared: getTodayDateString(),
       tech_initials: '',
       std_slide_number: '',

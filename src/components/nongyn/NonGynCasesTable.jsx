@@ -5,11 +5,23 @@ import { generateAccessionPrefix } from '../../utils/accessionUtils';
 import { getTodayDateString } from '../../utils/dateUtils';
 
 const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, removeRow }) => {
+  // Generate the current prefix for display
+  const currentPrefix = generateAccessionPrefix();
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
     handleSubmit(e);
   };
 
+  const handleAccessionChange = (e, index) => {
+    const { value } = e.target;
+    // If user clears the field completely, restore the prefix
+    if (value === '') {
+      handleChange({ target: { name: 'accession_number', value: currentPrefix } }, index);
+    } else {
+      handleChange(e, index);
+    }
+  };
   return (
     <div className="form-section mb-8">
       <h2 className="text-xl font-bold mb-4">Non-Gyn Case Entry</h2>
@@ -35,11 +47,11 @@ const NonGynCasesTable = ({ formData, handleChange, handleSubmit, addRow, remove
                       type="text"
                       name="accession_number"
                       value={row.accession_number}
-                      onChange={(e) => handleChange(e, index)}
+                      onChange={(e) => handleAccessionChange(e, index)}
                       maxLength={10}
                       noValidate
                       className="w-[150px] border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 p-1"
-                      placeholder="Enter accession number"
+                      placeholder={`${currentPrefix}###`}
                     />
                   </td>
                   <td className="border border-gray-300 p-2">
